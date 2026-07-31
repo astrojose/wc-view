@@ -22,6 +22,10 @@ export interface AnchorData {
   tertiary: TertiaryAnchor;
 }
 
+function slugifyHeading(text: string): string {
+  return text.toLowerCase().replace(/[^\w]+/g, "-").replace(/^-|-$/g, "");
+}
+
 /**
  * Extracts 3-tier anchor metadata for a DOM element or text selection.
  */
@@ -34,13 +38,17 @@ export function extractAnchor(el: HTMLElement, root: HTMLElement): AnchorData {
 
   // Secondary structural scope: nearest heading & element occurrence index
   let headingSlug: string | undefined;
-  let prev = el.previousElementSibling;
-  while (prev) {
-    if (/^H[1-6]$/.test(prev.tagName)) {
-      headingSlug = prev.textContent?.toLowerCase().replace(/[^\w]+/g, "-") || undefined;
-      break;
+  if (/^H[1-6]$/.test(el.tagName)) {
+    headingSlug = slugifyHeading(el.textContent || "") || undefined;
+  } else {
+    let prev = el.previousElementSibling;
+    while (prev) {
+      if (/^H[1-6]$/.test(prev.tagName)) {
+        headingSlug = slugifyHeading(prev.textContent || "") || undefined;
+        break;
+      }
+      prev = prev.previousElementSibling;
     }
-    prev = prev.previousElementSibling;
   }
 
   const tagName = el.tagName.toLowerCase();

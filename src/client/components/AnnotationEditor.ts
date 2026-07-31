@@ -35,6 +35,7 @@ export class AnnotationEditor {
     `;
 
     targetElement.appendChild(this.popoverEl);
+    this.popoverEl.addEventListener("click", (e) => e.stopPropagation());
 
     const input = this.popoverEl.querySelector("#annotation-comment-input") as HTMLTextAreaElement;
     const saveBtn = this.popoverEl.querySelector("#annotation-save-btn") as HTMLButtonElement;

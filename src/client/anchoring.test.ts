@@ -35,6 +35,16 @@ describe("Anchoring Engine", () => {
     expect(resolved.element).toBe(target);
   });
 
+  it("uses the selected heading as its own structural scope", () => {
+    const target = root.querySelector("h2");
+    const anchor = extractAnchor(target!, root);
+
+    expect(anchor.primary.exact).toBe("Introduction");
+    expect(anchor.secondary.headingSlug).toBe("introduction");
+    expect(anchor.secondary.elementType).toBe("h2");
+    expect(anchor.secondary.occurrenceIndex).toBe(0);
+  });
+
   it("marks missing anchor as orphaned", () => {
     const dummyAnchor = {
       primary: { exact: "Non-existent text quote", prefix: "", suffix: "" },

@@ -25,6 +25,18 @@ function getClientBundlePath(): string | null {
   return null;
 }
 
+function getClientStyleBundlePath(): string | null {
+  const candidates = [
+    path.join(__dirname, "..", "client", "main.css"),
+    path.join(__dirname, "client", "main.css"),
+    path.join(process.cwd(), "dist", "client", "main.css")
+  ];
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) return candidate;
+  }
+  return null;
+}
+
 /**
  * Creates native HTTP server for wc-view localhost review surface.
  */
@@ -107,6 +119,16 @@ export function createServer(options: ServerOptions): http.Server {
       }
     }
 
+    // Serve bundled client CSS
+    if (pathname === "/main.css") {
+      const stylePath = getClientStyleBundlePath();
+      if (stylePath) {
+        res.writeHead(200, { "Content-Type": "text/css" });
+        res.end(fs.readFileSync(stylePath));
+        return;
+      }
+    }
+
     // Serve HTML entry point
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
     res.end(getAppHtml());
@@ -122,109 +144,10 @@ function getAppHtml(): string {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>wc-view — Local Markdown Review Surface</title>
-  <style>
-    :root {
-      --bg-base: #121212;
-      --surface-card: #1C1C1C;
-      --surface-raised: #242424;
-      --border-subtle: #2C2C2C;
-      --fg-primary: #EDEBE4;
-      --fg-secondary: #D1CFC0;
-      --fg-muted: #8E8A83;
-      --ring-accent: #D1CFC0;
-      --accent-action: #F26A4B;
-      --accent-action-fg: #121212;
-      --annotation-bar: #D1CFC0;
-      --annotation-tint: rgba(209,207,192,0.06);
-    }
-    [data-theme="light"] {
-      --bg-base: #FCFCFC;
-      --surface-card: #FFFFFF;
-      --surface-raised: #FFFFFF;
-      --border-subtle: #E4E4E7;
-      --fg-primary: #18181B;
-      --fg-secondary: #3F3F46;
-      --fg-muted: #71717A;
-      --ring-accent: #18181B;
-      --accent-action: #18181B;
-      --accent-action-fg: #FCFCFC;
-      --annotation-bar: #18181B;
-      --annotation-tint: rgba(24,24,27,0.04);
-    }
-    body {
-      margin: 0;
-      padding: 0;
-      background: var(--bg-base);
-      color: var(--fg-primary);
-      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-    }
-    #doc-canvas {
-      width: min(72ch, 100% - 2rem);
-      margin: 2rem auto 6rem auto;
-      line-height: 1.6;
-    }
-    #doc-canvas header h1 {
-      font-size: 2.25rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin-bottom: 0.5rem;
-      border-bottom: 1px solid var(--border-subtle);
-      padding-bottom: 0.75rem;
-    }
-    .doc-block {
-      padding: 0.75rem;
-      margin: 0.5rem 0;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.15s, border-left 0.15s;
-    }
-    .doc-block:hover {
-      background: var(--surface-card);
-    }
-    .doc-block.active {
-      outline: 2px solid var(--ring-accent);
-      background: var(--surface-raised);
-    }
-    .doc-block.annotated {
-      border-left: 3px solid var(--ring-accent);
-      background: var(--annotation-tint);
-    }
-    .status-region {
-      position: fixed;
-      bottom: 1.5rem;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--surface-card);
-      border: 1px solid var(--border-subtle);
-      padding: 0.6rem 1.25rem;
-      border-radius: 20px;
-      font-size: 0.875rem;
-      color: var(--fg-secondary);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      z-index: 100;
-    }
-    h1, h2, h3, h4, h5, h6 {
-      color: var(--fg-primary);
-      margin-top: 1.5rem;
-    }
-    code, pre {
-      font-family: "JetBrains Mono", Menlo, Consolas, monospace;
-      background: var(--surface-card);
-      border-radius: 4px;
-    }
-    pre {
-      padding: 1rem;
-      overflow-x: auto;
-    }
-  </style>
+  <link rel="stylesheet" href="/main.css">
 </head>
 <body>
-  <div id="doc-canvas" role="main"></div>
-  <div class="status-region" role="status" aria-live="polite">wc-view local server active.</div>
+  <div id="doc-canvas" class="doc-canvas" role="main" aria-label="Document Canvas"></div>
   <script type="module" src="/main.js"></script>
 </body>
 </html>`;

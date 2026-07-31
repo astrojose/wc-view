@@ -1,0 +1,4 @@
+interface:
+  display_name: "Release wc-view"
+  short_description: "Release wc-view to npm and GitHub"
+  default_prompt: "Use $release-wcv to prepare and publish a wc-view release."

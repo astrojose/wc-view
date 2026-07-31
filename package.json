@@ -1,11 +1,15 @@
 {
-  "name": "wc-view",
+  "name": "@astrojose/wc-view",
   "version": "0.1.0",
   "description": "Local Markdown review surface for agent workflows",
   "type": "module",
   "bin": {
     "wc-view": "./dist/bin/wc-view.js"
   },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",

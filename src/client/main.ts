@@ -5,6 +5,7 @@ import { FloatingComposer, NoteItem } from "./components/FloatingComposer.js";
 import { AnnotationEditor } from "./components/AnnotationEditor.js";
 import { ConfirmDialog } from "./components/ConfirmDialog.js";
 import { extractAnchor, resolveAnchor } from "./anchoring.js";
+import "./styles/app.css";
 
 export class ReviewApp {
   private themeToggle: ThemeToggle;
@@ -32,7 +33,7 @@ export class ReviewApp {
     this.setupShortcuts();
     this.statusRegion.announce("Select any paragraph to attach a review note.");
 
-    if (typeof window !== "undefined" && window.fetch) {
+    if (typeof window !== "undefined") {
       this.initFromApi();
     }
   }
