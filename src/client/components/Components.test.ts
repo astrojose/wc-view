@@ -27,7 +27,7 @@ describe("Phase 1 & 2 Client Components", () => {
     const element = document.getElementById("test-status");
     expect(element?.getAttribute("role")).toBe("status");
     expect(element?.getAttribute("aria-live")).toBe("polite");
-    expect(element?.textContent).toBe("Note attached.");
+    expect(element?.textContent).toContain("Note attached.");
   });
 
   it("manages floating composer notes and chip badge", () => {

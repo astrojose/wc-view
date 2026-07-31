@@ -4,6 +4,7 @@ import { DocCanvas, DocBlock } from "./components/DocCanvas.js";
 import { FloatingComposer, NoteItem } from "./components/FloatingComposer.js";
 import { AnnotationEditor } from "./components/AnnotationEditor.js";
 import { ConfirmDialog } from "./components/ConfirmDialog.js";
+import { extractAnchor, resolveAnchor } from "./anchoring.js";
 
 export class ReviewApp {
   private themeToggle: ThemeToggle;
@@ -12,6 +13,7 @@ export class ReviewApp {
   private composer: FloatingComposer;
   private editor: AnnotationEditor;
   private confirmDialog: ConfirmDialog;
+  private currentFilePath = "";
   private noteSeq = 0;
 
   constructor() {
@@ -25,13 +27,55 @@ export class ReviewApp {
       (prompt, notes) => this.handleBatchSubmit(prompt, notes),
       () => this.handleDiscardNotes()
     );
+    this.composer.mountAbove(this.statusRegion.getElement());
 
     this.setupShortcuts();
     this.statusRegion.announce("Select any paragraph to attach a review note.");
+
+    if (typeof window !== "undefined" && window.fetch) {
+      this.initFromApi();
+    }
   }
 
-  public loadMarkdown(markdown: string, title?: string): void {
-    this.canvas.render(markdown, title, (block) => this.handleBlockSelect(block));
+  public async initFromApi(): Promise<void> {
+    try {
+      const res = await fetch("/api/document");
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.content) {
+        this.currentFilePath = data.path || "";
+        const title = data.path ? data.path.split("/").pop() : "Document";
+        this.loadMarkdown(data.content, title);
+        this.loadFeedback();
+      }
+    } catch {
+      // Standalone mode without backend server API
+    }
+  }
+
+  public loadMarkdown(markdown: string, title?: string, meta?: string): void {
+    this.canvas.render(markdown, title, meta, (block) => this.handleBlockSelect(block));
+  }
+
+  public async loadFeedback(): Promise<void> {
+    try {
+      const res = await fetch("/api/feedback");
+      if (!res.ok) return;
+      const items = await res.json();
+      const article = document.querySelector("#doc-content") as HTMLElement;
+      if (!article) return;
+
+      for (const item of items) {
+        if (item.anchor) {
+          const resolved = resolveAnchor(item.anchor, article);
+          if (resolved.element) {
+            resolved.element.classList.add("annotated");
+          }
+        }
+      }
+    } catch {
+      // Silent catch
+    }
   }
 
   private handleBlockSelect(block: DocBlock): void {
@@ -39,6 +83,8 @@ export class ReviewApp {
     if (!el) return;
 
     this.canvas.markActive(block.id);
+    const canvasEl = document.querySelector("#doc-content") as HTMLElement || document.body;
+    const anchor = extractAnchor(el, canvasEl);
 
     this.editor.open(
       block,
@@ -47,7 +93,7 @@ export class ReviewApp {
         if (!comment) return;
         this.noteSeq++;
         const note: NoteItem = {
-          id: `n${this.noteSeq}`,
+          id: `fb_${Date.now()}_${this.noteSeq}`,
           blockId: block.id,
           quote,
           comment,
@@ -57,11 +103,36 @@ export class ReviewApp {
         this.canvas.markAnnotated(block.id, true);
         this.statusRegion.announce(`Note attached to “${quote}” — not yet submitted.`);
         this.canvas.markActive(null);
+
+        // Submit feedback item to backend
+        this.saveFeedbackItem(note, anchor);
       },
       () => {
         this.canvas.markActive(null);
       }
     );
+  }
+
+  private async saveFeedbackItem(note: NoteItem, anchor: any): Promise<void> {
+    try {
+      const payload = {
+        id: note.id,
+        filePath: this.currentFilePath,
+        anchor,
+        comment: note.comment,
+        status: "unresolved",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } catch {
+      // Memory fallback
+    }
   }
 
   private handleBatchSubmit(prompt: string, notes: NoteItem[]): void {
@@ -86,7 +157,7 @@ export class ReviewApp {
 
   private setupShortcuts(): void {
     window.addEventListener("keydown", (e) => {
-      const isInput = /^(INPUT|TEXTAREA)$/.test((document.activeElement?.tagName || ""));
+      const isInput = /^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName || "");
       if (e.key === "?" && !isInput) {
         e.preventDefault();
         alert("Shortcuts: [Shift + ?] Help | [Esc] Close / Blur | [Enter] Select block");
@@ -95,7 +166,6 @@ export class ReviewApp {
   }
 }
 
-// Auto-initialize app if in browser window
 if (typeof window !== "undefined") {
   (window as any).reviewApp = new ReviewApp();
 }

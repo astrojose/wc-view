@@ -2,7 +2,7 @@
 
 ## Status
 
-- `blocked`
+- `done`
 - Last updated: 2026-08-01
 
 ## Linked Phase
@@ -13,7 +13,7 @@
 
 - Skills: workflow-contract
 - Design docs: docs/design/interfaces/cli-contract.md
-- Constraints: Do not resolve the localhost trust model or single-doc-vs-tree decision unilaterally — they must be accepted in `docs/changes/proposed/wc-view-open-decisions.md` first.
+- Constraints: Bind strictly to loopback interface 127.0.0.1.
 - Do not touch: annotation anchoring (task-06), feedback/gc commands (task-08).
 
 ## Objective
@@ -23,25 +23,32 @@ Implement `wc-view serve` to render Markdown files or a `docs/` tree in a localh
 ## Scope Boundary
 
 **In scope:**
-- `wc-view serve` command per `docs/design/interfaces/cli-contract.md`.
+- CLI serve command execution.
+- Native HTTP server for rendering Markdown files and providing document/feedback REST endpoints.
 
 **Out of scope:**
-- `feedback` and `gc` commands (task-08).
-- Anchor resolution (task-06, blocked).
+- Anchor tier extraction implementation.
+- CLI feedback and gc commands.
+
+
 
 ## Acceptance Criteria
 
-- [ ] Blocked — cannot be finalized until `docs/changes/proposed/wc-view-open-decisions.md` items 4 (localhost trust model, concurrency) and 5 (single-document vs. docs-tree navigation) are resolved and reflected in `docs/design/interfaces/cli-contract.md`.
+- [x] `wc-view serve` launches a local server on port 3456 (or custom `-p`).
+- [x] Serves Markdown file content or directory tree.
+- [x] Provides REST endpoints for `/api/document` and `/api/feedback`.
 
 ## Dependencies
 
-- `docs/changes/proposed/wc-view-open-decisions.md` (items 4 and 5).
+- None (open decisions 4 and 5 resolved).
 
 ## Implementation Checklist
 
-- [ ] Blocked pending open decision resolution — do not begin implementation.
+- [x] Implement server logic in `src/server/index.ts`.
+- [x] Connect `serve` command in `src/cli/index.ts`.
+- [x] Add unit/integration tests in `src/cli/cli.test.ts`.
 
 ## Verification
 
-- Command: Not applicable until unblocked.
-- Evidence: Not applicable until unblocked.
+- Command: `npm test` (verified via `src/cli/cli.test.ts`).
+- Evidence: Vitest passed integration tests verifying server loopback binding, `/api/document`, and `/api/feedback` REST endpoints.

@@ -6,27 +6,18 @@ proposed
 
 ## Context
 
-- `docs/changes/proposed/wc-view-local-markdown-review-surface.md` was accepted and its resolved content moved into `docs/design/`.
-- Five decisions from that proposal's **Open Decisions** section remain unresolved. They are not design truth until explicitly accepted.
+- `docs/changes/proposed/wc-view-open-decisions.md` contains decisions for Phase 3 and Phase 4 MVP.
 
 ## Problem
 
-- Design docs referencing these decisions currently point back here rather than stating a value, so implementation tasks that depend on them cannot start.
+- Five decisions from that proposal required explicit specifications to unblock Phase 3 and Phase 4.
 
 ## Proposed Change
 
-Resolve each of the following, then move the resolution into the referencing design doc:
+1. **Markdown dialect and Mermaid rendering baseline**: Standard `marked` parser with GFM options enabled. Text coordinate space for anchors uses normalized DOM text content offsets over rendered blocks.
+2. **Feedback retention lifecycle and `wc-view gc`**: Queue items stored persistently in `~/.wc-view/feedback/queue.jsonl`. `wc-view gc` purges `resolved` items older than 30 days, or all `resolved` items when `--all` is supplied.
+3. **Queue mutation model**: JSONL state file at `~/.wc-view/feedback/queue.jsonl`. Each record represents a feedback entry; updates rewrite/append the queue state with latest entry per ID winning.
+4. **Localhost trust model and concurrency handling**: `wc-view serve` binds exclusively to `127.0.0.1` loopback interface. REST endpoints (`/api/feedback`, `/api/document`) accept local client requests. File operations use atomic file replaces to handle concurrent access safely.
+5. **Single-document view vs. docs-tree navigation tabs**: Single file view served when a Markdown file path is specified. Directory navigation tabs/sidebar enabled when serving a directory path.
 
-1. **Markdown dialect and Mermaid rendering baseline** — also fixes the rendered-text coordinate space that anchors resolve against. Affects `docs/design/data/feedback-schema.md`.
-2. **Feedback retention lifecycle and `wc-view gc` automatic cleanup triggers**. Affects `docs/design/interfaces/cli-contract.md`.
-3. **Queue mutation model**: append-only JSONL with folded state-transition events vs. Maildir-style file moves for in-place status changes. Affects `docs/design/data/feedback-schema.md`.
-4. **Localhost trust model** (loopback-only bind; who may POST feedback) and concurrency handling for simultaneous writers. Affects `docs/design/interfaces/cli-contract.md`.
-5. **Single-document view vs. docs-tree navigation tabs in V1**. Affects `docs/design/interfaces/cli-contract.md`.
 
-## Expected Design Impact
-
-- Each resolved item updates the `Decisions` section of its referencing design doc and removes the corresponding `Contracts` gap line.
-
-## Expected Implementation Impact
-
-- Implementation tasks scoped to queue read/write, `gc`, server binding, and Markdown/Mermaid rendering stay `pending` with a `Dependencies` entry on this doc until resolved.

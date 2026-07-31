@@ -17,13 +17,26 @@
 
 ## Decisions
 
-- Comment/message field: plain feedback message (`comment`) plus `status`.
+- Comment/message field: plain feedback message (`comment`) plus `status` (`unresolved` | `in_progress` | `resolved` | `orphaned`).
 - Payload interop target shape: location anchor + message + severity, mappable to SARIF / LSP `Diagnostic` / Reviewdog RDFormat.
+- Storage path: durable user-local state under `~/.wc-view/feedback/queue.jsonl` (outside any git repository).
+- Queue mutation model: JSONL format with one JSON object per line. State updates preserve latest item state per `id`.
+- Anchor coordinate space: rendered DOM text content offsets generated via standard GFM `marked` parser.
 
 ## Contracts
 
-- Exact JSON field names, ID scheme, timestamp handling, and queue mutation model (append-only JSONL with folded state-transition events vs. Maildir-style file moves) are not yet defined — see `docs/changes/proposed/wc-view-open-decisions.md`.
-- Rendered-text coordinate space that anchors resolve against depends on the supported Markdown dialect and Mermaid rendering baseline, which is an open decision — see `docs/changes/proposed/wc-view-open-decisions.md`.
+- Feedback Item JSON structure:
+  - `id`: string (e.g. `fb_123456`)
+  - `filePath`: string (relative or absolute file path being reviewed)
+  - `anchor`: object
+    - `primary`: `{ exact: string, prefix: string, suffix: string }`
+    - `secondary`: `{ headingSlug?: string, elementType: string, occurrenceIndex: number }`
+    - `tertiary`: `{ startLine?: number, endLine?: number, offsetHint?: number }`
+  - `comment`: string
+  - `severity`: `"info" | "warning" | "error"`
+  - `status`: `"unresolved" | "in_progress" | "resolved" | "orphaned"`
+  - `createdAt`: string (ISO 8601)
+  - `updatedAt`: string (ISO 8601)
 - System-level flow: `docs/design/architecture/wc-view-system-flow.md`.
 
 ## Acceptance Criteria
@@ -31,3 +44,4 @@
 - Every feedback item carries a primary (quote+context), secondary (structural scope), and tertiary (position hint) anchor tier.
 - Status values are limited to `unresolved`, `in_progress`, `resolved`, `orphaned`.
 - Feedback is persisted only under `~/.wc-view/feedback/`, never inside a git-tracked path.
+

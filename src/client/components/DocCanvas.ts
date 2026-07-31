@@ -27,12 +27,16 @@ export class DocCanvas {
     this.container = existing;
   }
 
-  public render(markdown: string, title?: string, onSelect?: (block: DocBlock) => void): void {
+  public render(markdown: string, title?: string, meta?: string, onSelect?: (block: DocBlock) => void): void {
     this.onBlockSelect = onSelect;
     const htmlContent = renderMarkdown(markdown);
-    
+
+    const header = title || meta
+      ? `<header>${title ? `<h1>${title}</h1>` : ""}${meta ? `<p class="doc-meta">${meta}</p>` : ""}</header>`
+      : "";
+
     this.container.innerHTML = `
-      ${title ? `<h1>${title}</h1>` : ""}
+      ${header}
       <article id="doc-content">${htmlContent}</article>
     `;
 
@@ -67,6 +71,7 @@ export class DocCanvas {
       child.setAttribute("data-block-id", id);
       child.classList.add("doc-block");
       child.setAttribute("tabindex", "0");
+      child.setAttribute("role", "button");
 
       const block: DocBlock = {
         id,

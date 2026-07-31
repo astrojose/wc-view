@@ -16,6 +16,7 @@ export class FloatingComposer {
   private notesListElement: HTMLElement;
   private draftPrompt: string = "";
   private notes: NoteItem[] = [];
+  private queueOpen = false;
   private onSubmitCallback?: (prompt: string, notes: NoteItem[]) => void;
   private onDiscardCallback?: () => void;
   private invokerElement: HTMLElement | null = null;
@@ -35,16 +36,17 @@ export class FloatingComposer {
     this.container.innerHTML = `
       <div class="floating-composer-bar">
         <div style="display:flex;align-items:center;justify-content:space-between">
-          <div id="chip-badge" class="chip-badge">🏷️ 0 notes attached</div>
+          <div id="chip-badge" class="chip-badge">🏷️ <span class="chip-count">0</span> notes attached</div>
           <div style="display:flex;gap:var(--space-2)">
             <button id="discard-btn" type="button" class="btn" title="Discard notes">Discard</button>
             <button id="submit-btn" type="button" class="btn btn-primary">Submit Batch</button>
           </div>
         </div>
+        <div id="queued-notes-list" class="composer-queue" role="region" aria-label="Pending annotations"></div>
         <div class="composer-input-row">
+          <button id="queue-toggle-btn" type="button" class="icon-btn" aria-expanded="false" aria-label="Show review queue"><span aria-hidden="true">≡</span></button>
           <input id="composer-prompt" type="text" class="composer-input" placeholder="Add an instruction for the agent..." />
         </div>
-        <div id="queued-notes-list" style="display:flex;flex-direction:column;gap:var(--space-1);max-height:120px;overflow-y:auto"></div>
       </div>
     `;
 
@@ -55,6 +57,11 @@ export class FloatingComposer {
     this.notesListElement = this.container.querySelector("#queued-notes-list") as HTMLElement;
 
     this.bindEvents();
+  }
+
+  /** Groups another self-mounting landmark (e.g. StatusRegion) above the composer bar in the sticky bottom region. */
+  public mountAbove(element: HTMLElement): void {
+    this.container.insertBefore(element, this.container.firstChild);
   }
 
   public addNote(note: NoteItem): void {
@@ -106,6 +113,17 @@ export class FloatingComposer {
     discardBtn.addEventListener("click", () => {
       if (this.onDiscardCallback) this.onDiscardCallback();
     });
+
+    const queueToggleBtn = this.container.querySelector("#queue-toggle-btn") as HTMLButtonElement;
+    queueToggleBtn.addEventListener("click", () => this.toggleQueue());
+  }
+
+  private toggleQueue(): void {
+    this.queueOpen = !this.queueOpen;
+    const queueToggleBtn = this.container.querySelector("#queue-toggle-btn") as HTMLButtonElement;
+    queueToggleBtn.setAttribute("aria-expanded", String(this.queueOpen));
+    queueToggleBtn.setAttribute("aria-label", this.queueOpen ? "Hide review queue" : "Show review queue");
+    this.notesListElement.classList.toggle("open", this.queueOpen);
   }
 
   private handleSubmit(): void {
@@ -119,22 +137,17 @@ export class FloatingComposer {
   }
 
   private renderNotes(): void {
-    this.chipBadge.textContent = `🏷️ ${this.notes.length} note${this.notes.length === 1 ? "" : "s"} attached`;
+    const count = this.notes.length;
+    this.chipBadge.innerHTML = `🏷️ <span class="chip-count">${count}</span> note${count === 1 ? "" : "s"} attached`;
     this.notesListElement.innerHTML = "";
 
     this.notes.forEach((n) => {
       const itemEl = document.createElement("div");
-      itemEl.style.display = "flex";
-      itemEl.style.alignItems = "center";
-      itemEl.style.justifyContent = "space-between";
-      itemEl.style.fontSize = "var(--type-small-size)";
-      itemEl.style.padding = "var(--space-1) var(--space-2)";
-      itemEl.style.backgroundColor = "var(--surface-inset)";
-      itemEl.style.borderRadius = "var(--radius-sm)";
+      itemEl.className = "queue-item";
 
       itemEl.innerHTML = `
         <span><strong>“${n.quote}”</strong>: ${n.comment}</span>
-        <button type="button" class="btn" style="min-height:28px;padding:0 var(--space-2)" title="Remove note">×</button>
+        <button type="button" class="btn btn-ghost btn-sm" title="Remove note">×</button>
       `;
 
       const removeBtn = itemEl.querySelector("button") as HTMLButtonElement;

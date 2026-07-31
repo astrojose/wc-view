@@ -19,15 +19,31 @@
 
 - Default feedback payload format is compact JSON (see `docs/design/data/feedback-schema.md`).
 - Execution runtime: Node.js 18+ ESM CLI (`dist/bin/wc-view.js`).
+- Localhost security: `wc-view serve` binds exclusively to `127.0.0.1` (loopback interface), rejecting any external network requests.
+- GC retention: `wc-view gc` deletes `resolved` items older than 30 days by default, or all `resolved` items when `--all` is set.
+- View modes: single-file mode when given a `.md` file; docs-tree sidebar navigation when given a directory path.
 
 ## Contracts
 
-- Command flags beyond `--unresolved` and `--format` on `feedback`, port/host binding defaults, exit codes, and `gc` retention triggers are not yet defined — see `docs/changes/proposed/wc-view-open-decisions.md`.
-- Localhost trust model (loopback-only bind; who may POST feedback) and concurrency handling for simultaneous writers are not yet defined — see `docs/changes/proposed/wc-view-open-decisions.md`.
-- Single-document view vs. docs-tree navigation tabs in V1 is not yet defined — see `docs/changes/proposed/wc-view-open-decisions.md`.
+- `wc-view serve [path]` options:
+  - `-p, --port <number>` (default: `3456`)
+  - `-h, --host <string>` (default: `127.0.0.1`)
+- `wc-view feedback` options:
+  - `-u, --unresolved` (default: true)
+  - `-f, --format <type>` (`json` | `toon`, default: `json`)
+- `wc-view gc` options:
+  - `-a, --all` (purge all resolved feedback regardless of age)
+  - `-d, --days <number>` (retention days threshold, default: 30)
+- HTTP REST API endpoints on `wc-view serve`:
+  - `GET /api/document`: returns document text and file metadata.
+  - `GET /api/feedback`: returns feedback queue items for current file.
+  - `POST /api/feedback`: creates or updates a feedback entry in `~/.wc-view/feedback/queue.jsonl`.
+  - `PATCH /api/feedback/:id`: updates status (`resolved`, `in_progress`, etc.).
 - System-level flow: `docs/design/architecture/wc-view-system-flow.md`.
 
 ## Acceptance Criteria
 
 - `wc-view serve`, `wc-view feedback --unresolved`, and `wc-view gc` exist as named commands.
 - `wc-view feedback --format` supports at least `json` as the default output.
+- Server binds strictly to `127.0.0.1` loopback.
+

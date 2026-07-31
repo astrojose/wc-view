@@ -21,11 +21,11 @@ export class ConfirmDialog {
 
     this.scrim.innerHTML = `
       <div class="dialog-card">
-        <h3 id="confirm-dialog-title" style="margin:0">${title}</h3>
-        <p style="margin:0;color:var(--fg-secondary)">${description}</p>
+        <h3 id="confirm-dialog-title">${title}</h3>
+        <p>${description}</p>
         <div style="display:flex;justify-content:flex-end;gap:var(--space-2);margin-top:var(--space-2)">
-          <button id="dialog-cancel-btn" class="btn">Cancel</button>
-          <button id="dialog-confirm-btn" class="btn btn-primary">Confirm</button>
+          <button id="dialog-cancel-btn" class="btn" type="button">Cancel</button>
+          <button id="dialog-confirm-btn" class="btn btn-danger" type="button">Confirm</button>
         </div>
       </div>
     `;

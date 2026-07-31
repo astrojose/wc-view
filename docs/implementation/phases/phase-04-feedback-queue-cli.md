@@ -2,7 +2,7 @@
 
 ## Status
 
-- `blocked`
+- `done`
 - Last updated: 2026-08-01
 
 ## Objective
@@ -22,17 +22,19 @@
 
 ## Tasks
 
-- [ ] `task-07-cli-serve.md`
-- [ ] `task-08-cli-feedback-gc.md`
+- [x] `task-07-cli-serve.md`
+- [x] `task-08-cli-feedback-gc.md`
 
 ## Acceptance Criteria
 
-- [ ] `wc-view feedback --unresolved` returns only `unresolved`-status items as compact JSON by default.
-- [ ] Queue file lives under `~/.wc-view/feedback/`, never inside a git-tracked path.
+- [x] `wc-view feedback --unresolved` returns only `unresolved`-status items as compact JSON by default.
+- [x] Queue file lives under `~/.wc-view/feedback/`, never inside a git-tracked path.
 
 ## Blockers
 
-- Blocked on `docs/changes/proposed/wc-view-open-decisions.md` items 2, 3, 4, 5 (gc retention triggers, queue mutation model, localhost trust/concurrency model, single-doc vs. docs-tree navigation).
+- None (completed).
+
+
 
 ## Linked Tasks
 

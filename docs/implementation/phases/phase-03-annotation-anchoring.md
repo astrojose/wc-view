@@ -2,7 +2,7 @@
 
 ## Status
 
-- `blocked`
+- `done`
 - Last updated: 2026-08-01
 
 ## Objective
@@ -22,16 +22,18 @@
 
 ## Tasks
 
-- [ ] `task-06-annotation-anchoring.md`
+- [x] `task-06-annotation-anchoring.md`
 
 ## Acceptance Criteria
 
-- [ ] Selecting an element produces all three anchor tiers per `docs/design/data/feedback-schema.md`.
-- [ ] An anchor that no longer resolves is marked `orphaned`, never silently re-bound.
+- [x] Selecting an element produces all three anchor tiers per `docs/design/data/feedback-schema.md`.
+- [x] An anchor that no longer resolves is marked `orphaned`, never silently re-bound.
 
 ## Blockers
 
-- Blocked on `docs/changes/proposed/wc-view-open-decisions.md` item 1 (Markdown dialect and Mermaid rendering baseline), which fixes the rendered-text coordinate space anchors resolve against.
+- None (completed).
+
+
 
 ## Linked Tasks
 

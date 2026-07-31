@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
+import { createServer } from "../server/index.js";
+import { getUnresolvedItems, gcFeedback } from "../core/queue.js";
 
 const program = new Command();
 
@@ -9,13 +11,18 @@ program
   .version("0.1.0");
 
 program
-  .command("serve")
+  .command("serve [path]")
   .description("Render Markdown files or a docs/ tree in a lightweight localhost browser UI")
   .option("-p, --port <number>", "Port to bind localhost server", "3456")
   .option("-h, --host <string>", "Host interface to bind", "127.0.0.1")
-  .action((options) => {
-    process.stderr.write(`wc-view serve: Starting localhost server on http://${options.host}:${options.port}\n`);
-    // Server startup logic will be wired here in Phase 04 / CLI implementation
+  .action((targetPath, options) => {
+    const port = parseInt(options.port, 10);
+    const host = options.host;
+    const server = createServer({ port, host, targetPath });
+
+    server.listen(port, host, () => {
+      process.stderr.write(`wc-view serve: Localhost server active on http://${host}:${port}\n`);
+    });
   });
 
 program
@@ -24,16 +31,31 @@ program
   .option("-u, --unresolved", "Filter to unresolved feedback items", true)
   .option("-f, --format <type>", "Output payload format (json|toon)", "json")
   .action((options) => {
-    // POSIX stream discipline: structured data goes exclusively to stdout
-    const payload = JSON.stringify({ version: "1.0", items: [] }, null, options.format === "json" ? 2 : 0);
-    process.stdout.write(`${payload}\n`);
+    const items = getUnresolvedItems();
+    const payload = {
+      version: "1.0",
+      total: items.length,
+      items
+    };
+
+    const formatted = options.format === "json"
+      ? JSON.stringify(payload, null, 2)
+      : JSON.stringify(payload);
+
+    // POSIX stream discipline: structured data output to stdout only
+    process.stdout.write(`${formatted}\n`);
   });
 
 program
   .command("gc")
   .description("Garbage-collect feedback queue items per retention lifecycle")
-  .action(() => {
-    process.stderr.write("wc-view gc: Garbage collection complete.\n");
+  .option("-a, --all", "Purge all resolved feedback items regardless of age")
+  .option("-d, --days <number>", "Retention threshold in days", "30")
+  .action((options) => {
+    const days = parseInt(options.days, 10);
+    const purged = gcFeedback({ all: options.all, days });
+    // POSIX stream discipline: diagnostics/logs to stderr only
+    process.stderr.write(`wc-view gc: Garbage collection purged ${purged} resolved item(s).\n`);
   });
 
 program.parse(process.argv);

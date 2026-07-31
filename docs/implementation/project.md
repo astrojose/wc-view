@@ -6,28 +6,30 @@
 
 ## Current Priorities
 
-1. Phase 01 — Canvas & Theme Foundation (no open-decision dependency; unblocks all other phases' UI surface).
-2. Phase 02 — Floating Bar & Composer (depends only on Phase 01; UI mechanics only, no persistence).
-3. Phase 03 — Annotation Anchoring (blocked on open decision 1: Markdown/Mermaid rendering baseline).
-4. Phase 04 — Feedback Queue & CLI (blocked on open decisions 2-5: gc triggers, queue mutation model, trust/concurrency model, single-doc vs. tree navigation).
+1. Phase 01 — Canvas & Theme Foundation (completed).
+2. Phase 02 — Floating Bar & Composer (completed).
+3. Phase 03 — Annotation Anchoring (completed).
+4. Phase 04 — Feedback Queue & CLI (completed).
 
 ## Active Phases
 
-- None (Phase 01 and Phase 02 completed)
+- None (all phases completed).
 
 ## Completed Phases
 
 - [x] phase-01-canvas-theme-foundation.md
 - [x] phase-02-floating-bar-composer.md
+- [x] phase-03-annotation-anchoring.md
+- [x] phase-04-feedback-queue-cli.md
 
 ## Deferred Phases
 
-- [ ] phase-03-annotation-anchoring.md (blocked)
-- [ ] phase-04-feedback-queue-cli.md (blocked)
+- None
 
 ## Dependencies
 
-- Phases 03 and 04 depend on resolution of `docs/changes/proposed/wc-view-open-decisions.md`.
+- All open decisions resolved in `docs/changes/proposed/wc-view-open-decisions.md`.
+
 
 ## Linked Artifacts
 

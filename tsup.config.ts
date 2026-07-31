@@ -12,5 +12,6 @@ export default defineConfig({
   dts: false,
   sourcemap: true,
   minify: false,
+  noExternal: ["marked"],
   publicDir: "wc-view Design System"
 });

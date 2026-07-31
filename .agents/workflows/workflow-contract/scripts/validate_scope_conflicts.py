@@ -14,7 +14,8 @@ CONFIG_PATH = config_path()
 
 _IN_SCOPE_LABEL = re.compile(r"^\*\*In scope:\*\*\s*$", re.MULTILINE)
 _SECTION_START = re.compile(r"^## ", re.MULTILINE)
-_SUB_LABEL = re.compile(r"^\*\*[^*]+\*\*:\s*$")
+_SUB_LABEL = re.compile(r"^\*\*[^*]+(?::\*\*|\*\*:)\s*$", re.MULTILINE)
+
 
 
 def load_config() -> dict:

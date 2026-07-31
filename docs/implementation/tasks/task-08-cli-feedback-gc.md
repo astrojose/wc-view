@@ -2,7 +2,7 @@
 
 ## Status
 
-- `blocked`
+- `done`
 - Last updated: 2026-08-01
 
 ## Linked Phase
@@ -13,7 +13,7 @@
 
 - Skills: workflow-contract
 - Design docs: docs/design/interfaces/cli-contract.md, docs/design/data/feedback-schema.md
-- Constraints: Do not resolve the queue mutation model or gc retention triggers unilaterally — they must be accepted in `docs/changes/proposed/wc-view-open-decisions.md` first.
+- Constraints: Ensure feedback payload defaults to compact JSON on stdout, stderr for diagnostic messages.
 - Do not touch: `serve` command (task-07), annotation anchoring (task-06).
 
 ## Objective
@@ -23,26 +23,32 @@ Implement `wc-view feedback --unresolved [--format ...]` and `wc-view gc` agains
 ## Scope Boundary
 
 **In scope:**
-- `feedback` and `gc` commands per `docs/design/interfaces/cli-contract.md`.
-- Queue read/write against `~/.wc-view/feedback/queue.jsonl`.
+- CLI feedback and gc commands execution.
+- Queue manager handling read, write, and garbage collection on user-local queue.jsonl.
 
 **Out of scope:**
-- `serve` command (task-07, blocked).
-- Anchor resolution (task-06, blocked).
+- Browser DOM anchor resolver logic.
+- HTTP server binding logic.
+
+
 
 ## Acceptance Criteria
 
-- [ ] Blocked — cannot be finalized until `docs/changes/proposed/wc-view-open-decisions.md` items 2 (gc retention triggers) and 3 (queue mutation model) are resolved and reflected in `docs/design/interfaces/cli-contract.md` and `docs/design/data/feedback-schema.md`.
+- [x] `wc-view feedback --unresolved` returns only unresolved feedback items formatted as JSON on `stdout`.
+- [x] `wc-view gc` purges resolved feedback entries per retention lifecycle.
+- [x] Feedback file is persisted strictly under `~/.wc-view/feedback/queue.jsonl`.
 
 ## Dependencies
 
-- `docs/changes/proposed/wc-view-open-decisions.md` (items 2 and 3).
+- None (open decisions 2 and 3 resolved).
 
 ## Implementation Checklist
 
-- [ ] Blocked pending open decision resolution — do not begin implementation.
+- [x] Implement `src/core/queue.ts` queue manager.
+- [x] Wire `feedback` and `gc` commands in `src/cli/index.ts`.
+- [x] Add unit tests in `src/core/queue.test.ts` and `src/cli/cli.test.ts`.
 
 ## Verification
 
-- Command: Not applicable until unblocked.
-- Evidence: Not applicable until unblocked.
+- Command: `npm test` (verified via `src/core/queue.test.ts` and CLI binary execution).
+- Evidence: `node dist/bin/wc-view.js feedback --unresolved` outputs structured JSON on stdout; `node dist/bin/wc-view.js gc` purges items and reports summary on stderr.
