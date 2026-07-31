@@ -1,0 +1,11 @@
+agent:
+  name: workflow-contract
+  short_description: "Route docs work through the workflow contract"
+  default_prompt: |
+    Use $workflow-contract.
+    Before touching any file:
+    1. Classify layer (design | implementation | changes/proposed), lifecycle state, and agent mode (Thinking | Execution | Review).
+    2. Bootstrap structure if missing.
+    3. Read canonical spec files in order.
+    4. For task work: verify task passes readiness gate before setting in-progress.
+    5. Run python3 .agents/workflows/workflow-contract/scripts/validate_workflow.py and fix all failures before completion.

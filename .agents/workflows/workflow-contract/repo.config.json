@@ -1,0 +1,116 @@
+{
+  "version": 1,
+  "repo": {
+    "docs_root": "docs"
+  },
+  "paths": {
+    "design": "docs/design",
+    "implementation": "docs/implementation",
+    "implementation_project": "docs/implementation/project.md",
+    "implementation_phases": "docs/implementation/phases",
+    "implementation_tasks": "docs/implementation/tasks",
+    "implementation_status": "docs/implementation/status",
+    "changes_root": "docs/changes",
+    "changes_proposed": "docs/changes/proposed",
+    "changes_template": "docs/changes/template.md"
+  },
+  "read_order": [
+    "docs/design",
+    "docs/implementation",
+    "docs/changes/proposed"
+  ],
+  "required_directories": [
+    "docs/implementation/phases",
+    "docs/implementation/tasks",
+    "docs/implementation/status",
+    "docs/changes/proposed",
+    ".agents/workflows/workflow-contract/spec",
+    ".agents/workflows/workflow-contract/templates",
+    ".agents/workflows/workflow-contract/scripts"
+  ],
+  "required_files": [
+    "AGENTS.md",
+    "docs/README.md",
+    "docs/implementation/README.md",
+    "docs/implementation/project.md",
+    "docs/implementation/tasks/backlog.md",
+    "docs/implementation/status/weekly-status.md",
+    "docs/changes/README.md",
+    "docs/changes/template.md",
+    ".agents/workflows/workflow-contract/README.md",
+    ".agents/workflows/workflow-contract/repo.config.json",
+    ".agents/workflows/workflow-contract/spec/workflow-spec.md",
+    ".agents/workflows/workflow-contract/spec/lifecycle-spec.md",
+    ".agents/workflows/workflow-contract/spec/guardrails-spec.md",
+    ".agents/workflows/workflow-contract/spec/task-spec.md",
+    ".agents/workflows/workflow-contract/scripts/init_workflow_contract.py",
+    ".agents/workflows/workflow-contract/scripts/validate_workflow.py",
+    ".agents/workflows/workflow-contract/scripts/validate_readiness.py",
+    ".agents/workflows/workflow-contract/scripts/validate_scope_conflicts.py"
+  ],
+  "disallowed_directories": [
+    "docs/changes/approved",
+    "docs/changes/rejected"
+  ],
+  "disallowed_files": [],
+  "legacy_reference_patterns": [
+    "docs/changes/approved/",
+    "docs/changes/rejected/"
+  ],
+  "validation": {
+    "enable_structure": true,
+    "enable_metadata": true,
+    "enable_readiness": true,
+    "enable_scope_conflicts": true,
+    "enable_transitions": true,
+    "enable_references": true
+  },
+  "statuses": {
+    "proposal": {
+      "allowed": [
+        "proposed",
+        "under-review",
+        "on-hold"
+      ]
+    },
+    "task": {
+      "allowed": [
+        "pending",
+        "in-progress",
+        "blocked",
+        "done"
+      ]
+    },
+    "phase": {
+      "allowed": [
+        "pending",
+        "in-progress",
+        "blocked",
+        "done"
+      ]
+    }
+  },
+  "transitions": {
+    "proposal": {
+      "proposed": [
+        "proposed",
+        "under-review",
+        "on-hold"
+      ],
+      "under-review": [
+        "under-review",
+        "on-hold",
+        "proposed"
+      ],
+      "on-hold": [
+        "on-hold",
+        "proposed"
+      ]
+    }
+  },
+  "exceptions": {
+    "require_reason": true,
+    "require_scope": true,
+    "require_follow_up": true
+  }
+}
