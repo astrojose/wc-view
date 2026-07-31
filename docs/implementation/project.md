@@ -2,7 +2,7 @@
 
 ## Overview
 
-- `wc-view`: local Markdown review surface for agent workflows. Design truth adopted from the accepted proposal into `docs/design/`; five open decisions remain in `docs/changes/proposed/wc-view-open-decisions.md`.
+- `wc-view`: local Markdown review surface for agent workflows. Technical stack is established in `docs/design/architecture/tech-stack.md` (Node.js 18+ ESM, TypeScript, Commander, Marked, native HTTP). Visual design truth is defined in `wc-view Design System/` and `docs/design/product/ux-design-system.md`. Five open decisions remain in `docs/changes/proposed/wc-view-open-decisions.md`.
 
 ## Current Priorities
 

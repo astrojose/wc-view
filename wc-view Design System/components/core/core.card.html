@@ -1,0 +1,43 @@
+<!-- @dsCard group="Components" viewport="700x330" name="Core" subtitle="Button, IconButton, Chip, StatusBadge, Toast" -->
+<!doctype html><html data-theme="dark"><head><meta charset="utf-8"><link rel="stylesheet" href="../../styles.css"><style>html,body{margin:0}body{background:var(--bg-base);color:var(--fg-primary);font-family:var(--font-sans);letter-spacing:var(--tracking-tight);padding:var(--space-5)}a{color:var(--accent-action)}a:hover{color:var(--fg-primary)}.lbl{font:var(--type-meta);color:var(--fg-muted);letter-spacing:var(--tracking-wide);text-transform:uppercase;margin:0 0 var(--space-2)}.row{display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap}.stack{display:flex;flex-direction:column;gap:var(--space-4)}svg.lucide{width:1rem;height:1rem}</style></head><body><div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@0.454.0/dist/umd/lucide.js"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+const { Button, IconButton, Chip, StatusBadge, Toast } = window.WcViewDesignSystem_136191;
+const Ic = ({ n }) => <i data-lucide={n}></i>;
+function Card(){
+  const [open,setOpen] = React.useState(false);
+  return <div className="stack">
+    <div><p className="lbl">Button</p><div className="row">
+      <Button variant="primary" icon={<Ic n="send" />}>Submit</Button>
+      <Button variant="secondary">Cancel</Button>
+      <Button variant="ghost">Skip</Button>
+      <Button variant="danger" icon={<Ic n="trash-2" />}>Discard</Button>
+      <Button size="sm" variant="primary">Attach note</Button>
+      <Button disabled>Disabled</Button>
+    </div></div>
+    <div className="row" style={{gap:'var(--space-8)'}}>
+      <div><p className="lbl">IconButton</p><div className="row">
+        <IconButton label="Toggle theme" icon={<Ic n="moon" />} />
+        <IconButton label="Review queue" active icon={<Ic n="list" />} />
+        <IconButton size="sm" label="Close" icon={<Ic n="x" />} />
+      </div></div>
+      <div><p className="lbl">Chip</p><div className="row">
+        <Chip tone="accent" count={3} icon={<Ic n="tag" />}>notes attached</Chip>
+        <Chip onRemove={()=>{}}>“layered anchor”</Chip>
+      </div></div>
+    </div>
+    <div><p className="lbl">StatusBadge</p><div className="row">
+      <StatusBadge status="unresolved" /><StatusBadge status="in_progress" /><StatusBadge status="resolved" /><StatusBadge status="orphaned" />
+    </div></div>
+    <div><p className="lbl">Toast</p>
+      <Toast message="Claimed 3 notes in § Proposed Change — rewriting anchor tiers" meta="2 unresolved remaining · 20:41" expanded={open} onToggle={()=>setOpen(!open)} actions={<Button size="sm" variant="secondary">View queue</Button>} />
+    </div>
+  </div>;
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Card />);
+requestAnimationFrame(()=>lucide.createIcons());
+</script></body></html>

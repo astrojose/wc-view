@@ -3,7 +3,7 @@
 ## Context
 
 - System-level view of how a Markdown document moves through `wc-view` and back, as stated in the accepted proposal.
-- Referenced by `docs/design/product/ux-design-system.md`, `docs/design/interfaces/floating-bar-interaction-spec.md`, `docs/design/data/feedback-schema.md`, and `docs/design/interfaces/cli-contract.md`.
+- Referenced by `docs/design/product/ux-design-system.md`, `docs/design/interfaces/floating-bar-interaction-spec.md`, `docs/design/data/feedback-schema.md`, `docs/design/interfaces/cli-contract.md`, and `docs/design/architecture/tech-stack.md`.
 
 ## Requirements
 

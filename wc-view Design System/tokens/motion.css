@@ -1,0 +1,18 @@
+/* Restrained: opacity + small translate only. No bounce, no scale-in. INP target <=200ms. */
+:root{
+  --dur-instant:80ms; /* @kind other */
+  --dur-fast:120ms; /* @kind other */
+  --dur-normal:180ms; /* @kind other */
+  --ease-standard:cubic-bezier(0.2,0,0.2,1); /* @kind other */
+  --ease-out:cubic-bezier(0,0,0.2,1); /* @kind other */
+  --lift-enter:translateY(4px); /* @kind other */
+  --transition-control:background-color var(--dur-fast) var(--ease-standard),border-color var(--dur-fast) var(--ease-standard),color var(--dur-fast) var(--ease-standard),opacity var(--dur-fast) var(--ease-standard);
+}
+@media (prefers-reduced-motion:reduce){
+  :root{
+    --dur-instant:0ms; /* @kind other */
+    --dur-fast:0ms; /* @kind other */
+    --dur-normal:0ms; /* @kind other */
+    --lift-enter:none; /* @kind other */
+  }
+}

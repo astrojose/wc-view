@@ -1,0 +1,4 @@
+/* Spec requires zero CDN deps + self-hosted, font-display:swap in production.
+   Here we load from Google Fonts so specimens render; substitute self-hosted woff2 in the real build. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap");
+:root{--font-sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;--font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--font-serif-accent:"Playfair Display",ui-serif,Georgia,serif}

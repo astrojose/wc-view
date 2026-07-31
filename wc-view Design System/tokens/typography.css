@@ -1,0 +1,18 @@
+:root{
+  --text-xs:0.75rem;--text-sm:0.8125rem;--text-base:0.9375rem;--text-md:1rem;--text-lg:1.125rem;
+  --text-xl:1.375rem;--text-2xl:1.75rem;--text-3xl:2.25rem;
+  --leading-tight:1.2;--leading-snug:1.35;--leading-body:1.65;
+  --tracking-tight:0.01em;--tracking-wide:0.06em;
+  --weight-regular:400;--weight-medium:500;--weight-semibold:600;--weight-bold:700;
+
+  /* semantic roles */
+  --type-doc-title:var(--weight-semibold) var(--text-3xl)/var(--leading-tight) var(--font-serif-accent);
+  --type-heading:var(--weight-semibold) var(--text-xl)/var(--leading-snug) var(--font-sans);
+  --type-subheading:var(--weight-medium) var(--text-md)/var(--leading-snug) var(--font-sans);
+  --type-body:var(--weight-regular) var(--text-base)/var(--leading-body) var(--font-sans);
+  --type-ui:var(--weight-medium) var(--text-sm)/1.4 var(--font-sans);
+  --type-meta:var(--weight-regular) var(--text-xs)/1.4 var(--font-sans);
+  --type-code:var(--weight-regular) var(--text-sm)/1.6 var(--font-mono);
+
+  --measure-doc:72ch;--measure-doc-min:68ch;--measure-doc-max:76ch;
+}

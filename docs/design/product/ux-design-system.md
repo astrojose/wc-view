@@ -3,6 +3,7 @@
 ## Context
 
 - `wc-view` is a lightweight localhost browser UI for Markdown review, used by CLI-first agent workflows (Codex, Claude Code, Pi, OpenCode, Cursor, Antigravity, and other terminal-first agents).
+- `wc-view Design System/` is the authoritative source for visual design system tokens, typography, CSS variables, components, and layout contracts.
 - Markdown and explicit human acceptance remain authoritative. Browser feedback is unapproved input.
 
 ## Requirements

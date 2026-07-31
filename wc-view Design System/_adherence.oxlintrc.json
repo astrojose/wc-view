@@ -1,0 +1,427 @@
+{
+  "plugins": [
+    "react",
+    "import"
+  ],
+  "rules": {
+    "react/forbid-elements": [
+      "warn",
+      {
+        "forbid": []
+      }
+    ],
+    "no-restricted-imports": [
+      "warn",
+      {
+        "patterns": [
+          {
+            "group": [
+              "components/core/**",
+              "components/doc/**",
+              "components/review/**",
+              "ui_kits/wc-view-review/**"
+            ],
+            "message": "Import design-system components from 'index.js', not component internals."
+          }
+        ]
+      }
+    ],
+    "no-restricted-syntax": [
+      "warn",
+      {
+        "selector": "Literal[value=/#[0-9a-fA-F]{3,8}\\b/]",
+        "message": "Raw hex color — use a design-system color token via var()."
+      },
+      {
+        "selector": "Literal[value=/\\b\\d+px\\b/]",
+        "message": "Raw px value — use a design-system spacing token via var()."
+      },
+      {
+        "selector": "Literal[value=/font-family\\s*:\\s*(?!['\\\"]?(?:Inter|JetBrains Mono|Playfair Display))/i]",
+        "message": "Font not provided by the design system. Available: Inter, JetBrains Mono, Playfair Display."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='AnnotatedBlock'] > JSXAttribute > JSXIdentifier[name!=/^(?:count|status|active|selectable|onSelect|children|key|ref|className|style|children)$/]",
+        "message": "<AnnotatedBlock> doesn't accept that prop. Declared props: count, status, active, selectable, onSelect, children."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='AnnotatedBlock'] > JSXAttribute[name.name='status'] > Literal[value!=/^(?:unresolved|in_progress|resolved|orphaned)$/]",
+        "message": "<AnnotatedBlock> status must be one of 'unresolved' | 'in_progress' | 'resolved' | 'orphaned'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='AnnotationItem'] > JSXAttribute > JSXIdentifier[name!=/^(?:id|quote|comment|scope|status|key|ref|className|style|children)$/]",
+        "message": "<AnnotationItem> doesn't accept that prop. Declared props: id, quote, comment, scope, status."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='AnnotationItem'] > JSXAttribute[name.name='status'] > Literal[value!=/^(?:unresolved|in_progress|resolved|orphaned)$/]",
+        "message": "<AnnotationItem> status must be one of 'unresolved' | 'in_progress' | 'resolved' | 'orphaned'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='AnnotationPopover'] > JSXAttribute > JSXIdentifier[name!=/^(?:quote|anchorNote|value|status|onChange|onSave|onCancel|key|ref|className|style|children)$/]",
+        "message": "<AnnotationPopover> doesn't accept that prop. Declared props: quote, anchorNote, value, status, onChange, onSave, onCancel."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='AnnotationPopover'] > JSXAttribute[name.name='status'] > Literal[value!=/^(?:unresolved|in_progress|resolved|orphaned)$/]",
+        "message": "<AnnotationPopover> status must be one of 'unresolved' | 'in_progress' | 'resolved' | 'orphaned'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Button'] > JSXAttribute > JSXIdentifier[name!=/^(?:variant|size|disabled|icon|children|key|ref|className|style|children)$/]",
+        "message": "<Button> doesn't accept that prop. Declared props: variant, size, disabled, icon, children."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Button'] > JSXAttribute[name.name='variant'] > Literal[value!=/^(?:primary|secondary|ghost|danger)$/]",
+        "message": "<Button> variant must be one of 'primary' | 'secondary' | 'ghost' | 'danger'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Button'] > JSXAttribute[name.name='size'] > Literal[value!=/^(?:sm|md)$/]",
+        "message": "<Button> size must be one of 'sm' | 'md'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Chip'] > JSXAttribute > JSXIdentifier[name!=/^(?:children|icon|count|onRemove|tone|key|ref|className|style|children)$/]",
+        "message": "<Chip> doesn't accept that prop. Declared props: children, icon, count, onRemove, tone."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Chip'] > JSXAttribute[name.name='tone'] > Literal[value!=/^(?:neutral|accent)$/]",
+        "message": "<Chip> tone must be one of 'neutral' | 'accent'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='CodeBlock'] > JSXAttribute > JSXIdentifier[name!=/^(?:code|label|reservedHeight|key|ref|className|style|children)$/]",
+        "message": "<CodeBlock> doesn't accept that prop. Declared props: code, label, reservedHeight."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='ConfirmDialog'] > JSXAttribute > JSXIdentifier[name!=/^(?:open|title|description|confirmLabel|onConfirm|onCancel|key|ref|className|style|children)$/]",
+        "message": "<ConfirmDialog> doesn't accept that prop. Declared props: open, title, description, confirmLabel, onConfirm, onCancel."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='DocCanvas'] > JSXAttribute > JSXIdentifier[name!=/^(?:title|meta|children|key|ref|className|style|children)$/]",
+        "message": "<DocCanvas> doesn't accept that prop. Declared props: title, meta, children."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='FloatingComposer'] > JSXAttribute > JSXIdentifier[name!=/^(?:value|onChange|onSubmit|noteCount|selection|queueOpen|onToggleQueue|queueIcon|children|key|ref|className|style|children)$/]",
+        "message": "<FloatingComposer> doesn't accept that prop. Declared props: value, onChange, onSubmit, noteCount, selection, queueOpen, onToggleQueue, queueIcon, children."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='IconButton'] > JSXAttribute > JSXIdentifier[name!=/^(?:label|icon|active|size|key|ref|className|style|children)$/]",
+        "message": "<IconButton> doesn't accept that prop. Declared props: label, icon, active, size."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='IconButton'] > JSXAttribute[name.name='size'] > Literal[value!=/^(?:sm|md)$/]",
+        "message": "<IconButton> size must be one of 'sm' | 'md'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='ShortcutRow'] > JSXAttribute > JSXIdentifier[name!=/^(?:keys|label|key|ref|className|style|children)$/]",
+        "message": "<ShortcutRow> doesn't accept that prop. Declared props: keys, label."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='StatusBadge'] > JSXAttribute > JSXIdentifier[name!=/^(?:status|children|key|ref|className|style|children)$/]",
+        "message": "<StatusBadge> doesn't accept that prop. Declared props: status, children."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='StatusBadge'] > JSXAttribute[name.name='status'] > Literal[value!=/^(?:unresolved|in_progress|resolved|orphaned)$/]",
+        "message": "<StatusBadge> status must be one of 'unresolved' | 'in_progress' | 'resolved' | 'orphaned'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='StatusRegion'] > JSXAttribute > JSXIdentifier[name!=/^(?:message|tone|key|ref|className|style|children)$/]",
+        "message": "<StatusRegion> doesn't accept that prop. Declared props: message, tone."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='StatusRegion'] > JSXAttribute[name.name='tone'] > Literal[value!=/^(?:neutral|progress|success|warning|error)$/]",
+        "message": "<StatusRegion> tone must be one of 'neutral' | 'progress' | 'success' | 'warning' | 'error'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='ThemeToggle'] > JSXAttribute > JSXIdentifier[name!=/^(?:theme|onChange|lightIcon|darkIcon|key|ref|className|style|children)$/]",
+        "message": "<ThemeToggle> doesn't accept that prop. Declared props: theme, onChange, lightIcon, darkIcon."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='ThemeToggle'] > JSXAttribute[name.name='theme'] > Literal[value!=/^(?:dark|light)$/]",
+        "message": "<ThemeToggle> theme must be one of 'dark' | 'light'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Toast'] > JSXAttribute > JSXIdentifier[name!=/^(?:message|meta|expanded|onToggle|actions|key|ref|className|style|children)$/]",
+        "message": "<Toast> doesn't accept that prop. Declared props: message, meta, expanded, onToggle, actions."
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/index.js"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ],
+  "x-omelette": {
+    "components": {
+      "AnnotatedBlock": {
+        "replaces": []
+      },
+      "AnnotationItem": {
+        "replaces": []
+      },
+      "AnnotationPopover": {
+        "replaces": []
+      },
+      "Button": {
+        "replaces": []
+      },
+      "Chip": {
+        "replaces": []
+      },
+      "CodeBlock": {
+        "replaces": []
+      },
+      "ConfirmDialog": {
+        "replaces": []
+      },
+      "DocCanvas": {
+        "replaces": []
+      },
+      "FloatingComposer": {
+        "replaces": []
+      },
+      "IconButton": {
+        "replaces": []
+      },
+      "ShortcutRow": {
+        "replaces": []
+      },
+      "StatusBadge": {
+        "replaces": []
+      },
+      "StatusRegion": {
+        "replaces": []
+      },
+      "ThemeToggle": {
+        "replaces": []
+      },
+      "Toast": {
+        "replaces": []
+      }
+    },
+    "tokens": [
+      "--accent-action",
+      "--accent-action-fg",
+      "--accent-quiet",
+      "--amber-400",
+      "--annotation-bar",
+      "--annotation-bar-width",
+      "--annotation-tint",
+      "--annotation-tint-strong",
+      "--bg-base",
+      "--block-flow",
+      "--border-strong",
+      "--border-subtle",
+      "--border-width",
+      "--champagne-200",
+      "--champagne-300",
+      "--composer-inset",
+      "--coral-500",
+      "--dur-fast",
+      "--dur-instant",
+      "--dur-normal",
+      "--ease-out",
+      "--ease-standard",
+      "--fg-inverse",
+      "--fg-muted",
+      "--fg-primary",
+      "--fg-secondary",
+      "--focus-ring",
+      "--font-mono",
+      "--font-sans",
+      "--font-serif-accent",
+      "--gap-inline",
+      "--gap-stack",
+      "--green-400",
+      "--ink-500",
+      "--ink-600",
+      "--ink-700",
+      "--ink-800",
+      "--ink-900",
+      "--leading-body",
+      "--leading-snug",
+      "--leading-tight",
+      "--lift-enter",
+      "--measure-doc",
+      "--measure-doc-max",
+      "--measure-doc-min",
+      "--pad-card",
+      "--pad-control-x",
+      "--pad-control-y",
+      "--radius",
+      "--radius-lg",
+      "--radius-pill",
+      "--radius-sm",
+      "--ring-accent",
+      "--ring-offset",
+      "--ring-width",
+      "--shadow-ambient",
+      "--shadow-composer",
+      "--shadow-flat",
+      "--shadow-popover",
+      "--space-1",
+      "--space-10",
+      "--space-12",
+      "--space-16",
+      "--space-2",
+      "--space-20",
+      "--space-3",
+      "--space-4",
+      "--space-5",
+      "--space-6",
+      "--space-8",
+      "--status-in-progress",
+      "--status-orphaned",
+      "--status-resolved",
+      "--status-unresolved",
+      "--stone-500",
+      "--surface-card",
+      "--surface-inset",
+      "--surface-raised",
+      "--tap-min",
+      "--text-2xl",
+      "--text-3xl",
+      "--text-base",
+      "--text-lg",
+      "--text-md",
+      "--text-sm",
+      "--text-xl",
+      "--text-xs",
+      "--tracking-tight",
+      "--tracking-wide",
+      "--transition-control",
+      "--type-body",
+      "--type-code",
+      "--type-doc-title",
+      "--type-heading",
+      "--type-meta",
+      "--type-subheading",
+      "--type-ui",
+      "--weight-bold",
+      "--weight-medium",
+      "--weight-regular",
+      "--weight-semibold",
+      "--white",
+      "--zinc-050",
+      "--zinc-200",
+      "--zinc-400",
+      "--zinc-600",
+      "--zinc-900"
+    ],
+    "tokenKinds": {
+      "--font-sans": "font",
+      "--font-mono": "font",
+      "--font-serif-accent": "font",
+      "--ink-900": "color",
+      "--ink-800": "color",
+      "--ink-700": "color",
+      "--ink-600": "color",
+      "--ink-500": "color",
+      "--champagne-200": "color",
+      "--champagne-300": "color",
+      "--stone-500": "color",
+      "--coral-500": "color",
+      "--zinc-050": "color",
+      "--white": "color",
+      "--zinc-200": "color",
+      "--zinc-400": "color",
+      "--zinc-600": "color",
+      "--zinc-900": "color",
+      "--green-400": "color",
+      "--amber-400": "color",
+      "--bg-base": "color",
+      "--surface-card": "color",
+      "--surface-raised": "color",
+      "--surface-inset": "color",
+      "--border-subtle": "color",
+      "--border-strong": "color",
+      "--fg-primary": "color",
+      "--fg-secondary": "color",
+      "--fg-muted": "color",
+      "--fg-inverse": "color",
+      "--ring-accent": "color",
+      "--accent-action": "color",
+      "--accent-action-fg": "color",
+      "--accent-quiet": "color",
+      "--focus-ring": "color",
+      "--annotation-bar": "color",
+      "--annotation-tint": "color",
+      "--annotation-tint-strong": "color",
+      "--status-unresolved": "color",
+      "--status-in-progress": "color",
+      "--status-resolved": "color",
+      "--status-orphaned": "color",
+      "--text-xs": "font",
+      "--text-sm": "font",
+      "--text-base": "font",
+      "--text-md": "font",
+      "--text-lg": "font",
+      "--text-xl": "font",
+      "--text-2xl": "font",
+      "--text-3xl": "font",
+      "--leading-tight": "font",
+      "--leading-snug": "font",
+      "--leading-body": "font",
+      "--tracking-tight": "font",
+      "--tracking-wide": "font",
+      "--weight-regular": "font",
+      "--weight-medium": "font",
+      "--weight-semibold": "font",
+      "--weight-bold": "font",
+      "--type-doc-title": "font",
+      "--type-heading": "font",
+      "--type-subheading": "font",
+      "--type-body": "font",
+      "--type-ui": "font",
+      "--type-meta": "font",
+      "--type-code": "font",
+      "--measure-doc": "spacing",
+      "--measure-doc-min": "spacing",
+      "--measure-doc-max": "spacing",
+      "--space-1": "spacing",
+      "--space-2": "spacing",
+      "--space-3": "spacing",
+      "--space-4": "spacing",
+      "--space-5": "spacing",
+      "--space-6": "spacing",
+      "--space-8": "spacing",
+      "--space-10": "spacing",
+      "--space-12": "spacing",
+      "--space-16": "spacing",
+      "--space-20": "spacing",
+      "--gap-inline": "spacing",
+      "--gap-stack": "spacing",
+      "--block-flow": "color",
+      "--pad-card": "spacing",
+      "--pad-control-x": "spacing",
+      "--pad-control-y": "spacing",
+      "--tap-min": "spacing",
+      "--composer-inset": "spacing",
+      "--radius-sm": "radius",
+      "--radius": "radius",
+      "--radius-lg": "radius",
+      "--radius-pill": "radius",
+      "--border-width": "spacing",
+      "--annotation-bar-width": "spacing",
+      "--shadow-ambient": "shadow",
+      "--shadow-composer": "shadow",
+      "--shadow-popover": "shadow",
+      "--shadow-flat": "shadow",
+      "--ring-width": "spacing",
+      "--ring-offset": "spacing",
+      "--dur-instant": "other",
+      "--dur-fast": "other",
+      "--dur-normal": "other",
+      "--ease-standard": "other",
+      "--ease-out": "other",
+      "--lift-enter": "other",
+      "--transition-control": "color"
+    },
+    "fontFamilies": [
+      "Inter",
+      "JetBrains Mono",
+      "Playfair Display"
+    ]
+  }
+}

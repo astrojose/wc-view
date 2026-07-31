@@ -11,10 +11,14 @@
 - `wc-view serve`: render Markdown files or a `docs/` tree in a lightweight localhost browser UI.
 - `wc-view feedback --unresolved [--format <json|toon|...>]`: agent pulls structured, low-token feedback payloads on demand.
 - `wc-view gc`: garbage-collect feedback per retention lifecycle.
+- **POSIX Stream Discipline**: Machine-readable data outputs (e.g. `feedback --unresolved`) write strictly to `stdout`. Diagnostics, server toasts, warnings, and errors write strictly to `stderr`.
+- **TTY & Color Awareness**: Automatically strip ANSI color codes when `stdout` is piped or when `NO_COLOR` environment variable is present.
+- **Exit Code Schema**: `0` for clean execution, `1` for operational errors (file missing, queue lock error), `2` for invalid CLI usage.
 
 ## Decisions
 
 - Default feedback payload format is compact JSON (see `docs/design/data/feedback-schema.md`).
+- Execution runtime: Node.js 18+ ESM CLI (`dist/bin/wc-view.js`).
 
 ## Contracts
 

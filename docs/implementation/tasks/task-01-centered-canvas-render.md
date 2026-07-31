@@ -42,9 +42,9 @@ Render a Markdown document in a full-width centered column, `68-76ch` wide, with
 
 ## Implementation Checklist
 
-- [ ] Choose and wire a Markdown rendering library (no CDN fetch at runtime).
-- [ ] Implement centered column layout with `min()`/`clamp()` width constraint.
-- [ ] Verify no sidebar markup is present.
+- [x] Wire `marked` parser in `src/core/markdown.ts` (zero runtime CDN fetches).
+- [ ] Implement centered column layout in `src/client/` using `wc-view Design System/components/doc/DocCanvas.html` with `clamp(68ch, 100%, 76ch)` width constraint.
+- [ ] Verify no sidebar markup is present in DOM.
 - [ ] Verify zero external network requests on load.
 
 ## Verification

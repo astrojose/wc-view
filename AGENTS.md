@@ -4,9 +4,11 @@ Local Markdown review surface for agent workflows.
 
 ## Current State
 
-- `wc-view` is proposed.
-- No design, implementation plan, or code is authorized.
-- Current proposal: `docs/changes/proposed/wc-view-local-markdown-review-surface.md`.
+- `wc-view` design truth is adopted in `docs/design/` (product, interfaces, data).
+- `wc-view Design System/` is the authoritative source for the UI/UX design system (tokens, components, colors, typography, layout).
+- Implementation is planned in `docs/implementation/` — Phases 01-02 are unblocked; Phases 03-04 are `blocked` pending open decisions.
+- Five open decisions remain unresolved: `docs/changes/proposed/wc-view-open-decisions.md`.
+- No code is authorized yet — only design and implementation planning docs exist.
 
 ## Start Here
 
