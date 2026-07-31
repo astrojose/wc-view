@@ -4,7 +4,7 @@
   "description": "Local Markdown review surface for agent workflows",
   "type": "module",
   "bin": {
-    "wc-view": "./dist/bin/wc-view.js"
+    "wc-view": "dist/bin/wc-view.js"
   },
   "files": [
     "dist",

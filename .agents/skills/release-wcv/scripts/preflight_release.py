@@ -109,8 +109,8 @@ def main() -> int:
         fail(f"package-name:{package_json.get('name')}!= {PACKAGE_NAME}")
     if package_json.get("version") != args.version:
         fail(f"package-json-version:{package_json.get('version')}!= {args.version}")
-    if package_json.get("bin", {}).get(BIN_NAME) != "./dist/bin/wc-view.js":
-        fail("bin-path:wc-view must point to ./dist/bin/wc-view.js")
+    if package_json.get("bin", {}).get(BIN_NAME) != "dist/bin/wc-view.js":
+        fail("bin-path:wc-view must point to dist/bin/wc-view.js")
     if package_lock.get("name") != PACKAGE_NAME:
         fail("package-lock-name")
     if package_lock.get("version") != args.version:
