@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-08-01
+
+### Fixed
+
+- Prevent Space typed inside annotation comment fields from reopening the block editor and clearing the draft.
+
+### Changed
+
+- Require `release-wcv` to commit release changes on the current branch through `git-commit-now`.
+
 ## [0.1.0] - 2026-08-01
 
 ### Added

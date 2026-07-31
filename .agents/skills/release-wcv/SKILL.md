@@ -21,6 +21,8 @@ Run the wc-view release workflow end to end: changelog, versioning, verification
 
 - Never run `npm publish`, `git push`, `git push --tags`, or `gh release create` before showing the exact release plan and receiving explicit user approval in the current turn.
 - Never discard, reset, or overwrite unrelated user changes.
+- Always commit release changes on the current branch. Do not create or switch branches during this release skill.
+- Always use `$git-commit-now` to create the release commit after verification, staging only the approved release files for the current branch.
 - Stop if the package name is not `@astrojose/wc-view`.
 - Stop if `npm pack --dry-run` shows unexpected sensitive files, local state, `.env`, credentials, or generated feedback under `~/.wc-view/`.
 - Stop if npm pack includes repo-operational paths such as `.agents/`, `.claude/`, `docs/`, `src/`, or `wc-view Design System/`.
@@ -49,7 +51,7 @@ Run the wc-view release workflow end to end: changelog, versioning, verification
    - Show commands that will write externally.
    - Ask for explicit approval before external writes.
 5. Publish only after approval:
-   - Commit release files with `chore(release): release v<x.y.z>`.
+   - Use `$git-commit-now` on the current branch to commit the approved release files with `chore(release): release v<x.y.z>`.
    - Create annotated tag `v<x.y.z>`.
    - Run `npm publish --access public`.
    - Push the branch and tag.

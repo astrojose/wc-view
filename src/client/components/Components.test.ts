@@ -20,6 +20,27 @@ describe("Phase 1 & 2 Client Components", () => {
     expect(element?.textContent).toContain("Some text.");
   });
 
+  it("does not reopen block selection when Space is typed inside a nested input", () => {
+    const canvas = new DocCanvas("test-canvas");
+    let selectedCount = 0;
+
+    canvas.render("Some text.", "Test Title", undefined, () => {
+      selectedCount++;
+    });
+
+    const block = document.querySelector("[data-block-id='b1']") as HTMLElement;
+    const nestedInput = document.createElement("textarea");
+    block.appendChild(nestedInput);
+
+    nestedInput.dispatchEvent(new KeyboardEvent("keydown", {
+      key: " ",
+      bubbles: true,
+      cancelable: true
+    }));
+
+    expect(selectedCount).toBe(0);
+  });
+
   it("announces messages in StatusRegion with aria-live polite", () => {
     const status = new StatusRegion("test-status");
     status.announce("Note attached.");

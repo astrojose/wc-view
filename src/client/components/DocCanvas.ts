@@ -86,6 +86,7 @@ export class DocCanvas {
 
       child.addEventListener("keydown", (e: Event) => {
         const ke = e as KeyboardEvent;
+        if (ke.target !== child) return;
         if (ke.key === "Enter" || ke.key === " ") {
           ke.preventDefault();
           if (this.onBlockSelect) this.onBlockSelect(block);
