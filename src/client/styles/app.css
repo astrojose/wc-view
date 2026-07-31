@@ -1,0 +1,198 @@
+@import "./tokens.css";
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-base);
+  color: var(--fg-primary);
+  font-family: var(--font-sans);
+  letter-spacing: var(--tracking-tight);
+}
+
+*:focus-visible {
+  outline: var(--ring-width) solid var(--focus-ring);
+  outline-offset: var(--ring-offset);
+}
+
+.doc-canvas {
+  width: min(72ch, 100%);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-16);
+}
+
+.doc-canvas h1 {
+  font-family: var(--font-serif);
+  font-size: var(--type-h1-size);
+  line-height: var(--type-h1-lh);
+  margin-bottom: var(--space-4);
+}
+
+.doc-block {
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-3);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-standard), border-color var(--dur-fast) var(--ease-standard);
+}
+
+.doc-block:hover {
+  background-color: var(--surface-card);
+}
+
+.doc-block.annotated {
+  border-left: 3px solid var(--ring-accent);
+  background-color: var(--annotation-tint);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.doc-block.active {
+  background-color: var(--annotation-tint-strong);
+}
+
+.floating-composer-container {
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-4) var(--space-4);
+  background: linear-gradient(transparent, var(--bg-base) 40%);
+  pointer-events: none;
+}
+
+.floating-composer-container > * {
+  pointer-events: auto;
+}
+
+.floating-composer-bar {
+  width: min(46rem, 100%);
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-ambient);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.composer-input-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.composer-input {
+  flex: 1;
+  background-color: var(--surface-inset);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--fg-primary);
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--type-body-size);
+}
+
+.composer-input:focus {
+  outline: none;
+  border-color: var(--border-strong);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: var(--type-small-size);
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background-color: var(--surface-raised);
+  color: var(--fg-primary);
+  transition: background var(--dur-fast) var(--ease-standard);
+}
+
+.btn:hover {
+  background-color: var(--border-strong);
+}
+
+.btn-primary {
+  background-color: var(--accent-action);
+  color: var(--accent-action-fg);
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.chip-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  background-color: var(--surface-inset);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: var(--type-caption-size);
+  color: var(--fg-secondary);
+}
+
+.status-region {
+  width: min(46rem, 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--type-small-size);
+  color: var(--fg-muted);
+}
+
+.annotation-popover {
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-ambient);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.dialog-scrim {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.dialog-card {
+  width: min(28rem, 90vw);
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-ambient);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

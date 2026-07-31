@@ -13,8 +13,12 @@
 
 ## Active Phases
 
-- [ ] phase-01-canvas-theme-foundation.md
-- [ ] phase-02-floating-bar-composer.md
+- None (Phase 01 and Phase 02 completed)
+
+## Completed Phases
+
+- [x] phase-01-canvas-theme-foundation.md
+- [x] phase-02-floating-bar-composer.md
 
 ## Deferred Phases
 

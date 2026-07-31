@@ -4,3 +4,10 @@ __pycache__/
 
 # Generated viewer state lives in ~/.wc-view, never in the repo
 .wc-view/
+
+# Build & Dependencies
+dist/
+node_modules/
+package-lock.json
+.DS_Store
+

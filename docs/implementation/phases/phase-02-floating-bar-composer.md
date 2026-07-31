@@ -2,7 +2,7 @@
 
 ## Status
 
-- `pending`
+- `done`
 - Last updated: 2026-08-01
 
 ## Objective
@@ -24,14 +24,14 @@
 
 ## Tasks
 
-- [ ] `task-04-floating-bar-states.md`
-- [ ] `task-05-composer-annotation-editor.md`
+- [x] `task-04-floating-bar-states.md`
+- [x] `task-05-composer-annotation-editor.md`
 
 ## Acceptance Criteria
 
-- [ ] Floating bar defaults to showing only the latest agent message, with an affordance to view prior turns and pending annotations.
-- [ ] Composer never traps focus; Escape closes it, preserves the draft, and returns focus to the invoking control.
-- [ ] Destructive confirmations use a focus-trapping modal with a visible Cancel control.
+- [x] Floating bar defaults to showing only the latest agent message, with an affordance to view prior turns and pending annotations.
+- [x] Composer never traps focus; Escape closes it, preserves the draft, and returns focus to the invoking control.
+- [x] Destructive confirmations use a focus-trapping modal with a visible Cancel control.
 
 ## Blockers
 

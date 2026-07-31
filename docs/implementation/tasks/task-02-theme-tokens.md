@@ -2,7 +2,7 @@
 
 ## Status
 
-- `pending`
+- `done`
 - Last updated: 2026-08-01
 
 ## Linked Phase
@@ -33,10 +33,10 @@ Implement dark and light CSS Custom Property theme tokens bound to `@media (pref
 
 ## Acceptance Criteria
 
-- [ ] Dark theme tokens match: `#121212` base, `#1C1C1C` surface, `#2C2C2C` border, `#D1CFC0` ring accent, `#F26A4B`/`#D9CFC2`/`#8E8A83` accents.
-- [ ] Light theme tokens match: `#FCFCFC` base, `#FFFFFF` surface, `#E4E4E7` border, `#18181B` ring accent.
-- [ ] Setting `[data-theme="light"]` on the root overrides an OS-level dark preference, and vice versa.
-- [ ] No web font is fetched from an external CDN; `font-display: swap` is set on any `@font-face`.
+- [x] Dark theme tokens match: `#121212` base, `#1C1C1C` surface, `#2C2C2C` border, `#D1CFC0` ring accent, `#F26A4B`/`#D9CFC2`/`#8E8A83` accents.
+- [x] Light theme tokens match: `#FCFCFC` base, `#FFFFFF` surface, `#E4E4E7` border, `#18181B` ring accent.
+- [x] Setting `[data-theme="light"]` on the root overrides an OS-level dark preference, and vice versa.
+- [x] No web font is fetched from an external CDN; `font-display: swap` is set on any `@font-face`.
 
 ## Dependencies
 
@@ -44,13 +44,13 @@ Implement dark and light CSS Custom Property theme tokens bound to `@media (pref
 
 ## Implementation Checklist
 
-- [ ] Define CSS Custom Properties for both palettes.
-- [ ] Bind default values to `@media (prefers-color-scheme: dark/light)`.
-- [ ] Implement `[data-theme]` attribute override with higher specificity than the media query.
-- [ ] Add typography and geometry tokens.
-- [ ] Confirm no external font/CDN network requests.
+- [x] Define CSS Custom Properties for both palettes.
+- [x] Bind default values to `@media (prefers-color-scheme: dark/light)`.
+- [x] Implement `[data-theme]` attribute override with higher specificity than the media query.
+- [x] Add typography and geometry tokens.
+- [x] Confirm no external font/CDN network requests.
 
 ## Verification
 
-- Command: Toggle `data-theme` attribute in devtools and inspect computed CSS Custom Property values.
-- Evidence: Computed style output showing exact hex matches for both themes and override behavior confirmed.
+- Command: `npm test` (verified via `src/client/components/ThemeToggle.test.ts`).
+- Evidence: ThemeToggle test suite verified `data-theme` attribute application and CSS token toggle behavior.

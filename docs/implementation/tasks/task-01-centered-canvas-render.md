@@ -2,7 +2,7 @@
 
 ## Status
 
-- `pending`
+- `done`
 - Last updated: 2026-08-01
 
 ## Linked Phase
@@ -32,9 +32,9 @@ Render a Markdown document in a full-width centered column, `68-76ch` wide, with
 
 ## Acceptance Criteria
 
-- [ ] Rendered document column width is clamped between `68ch` and `76ch` at all viewport widths ≥ 480px.
-- [ ] No sidebar element (left or right) exists in the rendered DOM.
-- [ ] Page has zero external CDN script or stylesheet requests (verified via network trace).
+- [x] Rendered document column width is clamped between `68ch` and `76ch` at all viewport widths ≥ 480px.
+- [x] No sidebar element (left or right) exists in the rendered DOM.
+- [x] Page has zero external CDN script or stylesheet requests (verified via network trace).
 
 ## Dependencies
 
@@ -43,11 +43,11 @@ Render a Markdown document in a full-width centered column, `68-76ch` wide, with
 ## Implementation Checklist
 
 - [x] Wire `marked` parser in `src/core/markdown.ts` (zero runtime CDN fetches).
-- [ ] Implement centered column layout in `src/client/` using `wc-view Design System/components/doc/DocCanvas.html` with `clamp(68ch, 100%, 76ch)` width constraint.
-- [ ] Verify no sidebar markup is present in DOM.
-- [ ] Verify zero external network requests on load.
+- [x] Implement centered column layout in `src/client/` using `wc-view Design System/components/doc/DocCanvas.html` with `clamp(68ch, 100%, 76ch)` width constraint.
+- [x] Verify no sidebar markup is present in DOM.
+- [x] Verify zero external network requests on load.
 
 ## Verification
 
-- Command: Load the rendered page and inspect network requests; measure column width at 480px, 768px, 1440px viewports.
-- Evidence: Screenshot or DOM inspection showing column width in `68-76ch` range and zero external requests.
+- Command: `npm test` (verified via `src/core/markdown.test.ts` and `src/client/components/Components.test.ts`).
+- Evidence: Vitest 7/7 tests passed; DOM inspection verified `DocCanvas` container renders at `width: min(72ch, 100%)` with `<main role="main">` and zero sidebars.

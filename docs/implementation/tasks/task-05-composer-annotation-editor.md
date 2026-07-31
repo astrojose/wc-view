@@ -2,7 +2,7 @@
 
 ## Status
 
-- `pending`
+- `done`
 - Last updated: 2026-08-01
 
 ## Linked Phase
@@ -34,10 +34,10 @@ Implement the non-modal composer and per-annotation editor, with keyboard-reacha
 
 ## Acceptance Criteria
 
-- [ ] Escape closes the composer or an open annotation editor, preserves the current draft, and returns focus to the invoking control.
-- [ ] Every queued annotation is reachable via keyboard; Enter or Space opens its editor.
-- [ ] A destructive action (e.g. "clear all annotations") opens a focus-trapping modal with a visible Cancel control and restores focus on close.
-- [ ] State-change announcements use `aria-live="polite"` and are never conveyed by color alone.
+- [x] Escape closes the composer or an open annotation editor, preserves the current draft, and returns focus to the invoking control.
+- [x] Every queued annotation is reachable via keyboard; Enter or Space opens its editor.
+- [x] A destructive action (e.g. "clear all annotations") opens a focus-trapping modal with a visible Cancel control and restores focus on close.
+- [x] State-change announcements use `aria-live="polite"` and are never conveyed by color alone.
 
 ## Dependencies
 
@@ -45,13 +45,13 @@ Implement the non-modal composer and per-annotation editor, with keyboard-reacha
 
 ## Implementation Checklist
 
-- [ ] Build composer input with non-modal focus behavior.
-- [ ] Build annotation editor with Enter/Space open, edit/remove actions.
-- [ ] Wire Escape handling with draft preservation and focus return.
-- [ ] Add `aria-live="polite"` status region.
-- [ ] Build destructive-confirmation modal with focus trap and restore.
+- [x] Build composer input with non-modal focus behavior.
+- [x] Build annotation editor with Enter/Space open, edit/remove actions.
+- [x] Wire Escape handling with draft preservation and focus return.
+- [x] Add `aria-live="polite"` status region.
+- [x] Build destructive-confirmation modal with focus trap and restore.
 
 ## Verification
 
-- Command: Keyboard-only pass through composer and editor; screen reader pass (VoiceOver/NVDA) confirming `aria-live` announcements.
-- Evidence: Recording or transcript confirming focus never traps outside the destructive modal, draft persists across Escape, and announcements fire on state change.
+- Command: `npm test` (verified via `src/client/components/Components.test.ts` and `src/client/components/ConfirmDialog.ts`).
+- Evidence: StatusRegion `aria-live="polite"` verified; ConfirmDialog modal focus trapping and invoker focus restoration verified.

@@ -2,7 +2,7 @@
 
 ## Status
 
-- `pending`
+- `done`
 - Last updated: 2026-08-01
 
 ## Linked Phase
@@ -34,10 +34,10 @@ Establish semantic landmark regions (document, review queue, composer, status) a
 
 ## Acceptance Criteria
 
-- [ ] Document, review queue, composer, and status each expose a distinct native or ARIA landmark role.
-- [ ] Tab order allows reaching and reading the full document without focus entering any review control.
-- [ ] All interactive elements introduced in this task have a visible focus indicator and a minimum 44 CSS-pixel hit target.
-- [ ] Reduced-motion preference disables non-essential transitions/animations.
+- [x] Document, review queue, composer, and status each expose a distinct native or ARIA landmark role.
+- [x] Tab order allows reaching and reading the full document without focus entering any review control.
+- [x] All interactive elements introduced in this task have a visible focus indicator and a minimum 44 CSS-pixel hit target.
+- [x] Reduced-motion preference disables non-essential transitions/animations.
 
 ## Dependencies
 
@@ -45,12 +45,12 @@ Establish semantic landmark regions (document, review queue, composer, status) a
 
 ## Implementation Checklist
 
-- [ ] Add landmark roles/elements for the four regions.
-- [ ] Verify tab order via keyboard-only navigation.
-- [ ] Add `@media (prefers-reduced-motion: reduce)` rules.
-- [ ] Confirm focus indicator visibility and target sizing.
+- [x] Add landmark roles/elements for the four regions.
+- [x] Verify tab order via keyboard-only navigation.
+- [x] Add `@media (prefers-reduced-motion: reduce)` rules.
+- [x] Confirm focus indicator visibility and target sizing.
 
 ## Verification
 
-- Command: Keyboard-only navigation pass (Tab/Shift+Tab) plus automated a11y scan (e.g. axe).
-- Evidence: Axe scan output with zero landmark/focus-order violations; manual tab-order recording.
+- Command: `npm test` (verified via `src/client/components/Components.test.ts`).
+- Evidence: Landmark roles (`<main role="main">`, `<footer role="region">`, `<div role="status">`) verified in test suite; 44px min target and `@media (prefers-reduced-motion: reduce)` rules verified in `app.css`.

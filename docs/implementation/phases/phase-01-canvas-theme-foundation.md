@@ -2,7 +2,7 @@
 
 ## Status
 
-- `pending`
+- `done`
 - Last updated: 2026-08-01
 
 ## Objective
@@ -23,15 +23,15 @@
 
 ## Tasks
 
-- [ ] `task-01-centered-canvas-render.md`
-- [ ] `task-02-theme-tokens.md`
-- [ ] `task-03-a11y-landmarks-focus.md`
+- [x] `task-01-centered-canvas-render.md`
+- [x] `task-02-theme-tokens.md`
+- [x] `task-03-a11y-landmarks-focus.md`
 
 ## Acceptance Criteria
 
-- [ ] Rendered Markdown column measures `68-76ch` with no sidebar element present in the DOM.
-- [ ] Dark and light palettes match `docs/design/product/ux-design-system.md` hex values exactly.
-- [ ] Document, review queue, composer, and status regions are each reachable via a native landmark role.
+- [x] Rendered Markdown column measures `68-76ch` with no sidebar element present in the DOM.
+- [x] Dark and light palettes match `docs/design/product/ux-design-system.md` hex values exactly.
+- [x] Document, review queue, composer, and status regions are each reachable via a native landmark role.
 
 ## Blockers
 

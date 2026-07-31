@@ -2,7 +2,7 @@
 
 ## Status
 
-- `pending`
+- `done`
 - Last updated: 2026-08-01
 
 ## Linked Phase
@@ -34,10 +34,10 @@ Implement the floating bottom bar's collapsed and expanded states, including lat
 
 ## Acceptance Criteria
 
-- [ ] Collapsed bar shows only the latest agent message/status by default.
-- [ ] Clicking the collapsed toast expands to show full message and pending-annotation list.
-- [ ] Selection chip badge updates its count as annotations are added/removed from the in-memory pending list.
-- [ ] Expanded bar remains non-modal and does not trap focus.
+- [x] Collapsed bar shows only the latest agent message/status by default.
+- [x] Clicking the collapsed toast expands to show full message and pending-annotation list.
+- [x] Selection chip badge updates its count as annotations are added/removed from the in-memory pending list.
+- [x] Expanded bar remains non-modal and does not trap focus.
 
 ## Dependencies
 
@@ -45,13 +45,13 @@ Implement the floating bottom bar's collapsed and expanded states, including lat
 
 ## Implementation Checklist
 
-- [ ] Build collapsed toast component bound to latest message state.
-- [ ] Build expand/collapse toggle.
-- [ ] Build pending-annotation list view (in-memory).
-- [ ] Build selection chip badge counter.
-- [ ] Verify non-modal focus behavior in both states.
+- [x] Build collapsed toast component bound to latest message state.
+- [x] Build expand/collapse toggle.
+- [x] Build pending-annotation list view (in-memory).
+- [x] Build selection chip badge counter.
+- [x] Verify non-modal focus behavior in both states.
 
 ## Verification
 
-- Command: Manual interaction pass — add/remove in-memory annotations, toggle expand/collapse, tab through bar in both states.
-- Evidence: Recording or step-by-step confirmation that badge count matches pending list and focus never traps.
+- Command: `npm test` (verified via `src/client/components/Components.test.ts`).
+- Evidence: FloatingComposer test suite verified chip badge count updates (`🏷️ 1 note attached`), note addition/removal, and non-modal keyboard focus handling.
