@@ -38,6 +38,7 @@
   - `GET /api/document`: returns document text and file metadata.
   - `GET /api/feedback`: returns feedback queue items for current file.
   - `POST /api/feedback`: creates or updates a feedback entry in `~/.wc-view/feedback/queue.jsonl`.
+  - `GET /api/events`: opens a Server-Sent Events stream for real-time feedback updates.
   - `PATCH /api/feedback/:id`: updates status (`resolved`, `in_progress`, etc.).
 - System-level flow: `docs/design/architecture/wc-view-system-flow.md`.
 
@@ -46,4 +47,4 @@
 - `wc-view serve`, `wc-view feedback --unresolved`, and `wc-view gc` exist as named commands.
 - `wc-view feedback --format` supports at least `json` as the default output.
 - Server binds strictly to `127.0.0.1` loopback.
-
+- `POST /api/feedback` broadcasts the newly saved feedback item as JSON over each active `/api/events` SSE connection.

@@ -42,6 +42,24 @@ function getClientStyleBundlePath(): string | null {
  */
 export function createServer(options: ServerOptions): http.Server {
   const targetPath = options.targetPath ? path.resolve(options.targetPath) : process.cwd();
+  const eventClients = new Set<http.ServerResponse>();
+
+  function broadcastFeedbackItem(item: FeedbackItem): void {
+    const payload = `data: ${JSON.stringify(item)}\n\n`;
+
+    for (const client of eventClients) {
+      if (client.destroyed || client.writableEnded) {
+        eventClients.delete(client);
+        continue;
+      }
+
+      client.write(payload, (err) => {
+        if (err) {
+          eventClients.delete(client);
+        }
+      });
+    }
+  }
 
   const server = http.createServer((req, res) => {
     // Loopback security check
@@ -54,6 +72,22 @@ export function createServer(options: ServerOptions): http.Server {
 
     const url = new URL(req.url || "/", `http://${req.headers.host || "127.0.0.1"}`);
     const pathname = url.pathname;
+
+    // SSE API — GET /api/events
+    if (req.method === "GET" && pathname === "/api/events") {
+      res.writeHead(200, {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive"
+      });
+      res.write(": connected\n\n");
+      eventClients.add(res);
+
+      req.on("close", () => {
+        eventClients.delete(res);
+      });
+      return;
+    }
 
     // REST API — GET /api/document
     if (req.method === "GET" && pathname === "/api/document") {
@@ -102,6 +136,7 @@ export function createServer(options: ServerOptions): http.Server {
 
           process.stderr.write(`wc-view feedback: New feedback received for ${parsed.filePath}\n`);
           process.stderr.write("wc-view feedback: Run 'wc-view feedback' to review it.\n");
+          broadcastFeedbackItem(saved);
 
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end(JSON.stringify(saved));

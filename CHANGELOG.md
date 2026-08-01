@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-08-01
+
+### Added
+
+- Stream real-time feedback updates over the new `/api/events` Server-Sent Events endpoint whenever feedback is posted.
+
+### Changed
+
+- Update review-surface submission messaging to confirm notes were submitted to the feedback queue.
+
 ## [0.2.1] - 2026-08-01
 
 ### Fixed

@@ -5,6 +5,7 @@ import { FloatingComposer, NoteItem } from "./components/FloatingComposer.js";
 import { AnnotationEditor } from "./components/AnnotationEditor.js";
 import { ConfirmDialog } from "./components/ConfirmDialog.js";
 import { extractAnchor, resolveAnchor } from "./anchoring.js";
+import { getBatchSubmitStatus } from "./batchStatus.js";
 import "./styles/app.css";
 
 export class ReviewApp {
@@ -137,8 +138,7 @@ export class ReviewApp {
   }
 
   private handleBatchSubmit(prompt: string, notes: NoteItem[]): void {
-    const count = notes.length;
-    this.statusRegion.announce(`${count} note(s) + instruction prepared for atomic submission.`);
+    this.statusRegion.announce(getBatchSubmitStatus(prompt, notes.length));
   }
 
   private handleDiscardNotes(): void {

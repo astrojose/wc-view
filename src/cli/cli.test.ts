@@ -67,4 +67,51 @@ describe("Server & CLI Integration", () => {
     expect(data.id).toBe("fb_test_100");
     expect(data.comment).toBe("Test comment from API");
   });
+
+  it("broadcasts saved feedback items over SSE", async () => {
+    await new Promise<void>((resolve) => server.listen(port, "127.0.0.1", resolve));
+
+    const sampleItem: Partial<FeedbackItem> = {
+      id: "fb_test_sse",
+      filePath: testDocPath,
+      anchor: {
+        primary: { exact: "Test paragraph", prefix: "", suffix: "" },
+        secondary: { headingSlug: "test-title", elementType: "p", occurrenceIndex: 0 },
+        tertiary: { offsetHint: 0 }
+      },
+      comment: "Test comment from SSE",
+      status: "unresolved"
+    };
+
+    const streamedItem = new Promise<FeedbackItem>((resolve, reject) => {
+      const req = http.get(`http://127.0.0.1:${port}/api/events`, (res) => {
+        expect(res.statusCode).toBe(200);
+        expect(res.headers["content-type"]).toContain("text/event-stream");
+
+        res.setEncoding("utf-8");
+        res.on("data", (chunk) => {
+          const dataLine = chunk
+            .split("\n")
+            .find((line: string) => line.startsWith("data: "));
+
+          if (!dataLine) return;
+
+          req.destroy();
+          resolve(JSON.parse(dataLine.slice("data: ".length)) as FeedbackItem);
+        });
+      });
+
+      req.on("error", reject);
+    });
+
+    await fetch(`http://127.0.0.1:${port}/api/feedback`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(sampleItem)
+    });
+
+    const data = await streamedItem;
+    expect(data.id).toBe("fb_test_sse");
+    expect(data.comment).toBe("Test comment from SSE");
+  });
 });

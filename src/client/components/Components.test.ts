@@ -1,8 +1,9 @@
 // @vitest-environment happy-dom
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { DocCanvas } from "./DocCanvas.js";
 import { StatusRegion } from "./StatusRegion.js";
 import { FloatingComposer } from "./FloatingComposer.js";
+import { getBatchSubmitStatus } from "../batchStatus.js";
 
 describe("Phase 1 & 2 Client Components", () => {
   beforeEach(() => {
@@ -79,5 +80,41 @@ describe("Phase 1 & 2 Client Components", () => {
     composer.removeNote("n1");
     expect(composer.getNotes().length).toBe(0);
     expect(badge?.textContent).toContain("0 notes attached");
+  });
+
+  it("clears queued notes after submit", async () => {
+    const onSubmit = vi.fn();
+    const composer = new FloatingComposer(onSubmit);
+
+    composer.addNote({
+      id: "n1",
+      blockId: "b1",
+      quote: "Some text",
+      comment: "Fix typo",
+      status: "unresolved"
+    });
+
+    const submitButton = document.getElementById("submit-btn") as HTMLButtonElement;
+    submitButton.click();
+
+    const badge = document.getElementById("chip-badge");
+    expect(onSubmit).toHaveBeenCalledWith("", [
+      {
+        id: "n1",
+        blockId: "b1",
+        quote: "Some text",
+        comment: "Fix typo",
+        status: "unresolved"
+      }
+    ]);
+    expect(composer.getNotes().length).toBe(0);
+    expect(badge?.textContent).toContain("0 notes attached");
+  });
+
+  it("formats submitted state instead of prepared state after batch submit", () => {
+    const message = getBatchSubmitStatus("", 1);
+
+    expect(message).toBe("Submitted 1 note to the feedback queue.");
+    expect(message).not.toContain("prepared for atomic submission");
   });
 });
