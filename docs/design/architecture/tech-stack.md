@@ -11,7 +11,7 @@
 1. **Zero External CDN Dependencies**: All CSS tokens, fonts, icons, and client JavaScript assets must be self-contained and served locally to ensure zero runtime network calls and deterministic performance.
 2. **Performance Budgets**:
    - INP ≤ 200 ms (p75).
-   - CLS = 0 (driven by pre-reserved element heights `reservedHeight` for code blocks and SVGs/Mermaid diagrams).
+   - CLS = 0 (driven by pre-reserved element heights `reservedHeight` for code blocks and SVGs/Mermaid diagrams). Dynamic AI visualizations (Mermaid, HTML) must render asynchronously without blocking or shifting content.
    - CLI startup time < 30 ms for help/version queries.
 3. **Security Boundary**: Localhost server must bind strictly to `127.0.0.1` (loopback only) to prevent network exposure.
 

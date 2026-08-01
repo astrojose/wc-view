@@ -2,9 +2,9 @@
 
 ## Context
 
-- `wc-view` is a lightweight localhost browser UI for Markdown review, used by CLI-first agent workflows (Codex, Claude Code, Pi, OpenCode, Cursor, Antigravity, and other terminal-first agents).
+- `wc-view` is an AI-driven dynamic visualization and review surface. Rather than just viewing static Markdown, agents use `wc-view` to synthesize and render interactive visual artifacts (flowcharts, state machines, wireframes) from complex prompts, enabling a collaborative human-in-the-loop review process.
 - `wc-view Design System/` is the authoritative source for visual design system tokens, typography, CSS variables, components, and layout contracts.
-- Markdown and explicit human acceptance remain authoritative. Browser feedback is unapproved input.
+- Markdown, Mermaid, and explicit human acceptance are authoritative; browser feedback is unapproved input.
 
 ## Requirements
 
@@ -14,6 +14,7 @@
   - Typography: Sans (`Inter`), Mono (`JetBrains Mono`), Serif accent (`Playfair Display`), with tight `0.01em` tracking.
   - Geometry: `0.5rem` (8px) radius, `0.25rem` (4px) grid spacing, soft ambient shadows (`0 6px 15px rgba(0,0,0,0.30)`).
 - **Core Web Vitals & Accessibility (a11y)**:
+  - Accessibility guidelines achieve this design goal: clear, descriptive element names, predictable interaction patterns, logical page hierarchy, semantic HTML, ARIA standards. These are accessibility fundamentals that the design community has understood, albeit often deprioritized, for years.
   - Zero external CDN dependencies; pre-compiled CSS and system fallback font stacks (`font-display: swap`).
   - Fast interaction: target INP well inside Google's "good" threshold of ≤ 200 ms (p75); drive layout shift toward CLS = 0 — comfortably inside the "good" CLS threshold of ≤ 0.1 — by pre-reserving element heights for SVGs and code blocks.
   - Meet WCAG 2.2 AA. Use native HTML controls before ARIA; use semantic landmarks for document, review queue, composer, and status.

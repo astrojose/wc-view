@@ -20,6 +20,16 @@ describe("Phase 1 & 2 Client Components", () => {
     expect(element?.textContent).toContain("Some text.");
   });
 
+  it("converts mermaid code blocks into dynamic visualization divs", () => {
+    const canvas = new DocCanvas("test-mermaid-canvas");
+    canvas.render("```mermaid\ngraph TD;\nA-->B;\n```");
+
+    const element = document.getElementById("test-mermaid-canvas");
+    const mermaidDiv = element?.querySelector("div.mermaid");
+    expect(mermaidDiv).not.toBeNull();
+    expect(mermaidDiv?.textContent).toContain("A-->B;");
+  });
+
   it("does not reopen block selection when Space is typed inside a nested input", () => {
     const canvas = new DocCanvas("test-canvas");
     let selectedCount = 0;

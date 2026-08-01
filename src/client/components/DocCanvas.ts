@@ -80,6 +80,23 @@ export class DocCanvas {
       };
       this.blocks.push(block);
 
+      // Handle mermaid rendering
+      const mermaidCode = child.querySelector("code.language-mermaid");
+      if (mermaidCode) {
+        const text = mermaidCode.textContent || "";
+        const div = document.createElement("div");
+        div.className = "mermaid";
+        div.textContent = text;
+        child.innerHTML = "";
+        child.appendChild(div);
+        
+        // Asynchronously render the diagram
+        import("mermaid").then((m) => {
+          m.default.initialize({ startOnLoad: false, theme: document.documentElement.getAttribute("data-theme") === "light" ? "default" : "dark" });
+          m.default.run({ nodes: [div] }).catch(err => console.error("Mermaid render error", err));
+        });
+      }
+
       child.addEventListener("click", () => {
         if (this.onBlockSelect) this.onBlockSelect(block);
       });

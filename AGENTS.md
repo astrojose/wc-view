@@ -43,7 +43,8 @@ Run type-check after coherent TypeScript changes. Run workflow validation after 
 
 ## Agent Rules
 
-- Markdown and explicit human acceptance are authoritative.
+- Markdown, Mermaid, and explicit human acceptance are authoritative.
+- When asked to "visualize" a concept, process, or file, synthesize a dynamic visual representation (using Markdown, Mermaid, or HTML) into a temporary scratch file (e.g., `.wc-view-scratch.md`) and serve that artifact via `wc-view`, rather than serving static text docs blindly.
 - Do not create implementation tasks or code before accepted design truth exists.
 - Do not treat `docs/changes/proposed/` as approved truth.
 - Keep generated viewer state outside the repository: `~/.wc-view/`.

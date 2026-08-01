@@ -18,7 +18,8 @@
   },
   "dependencies": {
     "commander": "^12.1.0",
-    "marked": "^13.0.3"
+    "marked": "^13.0.3",
+    "mermaid": "^11.16.0"
   },
   "devDependencies": {
     "@types/node": "^20.14.10",
