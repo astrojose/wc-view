@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-01
+
+### Added
+
+- Support for dynamic AI visualization synthesis and Mermaid rendering within Markdown documents.
+
 ## [0.1.1] - 2026-08-01
 
 ### Fixed

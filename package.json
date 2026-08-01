@@ -1,6 +1,6 @@
 {
   "name": "@astrojose/wc-view",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Local Markdown review surface for agent workflows",
   "type": "module",
   "bin": {
