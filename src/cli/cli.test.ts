@@ -3,115 +3,92 @@ import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
+import { AddressInfo } from "node:net";
 import { createServer } from "../server/index.js";
-import { writeFeedbackItem, FeedbackItem } from "../core/queue.js";
 
 describe("Server & CLI Integration", () => {
   let server: http.Server;
   let tmpDir: string;
   let testDocPath: string;
-  const port = 3987;
+  let queuePath: string;
+  let baseUrl: string;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "wc-view-server-test-"));
-    testDocPath = path.join(tmpDir, "test.md");
+    testDocPath = path.join(tmpDir, ".wc-view-scratch.md");
+    queuePath = path.join(tmpDir, "queue.jsonl");
     fs.writeFileSync(testDocPath, "# Test Title\n\nTest paragraph content.", "utf-8");
-
-    server = createServer({ port, host: "127.0.0.1", targetPath: testDocPath });
+    server = createServer({ port: 0, host: "127.0.0.1", targetPath: testDocPath, queuePath });
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
   });
 
-  afterEach((done) => {
-    if (server) {
-      server.close(() => {
-        if (fs.existsSync(tmpDir)) {
-          fs.rmSync(tmpDir, { recursive: true, force: true });
-        }
-      });
-    }
+  afterEach(async () => {
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+    fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it("serves document API endpoint cleanly", async () => {
-    await new Promise<void>((resolve) => server.listen(port, "127.0.0.1", resolve));
-
-    const res = await fetch(`http://127.0.0.1:${port}/api/document`);
-    expect(res.status).toBe(200);
-
-    const data = await res.json();
-    expect(data.path).toBe(testDocPath);
-    expect(data.content).toContain("Test paragraph content.");
+  it("serves document metadata including artifact policy and non-cacheable client assets", async () => {
+    const response = await fetch(`${baseUrl}/api/document`);
+    expect(await response.json()).toMatchObject({ path: testDocPath, artifactClass: "scratch" });
+    const client = await fetch(`${baseUrl}/main.js`);
+    expect(client.headers.get("cache-control")).toBe("no-store");
+    await client.text();
   });
 
-  it("accepts feedback POST request on loopback", async () => {
-    await new Promise<void>((resolve) => server.listen(port, "127.0.0.1", resolve));
-
-    const sampleItem: Partial<FeedbackItem> = {
-      id: "fb_test_100",
-      filePath: testDocPath,
-      anchor: {
-        primary: { exact: "Test paragraph", prefix: "", suffix: "" },
-        secondary: { headingSlug: "test-title", elementType: "p", occurrenceIndex: 0 },
-        tertiary: { offsetHint: 0 }
-      },
-      comment: "Test comment from API",
-      status: "unresolved"
-    };
-
-    const res = await fetch(`http://127.0.0.1:${port}/api/feedback`, {
+  it("persists an atomic feedback batch", async () => {
+    const response = await fetch(`${baseUrl}/api/batches`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(sampleItem)
+      body: JSON.stringify({
+        id: "batch_test",
+        prompt: "Improve this",
+        notes: [{
+          id: "note_1",
+          anchor: {
+            primary: { exact: "Test paragraph", prefix: "", suffix: "" },
+            secondary: { headingSlug: "test-title", elementType: "p", occurrenceIndex: 0 },
+            tertiary: { offsetHint: 0 }
+          },
+          comment: "Clarify the purpose"
+        }]
+      })
     });
-
-    expect(res.status).toBe(200);
-    const data = await res.json();
-    expect(data.id).toBe("fb_test_100");
-    expect(data.comment).toBe("Test comment from API");
+    expect(response.status).toBe(201);
+    expect(await response.json()).toMatchObject({ artifactClass: "scratch", prompt: "Improve this", notes: [expect.objectContaining({ id: "note_1" })] });
   });
 
-  it("broadcasts saved feedback items over SSE", async () => {
-    await new Promise<void>((resolve) => server.listen(port, "127.0.0.1", resolve));
-
-    const sampleItem: Partial<FeedbackItem> = {
-      id: "fb_test_sse",
-      filePath: testDocPath,
-      anchor: {
-        primary: { exact: "Test paragraph", prefix: "", suffix: "" },
-        secondary: { headingSlug: "test-title", elementType: "p", occurrenceIndex: 0 },
-        tertiary: { offsetHint: 0 }
-      },
-      comment: "Test comment from SSE",
-      status: "unresolved"
-    };
-
-    const streamedItem = new Promise<FeedbackItem>((resolve, reject) => {
-      const req = http.get(`http://127.0.0.1:${port}/api/events`, (res) => {
-        expect(res.statusCode).toBe(200);
-        expect(res.headers["content-type"]).toContain("text/event-stream");
-
-        res.setEncoding("utf-8");
-        res.on("data", (chunk) => {
-          const dataLine = chunk
-            .split("\n")
-            .find((line: string) => line.startsWith("data: "));
-
-          if (!dataLine) return;
-
-          req.destroy();
-          resolve(JSON.parse(dataLine.slice("data: ".length)) as FeedbackItem);
+  it("sends batch updates through SSE after an initial snapshot", async () => {
+    const streamed = new Promise<Record<string, unknown>>((resolve, reject) => {
+      const timeout = setTimeout(() => reject(new Error("Timed out waiting for a batch event.")), 2_000);
+      const request = http.get(`${baseUrl}/api/events`, (response) => {
+        let buffer = "";
+        response.setEncoding("utf-8");
+        response.on("data", (chunk) => {
+          buffer += chunk;
+          let messageEnd = buffer.indexOf("\n\n");
+          while (messageEnd >= 0) {
+            const message = buffer.slice(0, messageEnd);
+            buffer = buffer.slice(messageEnd + 2);
+            if (message.startsWith("event: batch")) {
+              clearTimeout(timeout);
+              request.destroy();
+              resolve(JSON.parse(message.split("\n").find((line) => line.startsWith("data: "))!.slice(6)));
+              return;
+            }
+            messageEnd = buffer.indexOf("\n\n");
+          }
         });
       });
-
-      req.on("error", reject);
+      request.on("error", reject);
     });
 
-    await fetch(`http://127.0.0.1:${port}/api/feedback`, {
+    await fetch(`${baseUrl}/api/batches`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(sampleItem)
+      body: JSON.stringify({ id: "batch_sse", prompt: "Start work", notes: [] })
     });
 
-    const data = await streamedItem;
-    expect(data.id).toBe("fb_test_sse");
-    expect(data.comment).toBe("Test comment from SSE");
+    await expect(streamed).resolves.toMatchObject({ status: "queued", prompt: "Start work" });
   });
 });

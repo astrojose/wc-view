@@ -114,7 +114,7 @@ describe("Phase 1 & 2 Client Components", () => {
   it("formats submitted state instead of prepared state after batch submit", () => {
     const message = getBatchSubmitStatus("", 1);
 
-    expect(message).toBe("Submitted 1 note to the feedback queue.");
+    expect(message).toBe("Sent 1 note to the agent work queue.");
     expect(message).not.toContain("prepared for atomic submission");
   });
 });

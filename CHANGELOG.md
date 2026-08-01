@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-08-01
+
+### Added
+
+- Add durable feedback batches, exclusive bridge claims, and `wc-view bridge` for automatic agent work after browser submission.
+- Stream replayable batch state and results to the review surface through Server-Sent Events.
+- Add scratch-versus-protected target policy and explicit protected-result acceptance.
+
+### Changed
+
+- Submit all notes and the optional prompt as one idempotent browser batch instead of persisting notes individually.
+- Prevent client asset caching so a restarted local review surface loads the current feedback workflow.
+
 ## [0.3.0] - 2026-08-01
 
 ### Added

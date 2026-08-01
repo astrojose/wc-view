@@ -2,46 +2,72 @@
 
 ## Context
 
-- No cross-harness standard yet exists for portable human→agent review feedback (MCP elicitation is agent-initiated and session-scoped; AGENTS.md carries static instructions, not per-item feedback) — this contract is **greenfield**.
-- To keep future interop open, each feedback item is shaped on an established finding schema (SARIF / LSP `Diagnostic` / Reviewdog RDFormat): location anchor + message + severity.
+- Feedback uses location anchor + message + severity, shaped for future mapping to SARIF / LSP `Diagnostic` / Reviewdog RDFormat.
+- Browser feedback must start connected agent work without a second terminal or chat prompt.
+- Durable state remains outside git under `~/.wc-view/feedback/`.
 
 ## Requirements
 
-- **Layered anchor**, following the W3C Web Annotation Data Model and Hypothes.is fuzzy-anchoring, resolved by ordered fallback:
-  - **Primary — quote + context**: `exact` selected text plus ~32-char `prefix`/`suffix`, taken over the *rendered* text. This is the only tier that survives the agent rewrites this workload continuously produces.
-  - **Secondary — structural scope narrower**: nearest stable heading slug + element type + occurrence index, used to disambiguate and cheaply bound the fuzzy search, not to locate.
-  - **Tertiary — position hint**: `line_range` / offset kept only as a fast-path cache, re-validated against the quote on every load and never trusted alone.
-- Feedback lifecycle status: `unresolved` → `in_progress` → `resolved`, plus `orphaned` when an anchor no longer resolves.
-- Written to durable user-local state under `~/.wc-view/feedback/queue.jsonl` (never polluting git repositories).
-- Default payload format is compact JSON — universally parseable and smallest on the nested, irregular shape of review feedback. A `--format` flag may offer alternatives (e.g. `toon`, CSV/Markdown table), adopted only where a benchmark on the real schema shows a stable, worthwhile token win.
+- A submitted batch contains the optional prompt (`""` when omitted) and all selected notes in one atomic write.
+- The browser supplies a client-generated batch id as an idempotency key; a retry with that id returns the original batch without resetting its state.
+- Each note retains a layered anchor:
+  - Primary: rendered-text `exact` quote plus `prefix` and `suffix`.
+  - Secondary: heading slug, element type, and occurrence index.
+  - Tertiary: line range or offset hint; never trusted without quote re-validation.
+- A bridge atomically claims a queued batch before dispatching it to an agent adapter.
+- State transitions are durable and recoverable after bridge restart.
+- A browser reconnect receives current batch state before live updates.
 
 ## Decisions
 
-- Comment/message field: plain feedback message (`comment`) plus `status` (`unresolved` | `in_progress` | `resolved` | `orphaned`).
-- Payload interop target shape: location anchor + message + severity, mappable to SARIF / LSP `Diagnostic` / Reviewdog RDFormat.
-- Storage path: durable user-local state under `~/.wc-view/feedback/queue.jsonl` (outside any git repository).
-- Queue mutation model: JSONL format with one JSON object per line. State updates preserve latest item state per `id`.
-- Anchor coordinate space: rendered DOM text content offsets generated via standard GFM `marked` parser.
+- Storage path: `~/.wc-view/feedback/queue.jsonl`.
+- Queue mutation model: JSONL, with latest record for an id taking precedence.
+- Artifact class is `scratch` for a workspace-local `.wc-view-scratch*.md` target; all other targets are `protected` unless a future contract adds stricter classes.
+- `scratch` batches permit automatic artifact edits.
+- `protected` batches permit analysis and result proposal only until explicit human acceptance.
+- A claim contains bridge id and a lease expiry. An expired lease returns the batch to `queued`.
 
 ## Contracts
 
-- Feedback Item JSON structure:
-  - `id`: string (e.g. `fb_123456`)
-  - `filePath`: string (relative or absolute file path being reviewed)
-  - `anchor`: object
-    - `primary`: `{ exact: string, prefix: string, suffix: string }`
-    - `secondary`: `{ headingSlug?: string, elementType: string, occurrenceIndex: number }`
-    - `tertiary`: `{ startLine?: number, endLine?: number, offsetHint?: number }`
-  - `comment`: string
-  - `severity`: `"info" | "warning" | "error"`
-  - `status`: `"unresolved" | "in_progress" | "resolved" | "orphaned"`
-  - `createdAt`: string (ISO 8601)
-  - `updatedAt`: string (ISO 8601)
-- System-level flow: `docs/design/architecture/wc-view-system-flow.md`.
+### FeedbackNote
+
+- `id`: string.
+- `anchor`: layered anchor object.
+- `comment`: string.
+- `severity`: optional `"info" | "warning" | "error"`.
+- `status`: optional `"unresolved" | "resolved" | "orphaned"`; a batch is not resolved until every note is resolved or orphaned.
+
+### FeedbackBatch
+
+- `id`: string.
+- `filePath`: absolute target path.
+- `artifactClass`: `"scratch" | "protected"`.
+- `prompt`: string.
+- `notes`: `FeedbackNote[]`.
+- `status`: `"queued" | "claimed" | "working" | "response_ready" | "applied" | "awaiting_acceptance" | "resolved" | "failed" | "orphaned"`.
+- `claim`: optional `{ bridgeId: string, leaseExpiresAt: string }`.
+- `approval`: optional `{ acceptedAt: string }`; present only after a human accepts a protected result.
+- `result`: optional `{ summary: string, proposal?: string, status: "applied" | "awaiting_acceptance" | "resolved" | "failed" }`.
+- `createdAt`: ISO 8601 string.
+- `updatedAt`: ISO 8601 string.
+
+### Bridge adapter result
+
+- Adapter receives one `FeedbackBatch` as JSON on standard input.
+- Adapter returns one JSON object on standard output: `{ "summary": string, "proposal"?: string, "status": "applied" | "awaiting_acceptance" | "resolved" }`.
+- Non-zero process exit or invalid JSON produces a durable `failed` result with diagnostics as its summary.
+- Adapter diagnostics write to standard error.
+
+### Human acceptance
+
+- `POST /api/batches/:id/accept` accepts only a batch in `awaiting_acceptance` state.
+- Acceptance records `approval.acceptedAt`, returns the batch to `queued`, and broadcasts a batch event.
+- The bridge redispatches the approved batch; only then may its adapter apply the protected target.
 
 ## Acceptance Criteria
 
-- Every feedback item carries a primary (quote+context), secondary (structural scope), and tertiary (position hint) anchor tier.
-- Status values are limited to `unresolved`, `in_progress`, `resolved`, `orphaned`.
-- Feedback is persisted only under `~/.wc-view/feedback/`, never inside a git-tracked path.
-
+- One browser submission persists one batch with its prompt and all notes.
+- Batch records and all state transitions exist only below `~/.wc-view/feedback/`.
+- A batch cannot be claimed by two non-expired bridge leases.
+- A protected target is never mutated until a human accepts its durable `awaiting_acceptance` result.
+- System-level flow: `docs/design/architecture/wc-view-system-flow.md`.

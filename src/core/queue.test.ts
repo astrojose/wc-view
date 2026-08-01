@@ -2,7 +2,22 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
-import { readQueue, writeFeedbackItem, getUnresolvedItems, gcFeedback, FeedbackItem } from "./queue.js";
+import {
+  claimNextBatch,
+  createFeedbackBatch,
+  getUnresolvedItems,
+  gcFeedback,
+  readBatches,
+  readQueue,
+  writeFeedbackItem,
+  FeedbackItem
+} from "./queue.js";
+
+const anchor = {
+  primary: { exact: "Node.js 18+ ESM", prefix: "", suffix: "" },
+  secondary: { headingSlug: "tech", elementType: "p", occurrenceIndex: 0 },
+  tertiary: { offsetHint: 0 }
+};
 
 describe("Feedback Queue Manager", () => {
   let tmpDir: string;
@@ -13,20 +28,12 @@ describe("Feedback Queue Manager", () => {
     testQueuePath = path.join(tmpDir, "queue.jsonl");
   });
 
-  afterEach(() => {
-    if (fs.existsSync(tmpDir)) {
-      fs.rmSync(tmpDir, { recursive: true, force: true });
-    }
-  });
+  afterEach(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
 
   const sampleItem: FeedbackItem = {
     id: "fb_001",
     filePath: "docs/design/tech-stack.md",
-    anchor: {
-      primary: { exact: "Node.js 18+ ESM", prefix: "", suffix: "" },
-      secondary: { headingSlug: "tech", elementType: "p", occurrenceIndex: 0 },
-      tertiary: { offsetHint: 0 }
-    },
+    anchor,
     comment: "Update Node.js requirement details",
     severity: "info",
     status: "unresolved",
@@ -34,54 +41,49 @@ describe("Feedback Queue Manager", () => {
     updatedAt: new Date().toISOString()
   };
 
-  it("writes and reads feedback items cleanly", () => {
+  it("writes and updates legacy feedback without removing batches", () => {
     writeFeedbackItem(sampleItem, testQueuePath);
-    const items = readQueue(testQueuePath);
+    const batch = createFeedbackBatch({ filePath: path.join(tmpDir, ".wc-view-scratch.md"), prompt: "Improve it", notes: [] }, tmpDir, testQueuePath);
+    writeFeedbackItem({ ...sampleItem, comment: "Updated comment text", status: "resolved" }, testQueuePath);
 
-    expect(items.length).toBe(1);
-    expect(items[0].id).toBe("fb_001");
-    expect(items[0].comment).toBe("Update Node.js requirement details");
+    expect(readQueue(testQueuePath)).toEqual([expect.objectContaining({ comment: "Updated comment text" })]);
+    expect(readBatches(testQueuePath)).toEqual([expect.objectContaining({ id: batch.id, status: "queued" })]);
   });
 
-  it("updates existing feedback item by ID", () => {
-    writeFeedbackItem(sampleItem, testQueuePath);
-    const updated = { ...sampleItem, comment: "Updated comment text", status: "resolved" as const };
-    writeFeedbackItem(updated, testQueuePath);
+  it("creates one classified batch containing its prompt and every note", () => {
+    const batch = createFeedbackBatch({
+      filePath: path.join(tmpDir, ".wc-view-scratch-training.md"),
+      prompt: "Improve the training",
+      notes: [{ id: "note_1", anchor, comment: "Make the handoff explicit" }, { id: "note_2", anchor, comment: "Add a live demo" }]
+    }, tmpDir, testQueuePath);
 
-    const items = readQueue(testQueuePath);
-    expect(items.length).toBe(1);
-    expect(items[0].comment).toBe("Updated comment text");
-    expect(items[0].status).toBe("resolved");
+    expect(batch.artifactClass).toBe("scratch");
+    expect(batch.notes).toHaveLength(2);
+    expect(batch.status).toBe("queued");
+    expect(readBatches(testQueuePath)).toHaveLength(1);
+    const retried = createFeedbackBatch({
+      id: batch.id,
+      filePath: path.join(tmpDir, ".wc-view-scratch-training.md"),
+      prompt: "A retry must not replace this batch",
+      notes: []
+    }, tmpDir, testQueuePath);
+    expect(retried).toEqual(batch);
   });
 
-  it("filters unresolved items", () => {
-    writeFeedbackItem(sampleItem, testQueuePath);
-    const resolvedItem: FeedbackItem = {
-      ...sampleItem,
-      id: "fb_002",
-      status: "resolved"
-    };
-    writeFeedbackItem(resolvedItem, testQueuePath);
+  it("claims each batch once until its lease expires", () => {
+    createFeedbackBatch({ filePath: path.join(tmpDir, "docs.md"), prompt: "Review", notes: [] }, tmpDir, testQueuePath);
+    const first = claimNextBatch("bridge_a", 30_000, testQueuePath);
+    const second = claimNextBatch("bridge_b", 30_000, testQueuePath);
 
-    const unresolved = getUnresolvedItems(undefined, testQueuePath);
-    expect(unresolved.length).toBe(1);
-    expect(unresolved[0].id).toBe("fb_001");
+    expect(first).toMatchObject({ status: "claimed", claim: { bridgeId: "bridge_a" } });
+    expect(second).toBeUndefined();
   });
 
-  it("garbage collects resolved items with --all", () => {
+  it("filters unresolved legacy items and garbage collects terminal records", () => {
     writeFeedbackItem(sampleItem, testQueuePath);
-    const resolvedItem: FeedbackItem = {
-      ...sampleItem,
-      id: "fb_002",
-      status: "resolved"
-    };
-    writeFeedbackItem(resolvedItem, testQueuePath);
-
-    const removed = gcFeedback({ all: true }, testQueuePath);
-    expect(removed).toBe(1);
-
-    const remaining = readQueue(testQueuePath);
-    expect(remaining.length).toBe(1);
-    expect(remaining[0].id).toBe("fb_001");
+    writeFeedbackItem({ ...sampleItem, id: "fb_002", status: "resolved" }, testQueuePath);
+    expect(getUnresolvedItems(undefined, testQueuePath)).toHaveLength(1);
+    expect(gcFeedback({ all: true }, testQueuePath)).toBe(1);
+    expect(readQueue(testQueuePath)).toHaveLength(1);
   });
 });

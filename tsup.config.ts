@@ -12,6 +12,5 @@ export default defineConfig({
   dts: false,
   sourcemap: true,
   minify: false,
-  noExternal: ["marked", "mermaid"],
-  publicDir: "wc-view Design System"
+  noExternal: ["marked", "mermaid"]
 });

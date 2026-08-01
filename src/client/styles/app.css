@@ -235,6 +235,21 @@ textarea.composer-input {
   color: var(--ring-accent);
 }
 
+.composer-policy,
+.composer-status {
+  font: var(--type-meta);
+  letter-spacing: var(--tracking-tight);
+}
+
+.composer-policy {
+  color: var(--fg-secondary);
+}
+
+.composer-status {
+  color: var(--fg-muted);
+  min-height: 1.25rem;
+}
+
 .composer-queue {
   display: flex;
   flex-direction: column;
