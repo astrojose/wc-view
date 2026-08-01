@@ -119,7 +119,7 @@ export function classifyArtifact(filePath: string, workspacePath: string): Artif
   const workspace = path.resolve(workspacePath);
   const relative = path.relative(workspace, absoluteFile);
   const withinWorkspace = relative !== "" && !relative.startsWith(`..${path.sep}`) && relative !== ".." && !path.isAbsolute(relative);
-  const scratchName = /^\.wc-view-scratch[^/]*\.md$/i.test(path.basename(absoluteFile));
+  const scratchName = /^\.wc-view-scratch[^/]*\.(md|html?)$/i.test(path.basename(absoluteFile));
   return withinWorkspace && scratchName ? "scratch" : "protected";
 }
 

@@ -14,7 +14,7 @@ export class StatusRegion {
       existing.setAttribute("role", "status");
       existing.setAttribute("aria-live", "polite");
       existing.innerHTML = `<span aria-hidden="true">›</span><span class="status-message"></span>`;
-      document.body.appendChild(existing);
+      document.body.insertBefore(existing, document.body.firstChild);
     }
     this.element = existing;
     this.messageEl = existing.querySelector(".status-message") || existing;

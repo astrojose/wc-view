@@ -4,6 +4,7 @@ import { DocCanvas, DocBlock } from "./components/DocCanvas.js";
 import { FloatingComposer, NoteItem } from "./components/FloatingComposer.js";
 import { AnnotationEditor } from "./components/AnnotationEditor.js";
 import { ConfirmDialog } from "./components/ConfirmDialog.js";
+import { DocumentFormat } from "./components/DocCanvas.js";
 import { extractAnchor, resolveAnchor } from "./anchoring.js";
 import { getBatchSubmitStatus } from "./batchStatus.js";
 import "./styles/app.css";
@@ -14,6 +15,13 @@ interface BatchView {
   artifactClass: "scratch" | "protected";
   result?: { summary: string; status: string };
   createdAt: string;
+}
+
+interface DocumentPayload {
+  path?: string;
+  content?: string;
+  format?: DocumentFormat;
+  artifactClass?: "scratch" | "protected";
 }
 
 export class ReviewApp {
@@ -39,7 +47,6 @@ export class ReviewApp {
       () => this.handleDiscardNotes(),
       (batchId) => this.handleBatchAcceptance(batchId)
     );
-    this.composer.mountAbove(this.statusRegion.getElement());
     this.setupShortcuts();
     this.statusRegion.announce("Select any paragraph to attach a review note.");
     if (typeof window !== "undefined") this.initFromApi();
@@ -49,11 +56,11 @@ export class ReviewApp {
     try {
       const response = await fetch("/api/document");
       if (!response.ok) return;
-      const data = await response.json();
+      const data = await response.json() as DocumentPayload;
       if (!data.content) return;
       this.currentFilePath = data.path || "";
       this.composer.setTargetPolicy(data.artifactClass || "protected");
-      this.loadMarkdown(data.content, data.path ? data.path.split("/").pop() : "Document");
+      this.loadDocument(data.content, data.path ? data.path.split("/").pop() : "Document", undefined, data.format || "markdown");
       await Promise.all([this.loadFeedback(), this.loadBatches()]);
       this.connectEventStream();
     } catch {
@@ -62,7 +69,11 @@ export class ReviewApp {
   }
 
   public loadMarkdown(markdown: string, title?: string, meta?: string): void {
-    this.canvas.render(markdown, title, meta, (block) => this.handleBlockSelect(block));
+    this.loadDocument(markdown, title, meta, "markdown");
+  }
+
+  public loadDocument(content: string, title?: string, meta?: string, format: DocumentFormat = "markdown"): void {
+    this.canvas.render(content, title, meta, (block) => this.handleBlockSelect(block), format);
   }
 
   public async loadFeedback(): Promise<void> {

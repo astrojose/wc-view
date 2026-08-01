@@ -23,7 +23,7 @@ export class ConfirmDialog {
       <div class="dialog-card">
         <h3 id="confirm-dialog-title">${title}</h3>
         <p>${description}</p>
-        <div style="display:flex;justify-content:flex-end;gap:var(--space-2);margin-top:var(--space-2)">
+        <div class="dialog-actions">
           <button id="dialog-cancel-btn" class="btn" type="button">Cancel</button>
           <button id="dialog-confirm-btn" class="btn btn-danger" type="button">Confirm</button>
         </div>

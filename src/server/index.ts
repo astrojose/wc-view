@@ -20,6 +20,8 @@ export interface ServerOptions {
   queuePath?: string;
 }
 
+export type DocumentFormat = "markdown" | "html";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const MAX_REQUEST_BYTES = 100 * 1024;
@@ -60,14 +62,46 @@ function getClientStyleBundlePath(): string | null {
   return candidates.find(fs.existsSync) || null;
 }
 
+function isMarkdownFile(filePath: string): boolean {
+  return /\.md$/i.test(filePath);
+}
+
+function isHtmlFile(filePath: string): boolean {
+  return /\.html?$/i.test(filePath);
+}
+
+function getDocumentFormat(filePath: string): DocumentFormat {
+  return isHtmlFile(filePath) ? "html" : "markdown";
+}
+
+function getDirectoryDocument(files: string[]): string | undefined {
+  const viewableFiles = files.filter((file) => isMarkdownFile(file) || isHtmlFile(file));
+  return (
+    viewableFiles.find((file) => /^\.wc-view-scratch[^/]*\.html?$/i.test(path.basename(file))) ||
+    viewableFiles.find((file) => /^\.wc-view-scratch[^/]*\.md$/i.test(path.basename(file))) ||
+    viewableFiles.find(isHtmlFile) ||
+    viewableFiles.find(isMarkdownFile)
+  );
+}
+
+export function getStaticAssetCandidates(filename: string, baseDir: string = __dirname): string[] {
+  return [
+    path.join(baseDir, "..", "client", filename),
+    path.join(baseDir, "client", filename),
+    path.join(baseDir, filename),
+    path.join(process.cwd(), "dist", "client", filename),
+    path.join(process.cwd(), "dist", filename)
+  ];
+}
+
 export function createServer(options: ServerOptions): http.Server {
   const targetPath = options.targetPath ? path.resolve(options.targetPath) : process.cwd();
   const workspacePath = fs.existsSync(targetPath) && fs.statSync(targetPath).isDirectory() ? targetPath : path.dirname(targetPath);
   const eventClients = new Set<http.ServerResponse>();
   const servedDocumentPath = (): string => {
     if (!fs.existsSync(targetPath) || !fs.statSync(targetPath).isDirectory()) return targetPath;
-    const firstMarkdown = fs.readdirSync(targetPath).find((file) => file.endsWith(".md"));
-    return firstMarkdown ? path.join(targetPath, firstMarkdown) : targetPath;
+    const firstDocument = getDirectoryDocument(fs.readdirSync(targetPath));
+    return firstDocument ? path.join(targetPath, firstDocument) : targetPath;
   };
 
   const batchesForTarget = (): FeedbackBatch[] => readBatches(options.queuePath).filter((batch) => batch.filePath === servedDocumentPath());
@@ -122,8 +156,8 @@ export function createServer(options: ServerOptions): http.Server {
       if (fs.existsSync(targetPath)) {
         const stat = fs.statSync(targetPath);
         if (stat.isDirectory()) {
-          files = fs.readdirSync(targetPath).filter((file) => file.endsWith(".md"));
-          const first = files[0];
+          files = fs.readdirSync(targetPath).filter((file) => isMarkdownFile(file) || isHtmlFile(file));
+          const first = getDirectoryDocument(files);
           if (first) {
             docPath = path.join(targetPath, first);
             content = fs.readFileSync(docPath, "utf-8");
@@ -133,7 +167,7 @@ export function createServer(options: ServerOptions): http.Server {
         }
       }
       res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ path: docPath, content, files, artifactClass: classifyArtifact(docPath, workspacePath) }));
+      res.end(JSON.stringify({ path: docPath, content, files, format: getDocumentFormat(docPath), artifactClass: classifyArtifact(docPath, workspacePath) }));
       return;
     }
 
@@ -229,12 +263,7 @@ export function createServer(options: ServerOptions): http.Server {
 
     if (pathname.match(/\.(js|css|map)$/)) {
       const filename = path.basename(pathname);
-      const candidates = [
-        path.join(__dirname, "..", "client", filename),
-        path.join(__dirname, "client", filename),
-        path.join(process.cwd(), "dist", "client", filename),
-        path.join(process.cwd(), "dist", filename)
-      ];
+      const candidates = getStaticAssetCandidates(filename);
       const foundPath = candidates.find(fs.existsSync);
       if (foundPath) {
         const ext = path.extname(foundPath);
@@ -245,6 +274,9 @@ export function createServer(options: ServerOptions): http.Server {
         res.end(fs.readFileSync(foundPath));
         return;
       }
+      res.writeHead(404, { "Content-Type": "text/plain", "Cache-Control": "no-store" });
+      res.end("Static asset not found");
+      return;
     }
 
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
@@ -266,7 +298,7 @@ function getAppHtml(): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>wc-view — Local Markdown Review Surface</title>
+  <title>wc-view — Local Review Surface</title>
   <link rel="stylesheet" href="/main.css">
 </head>
 <body>

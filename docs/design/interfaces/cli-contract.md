@@ -4,11 +4,11 @@
 
 - `wc-view` is an independent Node.js 18+ ESM CLI.
 - Terminal agent execution is decoupled from the browser review surface through a local bridge protocol.
-- Markdown remains authoritative. Browser feedback and bridge state are unapproved intermediate state.
+- Markdown and HTML source files remain authoritative. Browser feedback and bridge state are unapproved intermediate state.
 
 ## Requirements
 
-- `wc-view serve`: render a Markdown file or docs tree in a loopback-only browser UI.
+- `wc-view serve`: render a Markdown or HTML file, or a docs tree, in a loopback-only browser UI.
 - `wc-view feedback --unresolved`: pull unresolved legacy feedback items as compact JSON.
 - `wc-view bridge --command <command>`: watch durable feedback batches, claim work, invoke an adapter, and persist result state.
 - `wc-view gc`: garbage-collect resolved feedback records.
@@ -20,7 +20,9 @@
 - `serve` may receive `--agent-command <command>` to start one local bridge with the review server.
 - The adapter receives the claimed `FeedbackBatch` JSON on standard input and returns its JSON result on standard output.
 - The server owns no LLM integration. Harness adapters select, resume, or invoke the active agent session.
-- A scratch artifact may be automatically changed by its adapter. The core bridge dispatches protected targets but the adapter contract must return `awaiting_acceptance` rather than mutate them.
+- A scratch artifact may be automatically changed by its adapter. Scratch artifacts include workspace-local `.wc-view-scratch*.md` and `.wc-view-scratch*.html` files.
+- Dynamic visualization scratch artifacts should prefer styled HTML when the artifact benefits from richer layout, visual hierarchy, or embedded interaction; Markdown remains supported for documentation review.
+- The core bridge dispatches protected targets but the adapter contract must return `awaiting_acceptance` rather than mutate them.
 - Server-Sent Events replay the current batches at connection time and broadcast durable batch updates afterward.
 
 ## Contracts
@@ -40,7 +42,7 @@
 
 ### HTTP API
 
-- `GET /api/document`: document text and file metadata.
+- `GET /api/document`: document text, format (`markdown` or `html`), and file metadata.
 - `GET /api/feedback`: legacy feedback queue items.
 - `POST /api/feedback`: legacy single-note write.
 - `GET /api/batches`: current durable feedback batches for the served target.

@@ -8,16 +8,16 @@ const program = new Command();
 
 program
   .name("wc-view")
-  .description("Local Markdown review surface for agent workflows")
-  .version("0.3.0");
+  .description("Local Markdown and HTML review surface for agent workflows")
+  .version("0.4.0");
 
 program.exitOverride();
 program.configureOutput({ writeErr: () => {} });
-program.addHelpText("beforeAll", "bin: ~/.local/bin/wc-view\ndescription: Local Markdown review surface for agent workflows\n");
+program.addHelpText("beforeAll", "bin: ~/.local/bin/wc-view\ndescription: Local Markdown and HTML review surface for agent workflows\n");
 
 program
   .command("serve [path]")
-  .description("Render Markdown files or a docs/ tree in a lightweight localhost browser UI")
+  .description("Render Markdown, HTML artifacts, or a docs/ tree in a lightweight localhost browser UI")
   .option("-p, --port <number>", "Port to bind localhost server", "3456")
   .option("-H, --host <string>", "Host interface to bind", "127.0.0.1")
   .option("--agent-command <command>", "Start a local agent bridge with this adapter command")

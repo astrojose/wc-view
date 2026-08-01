@@ -1,8 +1,8 @@
 # wc-view
 
-Local Markdown review surface for agent workflows.
+Local Markdown and HTML review surface for agent workflows.
 
-`wc-view` renders Markdown files or documentation trees in a localhost browser UI and stores review feedback in user-local state for agent reconciliation.
+`wc-view` renders Markdown files, styled HTML artifacts, or documentation trees in a localhost browser UI and stores review feedback in user-local state for agent reconciliation.
 
 ## Package
 
@@ -46,6 +46,12 @@ Render a single Markdown file:
 
 ```bash
 wc-view serve docs/design/architecture/tech-stack.md
+```
+
+Render a styled HTML scratch artifact:
+
+```bash
+wc-view serve .wc-view-scratch.html
 ```
 
 Use a custom port:

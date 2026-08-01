@@ -2,7 +2,7 @@
 
 ## Overview
 
-- `wc-view`: local Markdown review surface for agent workflows.
+- `wc-view`: local Markdown and HTML review surface for agent workflows.
 - Product and architecture truth: `docs/design/`.
 - Visual token truth: `wc-view Design System/`.
 
@@ -21,6 +21,8 @@
 - [x] phase-03-annotation-anchoring.md
 - [x] phase-04-feedback-queue-cli.md
 - [x] phase-05-automatic-agent-feedback.md
+- [x] HTML scratch artifact rendering.
+- [x] Design-system visual polish.
 
 ## Dependencies
 
@@ -30,4 +32,6 @@
 
 - phases: docs/implementation/phases/phase-05-automatic-agent-feedback.md
 - tasks: docs/implementation/tasks/task-09-automatic-agent-feedback-loop.md
+- tasks: docs/implementation/tasks/task-10-html-scratch-artifacts.md
+- tasks: docs/implementation/tasks/task-11-design-system-visual-polish.md
 - status: docs/implementation/status/weekly-status.md

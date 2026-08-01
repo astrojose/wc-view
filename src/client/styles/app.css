@@ -11,6 +11,12 @@ html, body {
   color: var(--fg-primary);
   font-family: var(--font-sans);
   letter-spacing: var(--tracking-tight);
+  min-height: 100%;
+}
+
+body {
+  font: var(--type-body);
+  text-rendering: optimizeLegibility;
 }
 
 *:focus-visible {
@@ -18,11 +24,16 @@ html, body {
   outline-offset: var(--ring-offset);
 }
 
+::selection {
+  background: var(--annotation-tint-strong);
+  color: var(--fg-primary);
+}
+
 .doc-canvas {
-  width: 100%;
+  width: min(var(--measure-doc), calc(100% - (2 * var(--space-6))));
   max-width: var(--measure-doc-max);
   margin: 0 auto;
-  padding: var(--space-10) var(--space-6) calc(var(--space-20) + 10rem);
+  padding: var(--space-12) 0 calc(var(--space-20) + 10rem);
   display: flex;
   flex-direction: column;
   gap: var(--block-flow);
@@ -31,12 +42,23 @@ html, body {
 .doc-canvas > header {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
-.doc-canvas h1 {
+.doc-canvas > header h1 {
+  font: var(--type-heading);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  margin: 0;
+  color: var(--fg-primary);
+}
+
+#doc-content h1 {
   font: var(--type-doc-title);
   margin: 0;
+  color: var(--fg-primary);
 }
 
 .doc-canvas .doc-meta {
@@ -48,12 +70,139 @@ html, body {
 #doc-content {
   display: flex;
   flex-direction: column;
-  gap: var(--block-flow);
+  gap: var(--space-4);
+}
+
+#doc-content :where(h1, h2, h3, h4, h5, h6, p, ul, ol, blockquote, pre, table, section, article, aside, details, hr) {
+  margin: 0;
+}
+
+#doc-content :where(h2, h3, h4, h5, h6) {
+  font: var(--type-heading);
+  color: var(--fg-primary);
+  margin-top: var(--space-4);
+}
+
+#doc-content :where(h3, h4, h5, h6) {
+  font: var(--type-subheading);
+  color: var(--fg-secondary);
+}
+
+#doc-content :where(p, li, dd) {
+  font: var(--type-body);
+  color: var(--fg-secondary);
+}
+
+#doc-content :where(ul, ol) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-left: var(--space-6);
+}
+
+#doc-content :where(a) {
+  color: var(--accent-action);
+  text-underline-offset: 0.18em;
+}
+
+#doc-content :where(a:hover) {
+  color: var(--fg-primary);
+}
+
+#doc-content :where(strong) {
+  color: var(--fg-primary);
+  font-weight: var(--weight-semibold);
+}
+
+#doc-content :where(code) {
+  font: var(--type-code);
+  color: var(--fg-primary);
+  background: var(--surface-inset);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.05rem var(--space-1);
+}
+
+#doc-content :where(pre) {
+  overflow: auto;
+  background: var(--surface-inset);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4);
+  min-height: 6rem;
+}
+
+#doc-content :where(pre code) {
+  display: block;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: var(--fg-secondary);
+}
+
+#doc-content :where(blockquote) {
+  border-left: var(--annotation-bar-width) solid var(--annotation-bar);
+  color: var(--fg-secondary);
+  background: var(--annotation-tint);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+#doc-content :where(table) {
+  width: 100%;
+  border-collapse: collapse;
+  display: block;
+  overflow-x: auto;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+}
+
+#doc-content :where(th, td) {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: left;
+  vertical-align: top;
+  font: var(--type-ui);
+}
+
+#doc-content :where(th) {
+  color: var(--fg-primary);
+  background: var(--surface-inset);
+  font-weight: var(--weight-semibold);
+}
+
+#doc-content :where(td) {
+  color: var(--fg-secondary);
+}
+
+#doc-content :where(tr:last-child td) {
+  border-bottom: 0;
+}
+
+#doc-content :where(hr) {
+  border: 0;
+  border-top: 1px solid var(--border-subtle);
+  width: 100%;
+}
+
+#doc-content :where(section, article, aside, details) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+#doc-content :where(.mermaid) {
+  min-height: 12rem;
+  background: var(--surface-inset);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: var(--space-4);
 }
 
 .doc-block {
-  padding: var(--space-1) var(--space-3);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: 0 var(--radius) var(--radius) 0;
   border-left: var(--annotation-bar-width) solid transparent;
   margin-left: calc(-1 * var(--space-3) - var(--annotation-bar-width));
   cursor: pointer;
@@ -61,7 +210,7 @@ html, body {
 }
 
 .doc-block:hover {
-  background-color: var(--surface-card);
+  background-color: var(--annotation-tint);
 }
 
 .doc-block.annotated {
@@ -73,6 +222,10 @@ html, body {
   background-color: var(--annotation-tint-strong);
 }
 
+.doc-block:has(.annotation-popover) {
+  background-color: var(--annotation-tint-strong);
+}
+
 .floating-composer-container {
   position: sticky;
   bottom: 0;
@@ -81,9 +234,10 @@ html, body {
   flex-direction: column;
   align-items: center;
   gap: var(--space-2);
-  padding: 0 var(--space-4) var(--space-4);
-  background: linear-gradient(transparent, var(--bg-base) 40%);
+  padding: var(--space-8) var(--space-4) var(--space-6);
+  background: linear-gradient(transparent, var(--bg-base) 38%);
   pointer-events: none;
+  z-index: 40;
 }
 
 .floating-composer-container > * {
@@ -93,28 +247,45 @@ html, body {
 .floating-composer-bar {
   width: min(46rem, 100%);
   background-color: var(--surface-card);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-ambient);
-  padding: var(--space-3);
+  padding: var(--space-4);
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 }
 
+.composer-summary-row,
+.composer-actions,
+.annotation-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.composer-summary-row {
+  justify-content: space-between;
+}
+
+.annotation-actions {
+  justify-content: flex-end;
+}
+
 .composer-input-row {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: var(--space-2);
 }
 
 .composer-input {
   flex: 1;
+  min-height: var(--tap-min);
   background-color: var(--surface-inset);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   color: var(--fg-primary);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-3);
   font: var(--type-body);
   letter-spacing: var(--tracking-tight);
 }
@@ -124,8 +295,11 @@ textarea.composer-input {
 }
 
 .composer-input:focus {
-  outline: none;
   border-color: var(--border-strong);
+}
+
+.composer-input::placeholder {
+  color: var(--fg-muted);
 }
 
 .btn {
@@ -148,6 +322,10 @@ textarea.composer-input {
 
 .btn:hover {
   background-color: var(--border-strong);
+}
+
+.btn:active {
+  background-color: var(--surface-inset);
 }
 
 .btn:disabled {
@@ -235,6 +413,11 @@ textarea.composer-input {
   color: var(--ring-accent);
 }
 
+.chip-badge > span:first-child {
+  color: var(--fg-muted);
+  font: var(--type-code);
+}
+
 .composer-policy,
 .composer-status {
   font: var(--type-meta);
@@ -243,6 +426,18 @@ textarea.composer-input {
 
 .composer-policy {
   color: var(--fg-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.composer-policy::before {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: var(--radius-pill);
+  background: var(--status-in-progress);
+  flex: 0 0 auto;
 }
 
 .composer-status {
@@ -262,17 +457,30 @@ textarea.composer-input {
 .composer-queue.open {
   max-height: 220px;
   overflow-y: auto;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: var(--space-2);
 }
 
 .queue-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-2);
   font: var(--type-ui);
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-2);
   background-color: var(--surface-inset);
-  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+}
+
+.queue-item span {
+  min-width: 0;
+  color: var(--fg-secondary);
+}
+
+.queue-item strong {
+  color: var(--fg-primary);
+  font-weight: var(--weight-medium);
 }
 
 .annotation-label {
@@ -291,9 +499,13 @@ textarea.composer-input {
 }
 
 .theme-toggle {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: var(--space-2);
+  width: min(var(--measure-doc), calc(100% - (2 * var(--space-6))));
+  margin: 0 auto;
+  padding-top: var(--space-4);
+  color: var(--fg-muted);
 }
 
 .theme-toggle-label {
@@ -302,13 +514,27 @@ textarea.composer-input {
 }
 
 .status-region {
-  width: min(46rem, 100%);
+  position: sticky;
+  top: var(--space-3);
+  z-index: 50;
+  width: min(46rem, calc(100% - (2 * var(--space-4))));
+  margin: var(--space-3) auto 0;
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-ambient);
   font: var(--type-meta);
   letter-spacing: var(--tracking-tight);
   color: var(--fg-muted);
+}
+
+.status-region > span:first-child {
+  color: var(--ring-accent);
+  font: var(--type-code);
 }
 
 .annotation-popover {
@@ -321,6 +547,10 @@ textarea.composer-input {
   flex-direction: column;
   gap: var(--space-3);
   margin-top: var(--space-2);
+}
+
+.annotation-popover textarea {
+  min-height: 7rem;
 }
 
 .dialog-scrim {
@@ -358,9 +588,45 @@ textarea.composer-input {
   color: var(--fg-muted);
 }
 
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .doc-canvas,
+  .theme-toggle {
+    width: calc(100% - (2 * var(--space-4)));
+  }
+
+  .doc-canvas {
+    padding-top: var(--space-8);
+  }
+
+  .composer-summary-row,
+  .composer-input-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .composer-actions {
+    width: 100%;
+  }
+
+  .composer-actions .btn {
+    flex: 1;
+  }
+
+  .composer-input-row .icon-btn {
+    align-self: flex-start;
   }
 }

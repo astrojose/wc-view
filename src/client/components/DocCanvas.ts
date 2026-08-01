@@ -1,5 +1,7 @@
 import { renderMarkdown } from "../../core/markdown.js";
 
+export type DocumentFormat = "markdown" | "html";
+
 export interface DocBlock {
   id: string;
   kind: "paragraph" | "heading" | "code";
@@ -27,9 +29,9 @@ export class DocCanvas {
     this.container = existing;
   }
 
-  public render(markdown: string, title?: string, meta?: string, onSelect?: (block: DocBlock) => void): void {
+  public render(content: string, title?: string, meta?: string, onSelect?: (block: DocBlock) => void, format: DocumentFormat = "markdown"): void {
     this.onBlockSelect = onSelect;
-    const htmlContent = renderMarkdown(markdown);
+    const htmlContent = format === "html" ? this.prepareHtmlContent(content) : renderMarkdown(content);
 
     const header = title || meta
       ? `<header>${title ? `<h1>${title}</h1>` : ""}${meta ? `<p class="doc-meta">${meta}</p>` : ""}</header>`
@@ -67,6 +69,7 @@ export class DocCanvas {
     this.blocks = [];
 
     children.forEach((child, index) => {
+      if (["STYLE", "SCRIPT", "TEMPLATE", "META", "LINK"].includes(child.tagName)) return;
       const id = `b${index + 1}`;
       child.setAttribute("data-block-id", id);
       child.classList.add("doc-block");
@@ -110,5 +113,17 @@ export class DocCanvas {
         }
       });
     });
+  }
+
+  private prepareHtmlContent(html: string): string {
+    const trimmed = html.trim();
+    if (!/<(?:!doctype|html|head|body)(?:\s|>)/i.test(trimmed)) return trimmed;
+
+    const parsed = new DOMParser().parseFromString(trimmed, "text/html");
+    const styles = Array.from(parsed.head.querySelectorAll("style"))
+      .map((style) => style.outerHTML)
+      .join("\n");
+    const body = parsed.body.innerHTML.trim();
+    return [styles, body].filter(Boolean).join("\n");
   }
 }

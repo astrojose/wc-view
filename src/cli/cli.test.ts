@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { AddressInfo } from "node:net";
-import { createServer } from "../server/index.js";
+import { createServer, getStaticAssetCandidates } from "../server/index.js";
 
 describe("Server & CLI Integration", () => {
   let server: http.Server;
@@ -30,10 +30,52 @@ describe("Server & CLI Integration", () => {
 
   it("serves document metadata including artifact policy and non-cacheable client assets", async () => {
     const response = await fetch(`${baseUrl}/api/document`);
-    expect(await response.json()).toMatchObject({ path: testDocPath, artifactClass: "scratch" });
+    expect(await response.json()).toMatchObject({ path: testDocPath, artifactClass: "scratch", format: "markdown" });
     const client = await fetch(`${baseUrl}/main.js`);
     expect(client.headers.get("cache-control")).toBe("no-store");
     await client.text();
+  });
+
+  it("serves HTML scratch artifacts as scratch HTML documents", async () => {
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+    testDocPath = path.join(tmpDir, ".wc-view-scratch-flow.html");
+    fs.writeFileSync(testDocPath, "<section><h1>Payment Flow</h1><p>Styled artifact.</p></section>", "utf-8");
+    server = createServer({ port: 0, host: "127.0.0.1", targetPath: testDocPath, queuePath });
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+
+    const response = await fetch(`${baseUrl}/api/document`);
+    expect(await response.json()).toMatchObject({
+      path: testDocPath,
+      artifactClass: "scratch",
+      format: "html",
+      content: expect.stringContaining("Payment Flow")
+    });
+  });
+
+  it("prefers scratch HTML files when serving a directory", async () => {
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+    const markdownPath = path.join(tmpDir, "README.md");
+    const htmlPath = path.join(tmpDir, ".wc-view-scratch-flow.html");
+    fs.writeFileSync(markdownPath, "# Markdown Fallback", "utf-8");
+    fs.writeFileSync(htmlPath, "<main><h1>HTML First</h1></main>", "utf-8");
+    server = createServer({ port: 0, host: "127.0.0.1", targetPath: tmpDir, queuePath });
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+
+    const response = await fetch(`${baseUrl}/api/document`);
+    expect(await response.json()).toMatchObject({
+      path: htmlPath,
+      artifactClass: "scratch",
+      format: "html",
+      content: expect.stringContaining("HTML First")
+    });
+  });
+
+  it("includes package dist chunks in static asset candidates", () => {
+    const candidates = getStaticAssetCandidates("chunk-example.js", "/tmp/wc-view/dist");
+
+    expect(candidates).toContain(path.join("/tmp/wc-view/dist", "chunk-example.js"));
   });
 
   it("persists an atomic feedback batch", async () => {

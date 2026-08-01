@@ -28,7 +28,7 @@ export class AnnotationEditor {
       <span class="annotation-label">Review note</span>
       <blockquote class="annotation-quote">${quote}…</blockquote>
       <textarea id="annotation-comment-input" class="composer-input" rows="3" placeholder="What should the agent change here?"></textarea>
-      <div style="display:flex;justify-content:flex-end;gap:var(--space-2)">
+      <div class="annotation-actions">
         <button id="annotation-cancel-btn" class="btn btn-ghost btn-sm" type="button">Cancel</button>
         <button id="annotation-save-btn" class="btn btn-primary btn-sm" type="button">Attach Note</button>
       </div>

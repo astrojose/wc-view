@@ -2,7 +2,7 @@
 
 ## Context
 
-- `wc-view` is a local Markdown review surface for agent workflows, designed as an independent CLI tool and localhost web interface.
+- `wc-view` is a local Markdown and HTML review surface for agent workflows, designed as an independent CLI tool and localhost web interface.
 - UI/UX design truth and visual tokens are defined in `wc-view Design System/` (and summarized in `docs/design/product/ux-design-system.md`).
 - Markdown and explicit human acceptance are authoritative; browser feedback is unapproved input stored in user-local state (`~/.wc-view/feedback/queue.jsonl`).
 
@@ -23,6 +23,7 @@
 | **CLI Framework** | `commander` | Lightweight, zero-dependency argument parser with subcommand dispatch (`serve`, `feedback`, `gc`). |
 | **Local HTTP Server** | Native Node.js `http` module | Sub-50ms cold startup time, zero external framework bloat, strict control over loopback `127.0.0.1` binding. |
 | **Markdown Engine** | `marked` (+ GFM extension) | Ultra-fast client/server Markdown parsing with deterministic heading slug generation and HTML output. |
+| **HTML Artifact Mode** | Local HTML fragments or documents | Rich scratch visualizations render inside the styled wc-view shell without changing the feedback and acceptance model. |
 | **Diagram Engine** | `mermaid` | Client-side diagram rendering using pre-reserved height containers (`reservedHeight`) to prevent cumulative layout shift. |
 | **UI Design System** | Vanilla CSS (`wc-view Design System/`) | Direct adoption of the 100% complete CSS custom properties, tokens, and components from `wc-view Design System/`. |
 | **Build & Packaging** | `tsup` / `esbuild` | Fast TypeScript bundling into a single executable CLI (`dist/bin/wc-view.js`) and static frontend asset copier. |

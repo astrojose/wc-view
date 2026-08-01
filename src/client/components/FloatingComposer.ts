@@ -44,9 +44,9 @@ export class FloatingComposer {
         <div id="target-policy" class="composer-policy" role="status">Protected project artifact — result requires your acceptance</div>
         <div id="batch-status" class="composer-status" aria-live="polite">Ready for feedback.</div>
         <button id="accept-result-btn" type="button" class="btn btn-primary" hidden>Accept and apply</button>
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <div id="chip-badge" class="chip-badge">🏷️ <span class="chip-count">0</span> notes attached</div>
-          <div style="display:flex;gap:var(--space-2)">
+        <div class="composer-summary-row">
+          <div id="chip-badge" class="chip-badge"><span aria-hidden="true">#</span><span class="chip-count">0</span> notes attached</div>
+          <div class="composer-actions">
             <button id="discard-btn" type="button" class="btn" title="Discard notes">Discard</button>
             <button id="submit-btn" type="button" class="btn btn-primary">Send to Agent</button>
           </div>
@@ -176,7 +176,7 @@ export class FloatingComposer {
 
   private renderNotes(): void {
     const count = this.notes.length;
-    this.chipBadge.innerHTML = `🏷️ <span class="chip-count">${count}</span> note${count === 1 ? "" : "s"} attached`;
+    this.chipBadge.innerHTML = `<span aria-hidden="true">#</span><span class="chip-count">${count}</span> note${count === 1 ? "" : "s"} attached`;
     this.notesListElement.innerHTML = "";
     for (const note of this.notes) {
       const item = document.createElement("div");

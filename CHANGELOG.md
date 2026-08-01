@@ -2,6 +2,24 @@
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-08-01
+
+### Added
+
+- Render `.html` and `.htm` review artifacts directly in wc-view with sanitized in-app styling.
+- Treat `.wc-view-scratch.html` artifacts as scratch targets so accepted browser feedback can update generated styled HTML by default.
+
+### Changed
+
+- Style Markdown and HTML artifact content through the wc-view design system, including headings, tables, code blocks, blockquotes, cards, and responsive document layout.
+- Replace inline composer, annotation, dialog, and status layout styles with named design-system classes.
+- Keep the status region sticky at the top of the review surface while the composer remains non-modal at the bottom.
+
+### Fixed
+
+- Serve built client chunks from packaged `dist/` installs so dynamic Mermaid and other split assets load correctly from npm.
+- Report the CLI version from package metadata instead of a hardcoded string.
+
 ## [0.4.0] - 2026-08-01
 
 ### Added

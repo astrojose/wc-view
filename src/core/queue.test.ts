@@ -70,6 +70,16 @@ describe("Feedback Queue Manager", () => {
     expect(retried).toEqual(batch);
   });
 
+  it("classifies HTML scratch artifacts as scratch", () => {
+    const batch = createFeedbackBatch({
+      filePath: path.join(tmpDir, ".wc-view-scratch-flow.html"),
+      prompt: "Restyle the flow",
+      notes: []
+    }, tmpDir, testQueuePath);
+
+    expect(batch.artifactClass).toBe("scratch");
+  });
+
   it("claims each batch once until its lease expires", () => {
     createFeedbackBatch({ filePath: path.join(tmpDir, "docs.md"), prompt: "Review", notes: [] }, tmpDir, testQueuePath);
     const first = claimNextBatch("bridge_a", 30_000, testQueuePath);

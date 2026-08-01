@@ -22,7 +22,7 @@
 
 - Storage path: `~/.wc-view/feedback/queue.jsonl`.
 - Queue mutation model: JSONL, with latest record for an id taking precedence.
-- Artifact class is `scratch` for a workspace-local `.wc-view-scratch*.md` target; all other targets are `protected` unless a future contract adds stricter classes.
+- Artifact class is `scratch` for a workspace-local `.wc-view-scratch*.md` or `.wc-view-scratch*.html` target; all other targets are `protected` unless a future contract adds stricter classes.
 - `scratch` batches permit automatic artifact edits.
 - `protected` batches permit analysis and result proposal only until explicit human acceptance.
 - A claim contains bridge id and a lease expiry. An expired lease returns the batch to `queued`.
