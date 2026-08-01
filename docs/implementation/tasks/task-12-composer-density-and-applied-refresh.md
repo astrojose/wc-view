@@ -38,6 +38,7 @@ Tighten the floating composer proportions, refresh the rendered document when an
 - `npm test` exited 0: 8 test files and 35 tests passed. Vitest still prints the existing happy-dom Mermaid render warning on stderr, but no test fails.
 - `npm run build` exited 0.
 - `node dist/bin/wc-view.js --version` exited 0 with `0.5.1`.
+- Published smoke for `npx -y @astrojose/wc-view@0.5.1 --version` returned stale `0.4.0`; the patch release now resolves npm `.bin` symlinks before reading package metadata.
 - `npm run validate:workflow` exited 0.
 - `git diff --check` exited 0.
 - Built browser smoke against `http://127.0.0.1:3463` exited clean for desktop and mobile composer metrics:

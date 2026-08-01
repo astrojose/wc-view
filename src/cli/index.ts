@@ -10,14 +10,31 @@ import { runBridgeOnce, startBridge } from "../core/bridge.js";
 const program = new Command();
 
 function getPackageVersion(): string {
-  const cliDir = path.dirname(fileURLToPath(import.meta.url));
-  const packagePath = path.resolve(cliDir, "..", "..", "package.json");
+  const entryPath = fileURLToPath(import.meta.url);
+  const entryDirs = new Set([path.dirname(entryPath)]);
   try {
-    const packageJson = JSON.parse(fs.readFileSync(packagePath, "utf-8")) as { version?: string };
-    return packageJson.version || "0.0.0";
+    entryDirs.add(path.dirname(fs.realpathSync(entryPath)));
   } catch {
-    return "0.0.0";
+    // Symlink resolution is best-effort; direct execution still works without it.
   }
+
+  for (const cliDir of entryDirs) {
+    const packageCandidates = [
+      path.resolve(cliDir, "..", "..", "package.json"),
+      path.resolve(cliDir, "..", "@astrojose", "wc-view", "package.json")
+    ];
+    for (const packagePath of packageCandidates) {
+      try {
+        const packageJson = JSON.parse(fs.readFileSync(packagePath, "utf-8")) as { name?: string; version?: string };
+        if (packageJson.name === "@astrojose/wc-view" && packageJson.version) {
+          return packageJson.version;
+        }
+      } catch {
+        // Keep looking through the install layouts npm may use.
+      }
+    }
+  }
+  return "0.0.0";
 }
 
 program

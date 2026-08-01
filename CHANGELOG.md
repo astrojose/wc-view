@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-08-01
+
+### Fixed
+
+- Resolve npm `.bin` symlink paths before reading package metadata so `wc-view --version` reports the published package version under `npx`.
+
 ## [0.5.1] - 2026-08-01
 
 ### Changed
