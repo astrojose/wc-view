@@ -1,15 +1,29 @@
 #!/usr/bin/env node
 import { Command, CommanderError } from "commander";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { createServer } from "../server/index.js";
 import { getUnresolvedItems, gcFeedback, FeedbackItem } from "../core/queue.js";
 import { runBridgeOnce, startBridge } from "../core/bridge.js";
 
 const program = new Command();
 
+function getPackageVersion(): string {
+  const cliDir = path.dirname(fileURLToPath(import.meta.url));
+  const packagePath = path.resolve(cliDir, "..", "..", "package.json");
+  try {
+    const packageJson = JSON.parse(fs.readFileSync(packagePath, "utf-8")) as { version?: string };
+    return packageJson.version || "0.0.0";
+  } catch {
+    return "0.0.0";
+  }
+}
+
 program
   .name("wc-view")
   .description("Local Markdown and HTML review surface for agent workflows")
-  .version("0.4.0");
+  .version(getPackageVersion());
 
 program.exitOverride();
 program.configureOutput({ writeErr: () => {} });

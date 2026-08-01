@@ -23,6 +23,7 @@
 - [x] phase-05-automatic-agent-feedback.md
 - [x] HTML scratch artifact rendering.
 - [x] Design-system visual polish.
+- [x] Composer density and applied refresh.
 
 ## Dependencies
 
@@ -34,4 +35,5 @@
 - tasks: docs/implementation/tasks/task-09-automatic-agent-feedback-loop.md
 - tasks: docs/implementation/tasks/task-10-html-scratch-artifacts.md
 - tasks: docs/implementation/tasks/task-11-design-system-visual-polish.md
+- tasks: docs/implementation/tasks/task-12-composer-density-and-applied-refresh.md
 - status: docs/implementation/status/weekly-status.md

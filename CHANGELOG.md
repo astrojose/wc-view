@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-08-01
+
+### Changed
+
+- Tighten FloatingComposer spacing so the input and action controls keep better proportions.
+
+### Fixed
+
+- Refresh the rendered document when an agent-applied feedback batch updates the current file.
+- Report the CLI version from package metadata instead of a stale hardcoded value.
+
 ## [0.5.0] - 2026-08-01
 
 ### Added

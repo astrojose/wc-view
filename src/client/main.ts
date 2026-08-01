@@ -11,6 +11,7 @@ import "./styles/app.css";
 
 interface BatchView {
   id: string;
+  filePath: string;
   status: string;
   artifactClass: "scratch" | "protected";
   result?: { summary: string; status: string };
@@ -35,6 +36,7 @@ export class ReviewApp {
   private noteSeq = 0;
   private eventSource?: EventSource;
   private batches = new Map<string, BatchView>();
+  private refreshedAppliedBatchIds = new Set<string>();
 
   constructor() {
     this.themeToggle = new ThemeToggle("dark");
@@ -120,6 +122,34 @@ export class ReviewApp {
     this.composer.setBatchStatus(message);
     this.composer.setAcceptAction(latest.status === "awaiting_acceptance" ? latest.id : undefined);
     this.statusRegion.announce(message);
+    for (const batch of batches) {
+      if (this.shouldRefreshDocumentForBatch(batch)) {
+        this.refreshedAppliedBatchIds.add(batch.id);
+        void this.refreshDocumentFromServer();
+      }
+    }
+  }
+
+  private shouldRefreshDocumentForBatch(batch: BatchView): boolean {
+    if (batch.status !== "applied") return false;
+    if (this.refreshedAppliedBatchIds.has(batch.id)) return false;
+    return !batch.filePath || !this.currentFilePath || batch.filePath === this.currentFilePath;
+  }
+
+  private async refreshDocumentFromServer(): Promise<void> {
+    try {
+      const response = await fetch("/api/document");
+      if (!response.ok) return;
+      const data = await response.json() as DocumentPayload;
+      if (!data.content) return;
+      this.currentFilePath = data.path || this.currentFilePath;
+      this.composer.setTargetPolicy(data.artifactClass || "protected");
+      this.loadDocument(data.content, data.path ? data.path.split("/").pop() : "Document", undefined, data.format || "markdown");
+      await this.loadFeedback();
+      this.statusRegion.announce("Document refreshed with the latest agent-applied changes.");
+    } catch {
+      // The streamed batch result remains visible even if a transient refresh fails.
+    }
   }
 
   private handleBlockSelect(block: DocBlock): void {
