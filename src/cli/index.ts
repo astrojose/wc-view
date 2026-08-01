@@ -1,14 +1,23 @@
 #!/usr/bin/env node
-import { Command } from "commander";
+import { Command, CommanderError } from "commander";
 import { createServer } from "../server/index.js";
-import { getUnresolvedItems, gcFeedback } from "../core/queue.js";
+import { getUnresolvedItems, gcFeedback, FeedbackItem } from "../core/queue.js";
 
 const program = new Command();
 
 program
   .name("wc-view")
   .description("Local Markdown review surface for agent workflows")
-  .version("0.1.0");
+  .version("0.2.1");
+
+// AXI Principle 6: structured errors & exit codes
+program.exitOverride();
+program.configureOutput({
+  writeErr: () => {} // Suppress default error printing; we handle it in catch block
+});
+
+// AXI Principle 10: Consistent way to get help
+program.addHelpText('beforeAll', `bin: ~/.local/bin/wc-view\ndescription: Local Markdown review surface for agent workflows\n`);
 
 program
   .command("serve [path]")
@@ -32,18 +41,29 @@ program
   .option("-f, --format <type>", "Output payload format (json|toon)", "json")
   .action((options) => {
     const items = getUnresolvedItems();
-    const payload = {
-      version: "1.0",
-      total: items.length,
-      items
-    };
 
-    const formatted = options.format === "json"
-      ? JSON.stringify(payload, null, 2)
-      : JSON.stringify(payload);
+    if (options.format === "json") {
+      const payload = {
+        version: "1.0",
+        total: items.length,
+        items
+      };
+      process.stdout.write(`${JSON.stringify(payload, null, 2)}\n`);
+      return;
+    }
 
-    // POSIX stream discipline: structured data output to stdout only
-    process.stdout.write(`${formatted}\n`);
+    // TOON format
+    if (items.length === 0) {
+      process.stdout.write(`feedback: 0 unresolved items\n`);
+    } else {
+      process.stdout.write(`count: ${items.length} unresolved\n`);
+      process.stdout.write(`feedback[${items.length}]{id,status,filePath}:\n`);
+      items.forEach((item: FeedbackItem) => {
+        process.stdout.write(`  "${item.id}","${item.status}","${item.filePath}"\n`);
+      });
+      process.stdout.write(`help[1]: Run 'wc-view serve <path>' to view the related document in the visualizer\n`);
+      process.stdout.write(`help[2]: Run 'wc-view gc' to garbage collect resolved items\n`);
+    }
   });
 
 program
@@ -54,8 +74,23 @@ program
   .action((options) => {
     const days = parseInt(options.days, 10);
     const purged = gcFeedback({ all: options.all, days });
-    // POSIX stream discipline: diagnostics/logs to stderr only
     process.stderr.write(`wc-view gc: Garbage collection purged ${purged} resolved item(s).\n`);
   });
 
-program.parse(process.argv);
+try {
+  program.parse(process.argv);
+} catch (err: any) {
+  if (err instanceof CommanderError) {
+    if (err.code === 'commander.unknownCommand' || err.code === 'commander.unknownOption' || err.code === 'commander.missingArgument') {
+      const cleanMessage = err.message.replace(/^error:\s*/i, '');
+      process.stderr.write(`wc-view error: ${cleanMessage}\n`);
+      process.stderr.write(`wc-view help: run 'wc-view --help' for valid commands and options\n`);
+      process.exit(2); // AXI Principle 6
+    } else if (err.code === 'commander.helpDisplayed' || err.code === 'commander.version') {
+      process.exit(0);
+    }
+    process.exit(err.exitCode || 1);
+  } else {
+    throw err;
+  }
+}

@@ -99,6 +99,10 @@ export function createServer(options: ServerOptions): http.Server {
           if (!parsed.id) parsed.id = `fb_${Date.now()}`;
           if (!parsed.filePath) parsed.filePath = targetPath;
           const saved = writeFeedbackItem(parsed);
+
+          process.stderr.write(`wc-view feedback: New feedback received for ${parsed.filePath}\n`);
+          process.stderr.write("wc-view feedback: Run 'wc-view feedback' to review it.\n");
+
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end(JSON.stringify(saved));
         } catch (err: any) {
@@ -109,22 +113,33 @@ export function createServer(options: ServerOptions): http.Server {
       return;
     }
 
-    // Serve bundled client JS
-    if (pathname === "/main.js") {
-      const bundlePath = getClientBundlePath();
-      if (bundlePath) {
-        res.writeHead(200, { "Content-Type": "text/javascript" });
-        res.end(fs.readFileSync(bundlePath));
-        return;
-      }
-    }
+    // Serve bundled client JS/CSS and dynamic chunks
+    if (pathname.match(/\.(js|css|map)$/)) {
+      const filename = path.basename(pathname);
+      const candidates = [
+        path.join(__dirname, "..", "client", filename),
+        path.join(__dirname, "client", filename),
+        path.join(process.cwd(), "dist", "client", filename),
+        path.join(process.cwd(), "dist", filename)
+      ];
 
-    // Serve bundled client CSS
-    if (pathname === "/main.css") {
-      const stylePath = getClientStyleBundlePath();
-      if (stylePath) {
-        res.writeHead(200, { "Content-Type": "text/css" });
-        res.end(fs.readFileSync(stylePath));
+      let foundPath: string | null = null;
+      for (const candidate of candidates) {
+        if (fs.existsSync(candidate)) {
+          foundPath = candidate;
+          break;
+        }
+      }
+
+      if (foundPath) {
+        const ext = path.extname(foundPath);
+        let contentType = "text/plain";
+        if (ext === ".js") contentType = "text/javascript";
+        else if (ext === ".css") contentType = "text/css";
+        else if (ext === ".map") contentType = "application/json";
+
+        res.writeHead(200, { "Content-Type": contentType });
+        res.end(fs.readFileSync(foundPath));
         return;
       }
     }

@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-08-01
+
+### Fixed
+
+- Bundle Mermaid client assets for npm installs so dynamic diagram rendering works without CDN dependencies.
+- Preserve CLI stream discipline by keeping feedback JSON as the default payload and sending diagnostics to stderr.
+
 ## [0.2.0] - 2026-08-01
 
 ### Added
