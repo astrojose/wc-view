@@ -1,0 +1,16 @@
+{
+  "name": "wc-view",
+  "metadata": {
+    "description": "Local Markdown and HTML review surface for agent workflows"
+  },
+  "owner": {
+    "name": "astrojose",
+    "url": "https://github.com/astrojose"
+  },
+  "plugins": [
+    {
+      "name": "wc-view",
+      "source": "./"
+    }
+  ]
+}

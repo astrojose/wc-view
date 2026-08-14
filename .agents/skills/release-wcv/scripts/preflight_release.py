@@ -17,6 +17,9 @@ from pathlib import Path
 
 PACKAGE_NAME = "@astrojose/wc-view"
 BIN_NAME = "wc-view"
+PLUGIN_NAME = "wc-view"
+CLAUDE_PLUGIN_PATH = Path(".claude-plugin/plugin.json")
+CODEX_PLUGIN_PATH = Path(".codex-plugin/plugin.json")
 DISALLOWED_PACK_PREFIXES = (
     ".agents/",
     ".claude/",
@@ -120,6 +123,17 @@ def main() -> int:
     if package_lock.get("packages", {}).get("", {}).get("version") != args.version:
         fail("package-lock-root-version")
 
+    claude_plugin = read_json(root / CLAUDE_PLUGIN_PATH)
+    codex_plugin = read_json(root / CODEX_PLUGIN_PATH)
+    if claude_plugin.get("name") != PLUGIN_NAME:
+        fail(f"claude-plugin-name:{claude_plugin.get('name')}")
+    if claude_plugin.get("version") != args.version:
+        fail(f"claude-plugin-version:{claude_plugin.get('version')}!= {args.version}")
+    if codex_plugin.get("name") != PLUGIN_NAME:
+        fail(f"codex-plugin-name:{codex_plugin.get('name')}")
+    if codex_plugin.get("version") != args.version:
+        fail(f"codex-plugin-version:{codex_plugin.get('version')}!= {args.version}")
+
     try:
         changelog = changelog_path.read_text(encoding="utf-8")
     except FileNotFoundError:
@@ -141,6 +155,7 @@ def main() -> int:
         ["npm", "test"],
         ["npm", "run", "build"],
         ["npm", "run", "validate:workflow"],
+        ["claude", "plugin", "validate", "."],
     ]
     for command in commands:
         result = run(command, root)

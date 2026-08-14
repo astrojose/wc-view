@@ -1,0 +1,28 @@
+{
+  "name": "wc-view",
+  "description": "Local Markdown and HTML review surface for agent workflows",
+  "version": "0.6.0",
+  "author": {
+    "name": "astrojose",
+    "url": "https://github.com/astrojose"
+  },
+  "homepage": "https://github.com/astrojose/wc-view",
+  "repository": "https://github.com/astrojose/wc-view",
+  "license": "MIT",
+  "keywords": [
+    "markdown",
+    "html",
+    "docs",
+    "review",
+    "cli",
+    "agent-workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "wc-view",
+    "shortDescription": "Local Markdown and HTML review surface for agent workflows.",
+    "developerName": "astrojose",
+    "category": "Productivity",
+    "websiteURL": "https://github.com/astrojose/wc-view"
+  }
+}

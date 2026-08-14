@@ -1,0 +1,20 @@
+{
+  "name": "wc-view",
+  "interface": {
+    "displayName": "wc-view"
+  },
+  "plugins": [
+    {
+      "name": "wc-view",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

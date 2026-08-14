@@ -37,14 +37,17 @@ Run the wc-view release workflow end to end: changelog, versioning, verification
    - Determine the target semver version from the user request or package metadata.
 2. Prepare release files:
    - Set `package.json` and `package-lock.json` to the target version.
+   - Set `version` in `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` to the target version.
    - Update `CHANGELOG.md` with a dated `## [x.y.z] - YYYY-MM-DD` entry.
    - Keep an `## [Unreleased]` section at the top for future work.
+   - Review `skills/use-wc-view/SKILL.md` against any CLI surface changes in this release (new/changed commands, flags, output formats) and update it if it has drifted.
 3. Verify locally:
    - Run `./node_modules/.bin/tsc --noEmit` when local TypeScript exists.
    - Run `npm test`.
    - Run `npm run build`.
    - Run `npm run validate:workflow`.
-   - Run `python3 .agents/skills/release-wcv/scripts/preflight_release.py --version <x.y.z>`.
+   - Run `python3 .agents/skills/release-wcv/scripts/preflight_release.py --version <x.y.z>` (includes `claude plugin validate .`).
+   - Optionally sanity-check the Codex manifest by hand: `codex plugin marketplace add ./`, confirm `wc-view@wc-view` appears in `codex plugin list`, then `codex plugin marketplace remove wc-view`. Not run by the preflight script since it mutates local Codex config.
 4. Review publish plan:
    - Show current branch and commit target.
    - Show version, npm package name, tag name `v<x.y.z>`, changelog heading, and release notes summary.
