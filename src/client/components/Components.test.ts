@@ -175,4 +175,81 @@ describe("Phase 1 & 2 Client Components", () => {
     expect(message).toBe("Sent 1 note to the agent work queue.");
     expect(message).not.toContain("prepared for atomic submission");
   });
+
+  it("formats diff code blocks with line highlight classes", () => {
+    const canvas = new DocCanvas("test-diff-canvas");
+    canvas.render("```diff\n+ added line\n- deleted line\n@@ -1,2 +1,2 @@\n context\n```");
+
+    const element = document.getElementById("test-diff-canvas");
+    const diffCode = element?.querySelector("code.language-diff");
+    expect(diffCode).not.toBeNull();
+    expect(diffCode?.querySelector(".diff-add")?.textContent).toBe("+ added line");
+    expect(diffCode?.querySelector(".diff-del")?.textContent).toBe("- deleted line");
+    expect(diffCode?.querySelector(".diff-hunk")?.textContent).toBe("@@ -1,2 +1,2 @@");
+  });
+
+  it("manages HelpDialog visibility and escape key dismissal", async () => {
+    const { HelpDialog } = await import("./HelpDialog.js");
+    const dialog = new HelpDialog();
+    dialog.show();
+
+    const dialogEl = document.querySelector(".help-dialog");
+    expect(dialogEl?.classList.contains("visible")).toBe(true);
+
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    expect(dialogEl?.classList.contains("visible")).toBe(false);
+  });
+
+  it("manages Sidebar file listing and filter search", async () => {
+    const { Sidebar } = await import("./Sidebar.js");
+    const onSelect = vi.fn();
+    const sidebar = new Sidebar(onSelect);
+
+    sidebar.setFiles(["docs/index.md", "docs/design/tech.md"], "docs/index.md");
+    const items = document.querySelectorAll(".sidebar-file-item");
+    expect(items.length).toBe(2);
+    expect(items[0].classList.contains("active")).toBe(true);
+
+    (items[1] as HTMLElement).click();
+    expect(onSelect).toHaveBeenCalledWith("docs/design/tech.md");
+  });
+
+  it("handles interactive task checklist clicks and triggers onDecisionToggle", () => {
+    const canvas = new DocCanvas("test-decision-canvas");
+    const onDecision = vi.fn();
+    canvas.render("- [ ] Option A: PostgreSQL\n- [x] Option B: SQLite", undefined, undefined, undefined, onDecision);
+
+    const checkboxes = document.querySelectorAll<HTMLInputElement>(".interactive-checkbox");
+    expect(checkboxes.length).toBe(2);
+
+    checkboxes[0].checked = true;
+    checkboxes[0].dispatchEvent(new Event("change"));
+
+    expect(onDecision).toHaveBeenCalledWith("Option A: PostgreSQL", true, expect.any(String));
+  });
+
+  it("manages ActivityDrawer batches, agent replies, and visibility", async () => {
+    const { ActivityDrawer } = await import("./ActivityDrawer.js");
+    const onUnread = vi.fn();
+    const drawer = new ActivityDrawer(onUnread);
+
+    drawer.setBatches([{
+      id: "batch_123",
+      filePath: "docs.md",
+      status: "applied",
+      prompt: "Update API doc",
+      notes: [{ id: "n1", comment: "Fix typo" }],
+      replies: [{ id: "r1", sender: "agent", message: "Fixed typo in header", createdAt: new Date().toISOString() }],
+      createdAt: new Date().toISOString()
+    }]);
+
+    const cards = document.querySelectorAll(".activity-card");
+    expect(cards.length).toBe(1);
+    expect(document.querySelector(".reply-agent")?.textContent).toContain("Fixed typo in header");
+
+    drawer.toggle();
+    expect(document.querySelector(".activity-drawer")?.classList.contains("visible")).toBe(true);
+  });
 });
+
+

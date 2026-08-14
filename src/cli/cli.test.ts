@@ -133,4 +133,49 @@ describe("Server & CLI Integration", () => {
 
     await expect(streamed).resolves.toMatchObject({ status: "queued", prompt: "Start work" });
   });
+
+  it("serves recursive files and switches document via ?file query parameter", async () => {
+    const subDir = path.join(tmpDir, "sub");
+    fs.mkdirSync(subDir, { recursive: true });
+    const subDoc = path.join(subDir, "nested.md");
+    fs.writeFileSync(subDoc, "# Nested Doc\n\nNested content", "utf-8");
+
+    const dirServer = createServer({ port: 0, host: "127.0.0.1", targetPath: tmpDir, queuePath });
+    await new Promise<void>((resolve) => dirServer.listen(0, "127.0.0.1", resolve));
+    const dirBaseUrl = `http://127.0.0.1:${(dirServer.address() as AddressInfo).port}`;
+
+    try {
+      const response = await fetch(`${dirBaseUrl}/api/document`);
+      const data = await response.json();
+      expect(data.files).toContain("sub/nested.md");
+
+      const switchResponse = await fetch(`${dirBaseUrl}/api/document?file=sub/nested.md`);
+      const switchData = await switchResponse.json();
+      expect(switchData.path).toBe(subDoc);
+      expect(switchData.content).toContain("Nested content");
+    } finally {
+      await new Promise<void>((resolve) => dirServer.close(() => resolve()));
+    }
+  });
+
+  it("handles agent replies via POST /api/batches/:id/reply", async () => {
+    const createRes = await fetch(`${baseUrl}/api/batches`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: "batch_reply_test", prompt: "Fix issue", notes: [] })
+    });
+    expect(createRes.status).toBe(201);
+
+    const replyRes = await fetch(`${baseUrl}/api/batches/batch_reply_test/reply`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Fixed issue in component", sender: "agent" })
+    });
+    expect(replyRes.status).toBe(200);
+    const replyData = await replyRes.json();
+    expect(replyData.replies).toHaveLength(1);
+    expect(replyData.replies[0].message).toBe("Fixed issue in component");
+  });
 });
+
+

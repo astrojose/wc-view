@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  addAgentReply,
   approveBatch,
   classifyArtifact,
   createFeedbackBatch,
@@ -12,6 +13,7 @@ import {
   readQueue,
   writeFeedbackItem
 } from "../core/queue.js";
+
 
 export interface ServerOptions {
   port: number;
@@ -94,21 +96,50 @@ export function getStaticAssetCandidates(filename: string, baseDir: string = __d
   ];
 }
 
+export function listMarkdownFiles(dir: string, baseDir: string = dir): string[] {
+  if (!fs.existsSync(dir)) return [];
+  const stat = fs.statSync(dir);
+  if (!stat.isDirectory()) {
+    return (dir.endsWith(".md") || isHtmlFile(dir)) ? [path.relative(baseDir, dir).split(path.sep).join("/")] : [];
+  }
+
+  const results: string[] = [];
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (entry.name.startsWith(".") && !entry.name.startsWith(".wc-view-scratch")) continue;
+    if (["node_modules", "dist", ".git", ".gemini", ".agents"].includes(entry.name)) continue;
+
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      results.push(...listMarkdownFiles(fullPath, baseDir));
+    } else if (entry.isFile() && (entry.name.endsWith(".md") || isHtmlFile(entry.name))) {
+      results.push(path.relative(baseDir, fullPath).split(path.sep).join("/"));
+    }
+  }
+  return results.sort();
+}
+
 export function createServer(options: ServerOptions): http.Server {
   const targetPath = options.targetPath ? path.resolve(options.targetPath) : process.cwd();
   const workspacePath = fs.existsSync(targetPath) && fs.statSync(targetPath).isDirectory() ? targetPath : path.dirname(targetPath);
   const eventClients = new Set<http.ServerResponse>();
+  let activeDocumentPath = "";
+
   const servedDocumentPath = (): string => {
-    if (!fs.existsSync(targetPath) || !fs.statSync(targetPath).isDirectory()) return targetPath;
-    const firstDocument = getDirectoryDocument(fs.readdirSync(targetPath));
-    return firstDocument ? path.join(targetPath, firstDocument) : targetPath;
+    if (activeDocumentPath && fs.existsSync(activeDocumentPath)) return activeDocumentPath;
+    if (!fs.existsSync(targetPath)) return targetPath;
+    if (!fs.statSync(targetPath).isDirectory()) return targetPath;
+    const allFiles = listMarkdownFiles(targetPath);
+    const firstMarkdown = allFiles[0];
+    return firstMarkdown ? path.join(targetPath, firstMarkdown) : targetPath;
   };
 
+
   const batchesForTarget = (): FeedbackBatch[] => readBatches(options.queuePath).filter((batch) => batch.filePath === servedDocumentPath());
-  const writeEvent = (response: http.ServerResponse, event: "snapshot" | "batch", payload: unknown): void => {
+  const writeEvent = (response: http.ServerResponse, event: "snapshot" | "batch" | "document_change", payload: unknown): void => {
     response.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
   };
-  const broadcast = (event: "snapshot" | "batch", payload: unknown): void => {
+  const broadcast = (event: "snapshot" | "batch" | "document_change", payload: unknown): void => {
     for (const client of eventClients) {
       if (client.destroyed || client.writableEnded) {
         eventClients.delete(client);
@@ -125,6 +156,36 @@ export function createServer(options: ServerOptions): http.Server {
     lastBatchSnapshot = snapshot;
     broadcast("snapshot", JSON.parse(snapshot));
   }, 300);
+
+  // Live document watcher
+  let docWatchDebounce: NodeJS.Timeout | undefined;
+  let fileWatcher: fs.FSWatcher | undefined;
+  try {
+    if (fs.existsSync(targetPath)) {
+      fileWatcher = fs.watch(targetPath, { recursive: true }, () => {
+        clearTimeout(docWatchDebounce);
+        docWatchDebounce = setTimeout(() => {
+          const currentDoc = servedDocumentPath();
+          if (fs.existsSync(currentDoc) && !fs.statSync(currentDoc).isDirectory()) {
+            try {
+              const content = fs.readFileSync(currentDoc, "utf-8");
+              const files = fs.statSync(targetPath).isDirectory() ? listMarkdownFiles(targetPath) : [path.basename(targetPath)];
+              broadcast("document_change", {
+                path: currentDoc,
+                content,
+                files,
+                artifactClass: classifyArtifact(currentDoc, workspacePath)
+              });
+            } catch {
+              // File is being written atomically
+            }
+          }
+        }, 150);
+      });
+    }
+  } catch {
+    // OS recursive watch fallback
+  }
 
   const server = http.createServer((req, res) => {
     const remoteAddress = req.socket.remoteAddress;
@@ -153,23 +214,40 @@ export function createServer(options: ServerOptions): http.Server {
       let content = "# Welcome to wc-view\n\nNo document loaded.";
       let docPath = targetPath;
       let files: string[] = [];
+
       if (fs.existsSync(targetPath)) {
         const stat = fs.statSync(targetPath);
         if (stat.isDirectory()) {
-          files = fs.readdirSync(targetPath).filter((file) => isMarkdownFile(file) || isHtmlFile(file));
-          const first = getDirectoryDocument(files);
-          if (first) {
-            docPath = path.join(targetPath, first);
+          files = listMarkdownFiles(targetPath);
+          const requestedRelFile = url.searchParams.get("file");
+          if (requestedRelFile) {
+            const candidate = path.resolve(targetPath, requestedRelFile);
+            if (candidate.startsWith(targetPath) && fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+              docPath = candidate;
+            } else {
+              docPath = files[0] ? path.join(targetPath, files[0]) : targetPath;
+            }
+          } else {
+            docPath = files[0] ? path.join(targetPath, files[0]) : targetPath;
+          }
+
+          if (fs.existsSync(docPath) && fs.statSync(docPath).isFile()) {
             content = fs.readFileSync(docPath, "utf-8");
           }
+
         } else {
+          docPath = targetPath;
+          files = [path.basename(targetPath)];
           content = fs.readFileSync(targetPath, "utf-8");
         }
       }
+
+      activeDocumentPath = docPath;
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ path: docPath, content, files, format: getDocumentFormat(docPath), artifactClass: classifyArtifact(docPath, workspacePath) }));
       return;
     }
+
 
     if (req.method === "GET" && pathname === "/api/feedback") {
       res.writeHead(200, { "Content-Type": "application/json" });
@@ -261,6 +339,34 @@ export function createServer(options: ServerOptions): http.Server {
       return;
     }
 
+    const replyMatch = pathname.match(/^\/api\/batches\/([^/]+)\/reply$/);
+    if (req.method === "POST" && replyMatch) {
+      readJsonBody(req, res, (body) => {
+        try {
+          const parsed = JSON.parse(body) as { message: string; sender?: "agent" | "human" };
+          if (!parsed || typeof parsed.message !== "string" || !parsed.message.trim()) {
+            throw new Error("Reply requires a non-empty message string.");
+          }
+          const batchId = decodeURIComponent(replyMatch[1]);
+          const batch = addAgentReply(batchId, parsed.message, parsed.sender || "agent", options.queuePath);
+          if (!batch) {
+            res.writeHead(404, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Feedback batch not found." }));
+            return;
+          }
+          lastBatchSnapshot = JSON.stringify(batchesForTarget());
+          if (batch.filePath === servedDocumentPath()) broadcast("batch", batch);
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify(batch));
+        } catch (error) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: error instanceof Error ? error.message : "Invalid reply payload" }));
+        }
+      });
+      return;
+    }
+
+
     if (pathname.match(/\.(js|css|map)$/)) {
       const filename = path.basename(pathname);
       const candidates = getStaticAssetCandidates(filename);
@@ -283,9 +389,14 @@ export function createServer(options: ServerOptions): http.Server {
     res.end(getAppHtml());
   });
 
-  server.on("close", () => clearInterval(batchWatcher));
+  server.on("close", () => {
+    clearInterval(batchWatcher);
+    clearTimeout(docWatchDebounce);
+    try { fileWatcher?.close(); } catch {}
+  });
   return server;
 }
+
 
 function getAppHtml(): string {
   const client = getClientBundlePath();

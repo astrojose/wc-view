@@ -4,8 +4,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createServer } from "../server/index.js";
-import { getUnresolvedItems, gcFeedback, FeedbackItem } from "../core/queue.js";
+import { getUnresolvedItems, gcFeedback, resolveFeedbackItem, addAgentReply, FeedbackItem } from "../core/queue.js";
 import { runBridgeOnce, startBridge } from "../core/bridge.js";
+import { exportMarkdownFile } from "../core/export.js";
 
 const program = new Command();
 
@@ -34,13 +35,14 @@ function getPackageVersion(): string {
       }
     }
   }
-  return "0.0.0";
+  return "0.6.0";
 }
 
 program
   .name("wc-view")
   .description("Local Markdown and HTML review surface for agent workflows")
   .version(getPackageVersion());
+
 
 program.exitOverride();
 program.configureOutput({ writeErr: () => {} });
@@ -82,14 +84,42 @@ program
   });
 
 program
+  .command("export <path>")
+  .description("Export a Markdown review document to a standalone offline HTML file")
+  .option("-o, --out <path>", "Destination HTML output file path")
+  .action((targetPath, options) => {
+    try {
+      const outPath = exportMarkdownFile(targetPath, options.out);
+      process.stderr.write(`wc-view export: Exported standalone HTML to ${outPath}\n`);
+      process.stdout.write(`${JSON.stringify({ exported: true, source: targetPath, destination: outPath })}\n`);
+    } catch (error) {
+      process.stderr.write(`wc-view error: ${error instanceof Error ? error.message : "Export failed"}\n`);
+      process.exit(1);
+    }
+  });
+
+const feedbackCmd = program
   .command("feedback")
   .description("Pull structured review feedback payloads for agent consumption")
   .option("-u, --unresolved", "Filter to unresolved feedback items", true)
-  .option("-f, --format <type>", "Output payload format (json|toon)", "json")
+  .option("-f, --format <type>", "Output payload format (json|toon|markdown)", "json")
   .action((options) => {
     const items = getUnresolvedItems();
     if (options.format === "json") {
       process.stdout.write(`${JSON.stringify({ version: "1.0", total: items.length, items }, null, 2)}\n`);
+      return;
+    }
+    if (options.format === "markdown") {
+      if (items.length === 0) {
+        process.stdout.write("## Review Feedback\n\nNo unresolved feedback items.\n");
+        return;
+      }
+      let md = `## Review Feedback (${items.length} unresolved)\n\n`;
+      items.forEach((item: FeedbackItem, idx: number) => {
+        const exact = item.anchor?.primary?.exact ? `> "${item.anchor.primary.exact}"\n\n` : "";
+        md += `### ${idx + 1}. \`${item.filePath}\` (${item.id})\n${exact}- **Comment**: ${item.comment}\n\n`;
+      });
+      process.stdout.write(md);
       return;
     }
     if (items.length === 0) {
@@ -99,6 +129,40 @@ program
     process.stdout.write(`count: ${items.length} unresolved\nfeedback[${items.length}]{id,status,filePath}:\n`);
     items.forEach((item: FeedbackItem) => process.stdout.write(`  "${item.id}","${item.status}","${item.filePath}"\n`));
   });
+
+feedbackCmd
+  .command("resolve <id>")
+  .description("Mark a feedback item, batch, or note as resolved")
+  .action((id) => {
+    const result = resolveFeedbackItem(id);
+    if (!result) {
+      process.stderr.write(`wc-view error: Feedback item "${id}" not found.\n`);
+      process.exit(1);
+    }
+    process.stderr.write(`wc-view feedback: Resolved ${result.type} "${result.id}".\n`);
+    process.stdout.write(`${JSON.stringify(result)}\n`);
+  });
+
+feedbackCmd
+  .command("reply <batchId>")
+  .description("Post an agent reply message back to a feedback batch")
+  .requiredOption("-m, --message <text>", "Reply message text from the agent")
+  .action((batchId, options) => {
+    try {
+      const updated = addAgentReply(batchId, options.message, "agent");
+      if (!updated) {
+        process.stderr.write(`wc-view error: Feedback batch "${batchId}" not found.\n`);
+        process.exit(1);
+      }
+      process.stderr.write(`wc-view feedback: Reply recorded for batch "${batchId}".\n`);
+      process.stdout.write(`${JSON.stringify({ replied: true, batchId, repliesCount: updated.replies?.length || 0 })}\n`);
+    } catch (error) {
+      process.stderr.write(`wc-view error: ${error instanceof Error ? error.message : "Reply failed"}\n`);
+      process.exit(1);
+    }
+  });
+
+
 
 program
   .command("bridge")

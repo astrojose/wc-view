@@ -11,10 +11,13 @@ export interface DocBlock {
 /**
  * Centered document reading canvas component.
  */
+export type DocumentFormat = "markdown" | "html";
+
 export class DocCanvas {
   private container: HTMLElement;
   private blocks: DocBlock[] = [];
   private onBlockSelect?: (block: DocBlock) => void;
+  private onDecisionToggle?: (label: string, checked: boolean, blockId: string) => void;
 
   constructor(containerId: string = "doc-canvas") {
     let existing = document.getElementById(containerId);
@@ -29,8 +32,16 @@ export class DocCanvas {
     this.container = existing;
   }
 
-  public render(content: string, title?: string, meta?: string, onSelect?: (block: DocBlock) => void, format: DocumentFormat = "markdown"): void {
+  public render(
+    content: string,
+    title?: string,
+    meta?: string,
+    onSelect?: (block: DocBlock) => void,
+    onDecisionToggle?: (label: string, checked: boolean, blockId: string) => void,
+    format: DocumentFormat = "markdown"
+  ): void {
     this.onBlockSelect = onSelect;
+    this.onDecisionToggle = onDecisionToggle;
     const htmlContent = format === "html" ? this.prepareHtmlContent(content) : renderMarkdown(content);
 
     const header = title || meta
@@ -44,6 +55,7 @@ export class DocCanvas {
 
     this.parseAndBindBlocks();
   }
+
 
   public markAnnotated(blockId: string, isAnnotated: boolean): void {
     const el = this.container.querySelector(`[data-block-id="${blockId}"]`);
@@ -61,12 +73,38 @@ export class DocCanvas {
     }
   }
 
+  public updateTheme(theme: "dark" | "light"): void {
+    const mermaidContainers = this.container.querySelectorAll(".mermaid-block");
+    if (mermaidContainers.length === 0) return;
+
+    import("mermaid").then((m) => {
+      m.default.initialize({
+        startOnLoad: false,
+        theme: theme === "light" ? "default" : "dark",
+        securityLevel: "loose"
+      });
+      mermaidContainers.forEach((blockEl) => {
+        const rawSource = blockEl.getAttribute("data-mermaid-source");
+        if (!rawSource) return;
+        const div = document.createElement("div");
+        div.className = "mermaid";
+        div.textContent = rawSource;
+        blockEl.innerHTML = "";
+        blockEl.appendChild(div);
+        m.default.run({ nodes: [div] }).catch((err) => {
+          div.innerHTML = `<div class="mermaid-error" role="alert"><strong>Diagram Syntax Notice:</strong><pre>${rawSource}</pre></div>`;
+        });
+      });
+    }).catch(() => {});
+  }
+
   private parseAndBindBlocks(): void {
     const article = this.container.querySelector("#doc-content");
     if (!article) return;
 
     const children = Array.from(article.children);
     this.blocks = [];
+    const currentTheme = (document.documentElement.getAttribute("data-theme") as "dark" | "light") || "dark";
 
     children.forEach((child, index) => {
       if (["STYLE", "SCRIPT", "TEMPLATE", "META", "LINK"].includes(child.tagName)) return;
@@ -83,21 +121,57 @@ export class DocCanvas {
       };
       this.blocks.push(block);
 
+      // Handle interactive task list checkboxes
+      const checkboxes = child.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach((cb) => {
+        const input = cb as HTMLInputElement;
+        input.removeAttribute("disabled");
+        input.classList.add("interactive-checkbox");
+        input.addEventListener("click", (e) => e.stopPropagation());
+        input.addEventListener("change", (e) => {
+          e.stopPropagation();
+          const itemText = input.parentElement?.textContent?.trim() || "";
+          if (this.onDecisionToggle) {
+            this.onDecisionToggle(itemText, input.checked, id);
+          }
+        });
+      });
+
+      // Handle diff code blocks styling
+      const diffCode = child.querySelector("code.language-diff");
+      if (diffCode && diffCode.textContent) {
+        const lines = diffCode.textContent.split("\n");
+        const formatted = lines.map((line) => {
+          if (line.startsWith("+")) return `<span class="diff-line diff-add">${escapeHtml(line)}</span>`;
+          if (line.startsWith("-")) return `<span class="diff-line diff-del">${escapeHtml(line)}</span>`;
+          if (line.startsWith("@@")) return `<span class="diff-line diff-hunk">${escapeHtml(line)}</span>`;
+          return `<span class="diff-line">${escapeHtml(line)}</span>`;
+        }).join("\n");
+        diffCode.innerHTML = formatted;
+      }
+
       // Handle mermaid rendering
       const mermaidCode = child.querySelector("code.language-mermaid");
       if (mermaidCode) {
         const text = mermaidCode.textContent || "";
+        child.classList.add("mermaid-block");
+        child.setAttribute("data-mermaid-source", text);
         const div = document.createElement("div");
         div.className = "mermaid";
         div.textContent = text;
         child.innerHTML = "";
         child.appendChild(div);
-        
-        // Asynchronously render the diagram
+
         import("mermaid").then((m) => {
-          m.default.initialize({ startOnLoad: false, theme: document.documentElement.getAttribute("data-theme") === "light" ? "default" : "dark" });
-          m.default.run({ nodes: [div] }).catch(err => console.error("Mermaid render error", err));
-        });
+          m.default.initialize({
+            startOnLoad: false,
+            theme: currentTheme === "light" ? "default" : "dark",
+            securityLevel: "loose"
+          });
+          m.default.run({ nodes: [div] }).catch(() => {
+            div.innerHTML = `<div class="mermaid-error" role="alert"><strong>Diagram Syntax Notice:</strong><pre>${escapeHtml(text)}</pre></div>`;
+          });
+        }).catch(() => {});
       }
 
       child.addEventListener("click", () => {
@@ -114,7 +188,6 @@ export class DocCanvas {
       });
     });
   }
-
   private prepareHtmlContent(html: string): string {
     const trimmed = html.trim();
     if (!/<(?:!doctype|html|head|body)(?:\s|>)/i.test(trimmed)) return trimmed;
@@ -127,3 +200,14 @@ export class DocCanvas {
     return [styles, body].filter(Boolean).join("\n");
   }
 }
+
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+

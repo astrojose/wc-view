@@ -35,6 +35,13 @@ export type BatchStatus =
   | "orphaned";
 export type AdapterResultStatus = "applied" | "awaiting_acceptance" | "resolved";
 
+export interface AgentReply {
+  id: string;
+  sender: "agent" | "human";
+  message: string;
+  createdAt: string;
+}
+
 export interface FeedbackBatch {
   recordType: "batch";
   id: string;
@@ -42,6 +49,7 @@ export interface FeedbackBatch {
   artifactClass: ArtifactClass;
   prompt: string;
   notes: FeedbackNote[];
+  replies?: AgentReply[];
   status: BatchStatus;
   claim?: { bridgeId: string; leaseExpiresAt: string };
   approval?: { acceptedAt: string };
@@ -49,6 +57,7 @@ export interface FeedbackBatch {
   createdAt: string;
   updatedAt: string;
 }
+
 
 type QueueRecord = FeedbackItem | FeedbackBatch;
 
@@ -256,6 +265,89 @@ export function getUnresolvedItems(filePath?: string, queuePath: string = getDef
   });
 }
 
+export function resolveFeedbackItem(id: string, queuePath: string = getDefaultQueuePath()): { resolved: boolean; id: string; type: "item" | "batch" | "note" } | null {
+  return withQueueLock(queuePath, () => {
+    const records = readRecords(queuePath);
+    const now = new Date().toISOString();
+
+    // Check standalone feedback item
+    const itemIndex = records.findIndex((r) => !isBatch(r) && r.id === id);
+    if (itemIndex >= 0) {
+      const item = records[itemIndex] as FeedbackItem;
+      records[itemIndex] = { ...item, status: "resolved", updatedAt: now };
+      writeRecords(records, queuePath);
+      return { resolved: true, id, type: "item" };
+    }
+
+    // Check batch id
+    const batchIndex = records.findIndex((r) => isBatch(r) && r.id === id);
+    if (batchIndex >= 0) {
+      const batch = records[batchIndex] as FeedbackBatch;
+      const resolvedNotes = batch.notes.map((n) => ({ ...n, status: "resolved" as const }));
+      records[batchIndex] = { ...batch, status: "resolved", notes: resolvedNotes, updatedAt: now };
+      writeRecords(records, queuePath);
+      return { resolved: true, id, type: "batch" };
+    }
+
+    // Check individual note inside batches
+    for (let i = 0; i < records.length; i++) {
+      const record = records[i];
+      if (isBatch(record)) {
+        const noteIndex = record.notes.findIndex((n) => n.id === id);
+        if (noteIndex >= 0) {
+          record.notes[noteIndex].status = "resolved";
+          const allResolved = record.notes.every((n) => n.status === "resolved");
+          if (allResolved && ["applied", "response_ready", "awaiting_acceptance"].includes(record.status)) {
+            record.status = "resolved";
+          }
+          record.updatedAt = now;
+          records[i] = record;
+          writeRecords(records, queuePath);
+          return { resolved: true, id, type: "note" };
+        }
+      }
+    }
+
+    return null;
+  });
+}
+
+export function addAgentReply(
+  batchId: string,
+  message: string,
+  sender: "agent" | "human" = "agent",
+  queuePath: string = getDefaultQueuePath()
+): FeedbackBatch | null {
+  if (!message.trim()) {
+    throw new Error("Reply message cannot be empty.");
+  }
+  return withQueueLock(queuePath, () => {
+    const records = readRecords(queuePath);
+    const index = records.findIndex((r) => isBatch(r) && r.id === batchId);
+    if (index < 0) return null;
+
+    const existing = records[index] as FeedbackBatch;
+    const now = new Date().toISOString();
+    const reply: AgentReply = {
+      id: `reply_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      sender,
+      message: message.trim(),
+      createdAt: now
+    };
+
+    const nextReplies = [...(existing.replies || []), reply];
+    const next: FeedbackBatch = {
+      ...existing,
+      replies: nextReplies,
+      updatedAt: now
+    };
+
+    records[index] = next;
+    writeRecords(records, queuePath);
+    return next;
+  });
+}
+
 export function gcFeedback(options: { all?: boolean; days?: number } = {}, queuePath: string = getDefaultQueuePath()): number {
   if (!fs.existsSync(queuePath)) return 0;
   return withQueueLock(queuePath, () => {
@@ -273,3 +365,5 @@ export function gcFeedback(options: { all?: boolean; days?: number } = {}, queue
     return removed;
   });
 }
+
+

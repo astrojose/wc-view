@@ -8,9 +8,11 @@ export class ThemeToggle {
   private button: HTMLButtonElement | null = null;
   private icon: HTMLElement | null = null;
   private label: HTMLElement | null = null;
+  private onChange?: (theme: "dark" | "light") => void;
 
-  constructor(initialTheme: "dark" | "light" = "dark", mount: boolean = true) {
+  constructor(initialTheme: "dark" | "light" = "dark", mount: boolean = true, onChange?: (theme: "dark" | "light") => void) {
     this.currentTheme = initialTheme;
+    this.onChange = onChange;
     this.applyTheme(this.currentTheme);
     if (mount && typeof document !== "undefined") {
       this.mountControl();
@@ -21,6 +23,7 @@ export class ThemeToggle {
     this.currentTheme = this.currentTheme === "dark" ? "light" : "dark";
     this.applyTheme(this.currentTheme);
     this.updateControl();
+    this.onChange?.(this.currentTheme);
     return this.currentTheme;
   }
 
@@ -28,7 +31,9 @@ export class ThemeToggle {
     this.currentTheme = theme;
     this.applyTheme(this.currentTheme);
     this.updateControl();
+    this.onChange?.(this.currentTheme);
   }
+
 
   public getTheme(): "dark" | "light" {
     return this.currentTheme;

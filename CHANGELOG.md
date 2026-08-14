@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-08-14
+
+### Added
+
+- Add standalone zero-dependency offline HTML export engine and `wc-view export <file> [--out <path>]` CLI command.
+- Add two-way agent dialogue feed with `wc-view feedback reply <batchId> --message <text>` and in-browser sliding Activity Drawer (`💬 Feed`).
+- Add interactive GFM task list checkboxes (`- [ ]` / `- [x]`) that automatically stage structured decision notes into the composer.
+- Add multi-document recursive tree sidebar with real-time text filter and in-browser document switching.
+- Add live document hot-reloading over SSE on disk file changes.
+- Add markdown diff block syntax highlighting and dynamic Mermaid diagram re-theming on Dark/Light mode switch.
+- Add accessible design-system keyboard shortcut help modal (`HelpDialog`).
+- Add programmatic feedback resolution via `wc-view feedback resolve <id>` and markdown checklist formatting via `wc-view feedback --format markdown`.
+
 ## [0.5.2] - 2026-08-01
 
 ### Fixed
@@ -38,6 +51,7 @@
 - Report the CLI version from package metadata instead of a hardcoded string.
 
 ## [0.4.0] - 2026-08-01
+
 
 ### Added
 

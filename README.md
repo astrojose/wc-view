@@ -60,10 +60,34 @@ Use a custom port:
 wc-view serve docs/ --port 3457
 ```
 
+Export standalone offline HTML:
+
+```bash
+wc-view export docs/design/architecture/tech-stack.md --out ./tech-stack.html
+```
+
 Pull unresolved feedback for an agent:
 
 ```bash
 wc-view feedback --unresolved
+```
+
+Format feedback as a markdown checklist for PR comments:
+
+```bash
+wc-view feedback --format markdown
+```
+
+Post an agent reply to a review batch:
+
+```bash
+wc-view feedback reply <batchId> --message "Updated database schema per review notes"
+```
+
+Resolve a feedback item or batch:
+
+```bash
+wc-view feedback resolve <id>
 ```
 
 Garbage-collect resolved feedback older than the default retention window:
@@ -77,6 +101,7 @@ Purge all resolved feedback:
 ```bash
 wc-view gc --all
 ```
+
 
 ## Local Development
 

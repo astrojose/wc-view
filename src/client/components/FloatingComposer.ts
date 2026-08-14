@@ -25,16 +25,19 @@ export class FloatingComposer {
   private onSubmitCallback?: (prompt: string, notes: NoteItem[]) => SubmitResult;
   private onDiscardCallback?: () => void;
   private onAcceptCallback?: (batchId: string) => SubmitResult;
+  private onActivityToggleCallback?: () => void;
   private invokerElement: HTMLElement | null = null;
 
   constructor(
     onSubmit?: (prompt: string, notes: NoteItem[]) => SubmitResult,
     onDiscard?: () => void,
-    onAccept?: (batchId: string) => SubmitResult
+    onAccept?: (batchId: string) => SubmitResult,
+    onActivityToggle?: () => void
   ) {
     this.onSubmitCallback = onSubmit;
     this.onDiscardCallback = onDiscard;
     this.onAcceptCallback = onAccept;
+    this.onActivityToggleCallback = onActivityToggle;
     this.container = document.createElement("footer");
     this.container.className = "floating-composer-container";
     this.container.setAttribute("role", "region");
@@ -44,13 +47,19 @@ export class FloatingComposer {
         <div id="target-policy" class="composer-policy" role="status">Protected project artifact — result requires your acceptance</div>
         <div id="batch-status" class="composer-status" aria-live="polite">Ready for feedback.</div>
         <button id="accept-result-btn" type="button" class="btn btn-primary" hidden>Accept and apply</button>
-        <div class="composer-summary-row">
-          <div id="chip-badge" class="chip-badge"><span aria-hidden="true">#</span><span class="chip-count">0</span> notes attached</div>
-          <div class="composer-actions">
+        <div class="composer-summary-row" style="display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:var(--space-2)">
+            <div id="chip-badge" class="chip-badge">🏷️ <span class="chip-count">0</span> notes attached</div>
+            <button id="activity-drawer-btn" type="button" class="btn btn-ghost btn-sm" title="Open Activity & Dialogue Feed">
+              💬 Feed <span id="unread-reply-badge" class="unread-badge" hidden>0</span>
+            </button>
+          </div>
+          <div class="composer-actions" style="display:flex;gap:var(--space-2)">
             <button id="discard-btn" type="button" class="btn" title="Discard notes">Discard</button>
             <button id="submit-btn" type="button" class="btn btn-primary">Send to Agent</button>
           </div>
         </div>
+
         <div id="queued-notes-list" class="composer-queue" role="region" aria-label="Pending annotations"></div>
         <div class="composer-input-row">
           <button id="queue-toggle-btn" type="button" class="icon-btn" aria-expanded="false" aria-label="Show review queue"><span aria-hidden="true">≡</span></button>
@@ -66,6 +75,7 @@ export class FloatingComposer {
     this.acceptButton = this.container.querySelector("#accept-result-btn") as HTMLButtonElement;
     this.bindEvents();
   }
+
 
   public mountAbove(element: HTMLElement): void {
     this.container.insertBefore(element, this.container.firstChild);
@@ -106,6 +116,14 @@ export class FloatingComposer {
     this.acceptButton.dataset.batchId = batchId || "";
   }
 
+  public setUnreadCount(count: number): void {
+    const badge = this.container.querySelector("#unread-reply-badge") as HTMLElement;
+    if (badge) {
+      badge.textContent = String(count);
+      badge.hidden = count <= 0;
+    }
+  }
+
   public focus(invoker?: HTMLElement): void {
     if (invoker) this.invokerElement = invoker;
     this.inputElement.focus();
@@ -139,7 +157,9 @@ export class FloatingComposer {
     });
     (this.container.querySelector("#discard-btn") as HTMLButtonElement).addEventListener("click", () => this.onDiscardCallback?.());
     (this.container.querySelector("#queue-toggle-btn") as HTMLButtonElement).addEventListener("click", () => this.toggleQueue());
+    (this.container.querySelector("#activity-drawer-btn") as HTMLButtonElement)?.addEventListener("click", () => this.onActivityToggleCallback?.());
   }
+
 
   private toggleQueue(): void {
     this.queueOpen = !this.queueOpen;

@@ -4,8 +4,12 @@ import { DocCanvas, DocBlock } from "./components/DocCanvas.js";
 import { FloatingComposer, NoteItem } from "./components/FloatingComposer.js";
 import { AnnotationEditor } from "./components/AnnotationEditor.js";
 import { ConfirmDialog } from "./components/ConfirmDialog.js";
+import { HelpDialog } from "./components/HelpDialog.js";
+import { Sidebar } from "./components/Sidebar.js";
+import { ActivityDrawer, BatchActivity } from "./components/ActivityDrawer.js";
 import { DocumentFormat } from "./components/DocCanvas.js";
 import { extractAnchor, resolveAnchor } from "./anchoring.js";
+
 import { getBatchSubmitStatus } from "./batchStatus.js";
 import "./styles/app.css";
 
@@ -13,6 +17,9 @@ interface BatchView {
   id: string;
   filePath: string;
   status: string;
+  prompt: string;
+  notes: Array<{ id: string; comment: string; quote?: string; status?: string }>;
+  replies?: Array<{ id: string; sender: "agent" | "human"; message: string; createdAt: string }>;
   artifactClass: "scratch" | "protected";
   result?: { summary: string; status: string };
   createdAt: string;
@@ -21,6 +28,7 @@ interface BatchView {
 interface DocumentPayload {
   path?: string;
   content?: string;
+  files?: string[];
   format?: DocumentFormat;
   artifactClass?: "scratch" | "protected";
 }
@@ -32,6 +40,9 @@ export class ReviewApp {
   private composer: FloatingComposer;
   private editor: AnnotationEditor;
   private confirmDialog: ConfirmDialog;
+  private helpDialog: HelpDialog;
+  private sidebar: Sidebar;
+  private activityDrawer: ActivityDrawer;
   private currentFilePath = "";
   private noteSeq = 0;
   private eventSource?: EventSource;
@@ -39,15 +50,19 @@ export class ReviewApp {
   private refreshedAppliedBatchIds = new Set<string>();
 
   constructor() {
-    this.themeToggle = new ThemeToggle("dark");
-    this.statusRegion = new StatusRegion();
     this.canvas = new DocCanvas();
+    this.themeToggle = new ThemeToggle("dark", true, (theme) => this.canvas.updateTheme(theme));
+    this.statusRegion = new StatusRegion();
     this.editor = new AnnotationEditor();
     this.confirmDialog = new ConfirmDialog();
+    this.helpDialog = new HelpDialog();
+    this.sidebar = new Sidebar((file) => this.loadDocument(file));
+    this.activityDrawer = new ActivityDrawer((unread) => this.composer.setUnreadCount(unread));
     this.composer = new FloatingComposer(
       (prompt, notes) => this.handleBatchSubmit(prompt, notes),
       () => this.handleDiscardNotes(),
-      (batchId) => this.handleBatchAcceptance(batchId)
+      (batchId) => this.handleBatchAcceptance(batchId),
+      () => this.activityDrawer.toggle()
     );
     this.setupShortcuts();
     this.statusRegion.announce("Select any paragraph to attach a review note.");
@@ -62,7 +77,8 @@ export class ReviewApp {
       if (!data.content) return;
       this.currentFilePath = data.path || "";
       this.composer.setTargetPolicy(data.artifactClass || "protected");
-      this.loadDocument(data.content, data.path ? data.path.split("/").pop() : "Document", undefined, data.format || "markdown");
+      this.sidebar.setFiles(data.files || [], this.currentFilePath);
+      this.renderDocument(data.content, data.path ? data.path.split("/").pop() : "Document", undefined, data.format || "markdown");
       await Promise.all([this.loadFeedback(), this.loadBatches()]);
       this.connectEventStream();
     } catch {
@@ -70,13 +86,58 @@ export class ReviewApp {
     }
   }
 
-  public loadMarkdown(markdown: string, title?: string, meta?: string): void {
-    this.loadDocument(markdown, title, meta, "markdown");
+  public async loadDocument(relativePath: string): Promise<void> {
+    try {
+      const response = await fetch(`/api/document?file=${encodeURIComponent(relativePath)}`);
+      if (!response.ok) return;
+      const data = await response.json() as DocumentPayload;
+      if (!data.content) return;
+      this.currentFilePath = data.path || "";
+      this.composer.setTargetPolicy(data.artifactClass || "protected");
+      this.sidebar.setActivePath(this.currentFilePath);
+      this.renderDocument(data.content, data.path ? data.path.split("/").pop() : "Document", undefined, data.format || "markdown");
+      await Promise.all([this.loadFeedback(), this.loadBatches()]);
+      this.statusRegion.announce(`Loaded ${data.path ? data.path.split("/").pop() : "document"}`);
+    } catch {
+      // Error fetching document
+    }
   }
 
-  public loadDocument(content: string, title?: string, meta?: string, format: DocumentFormat = "markdown"): void {
-    this.canvas.render(content, title, meta, (block) => this.handleBlockSelect(block), format);
+  public loadMarkdown(markdown: string, title?: string, meta?: string): void {
+    this.renderDocument(markdown, title, meta, "markdown");
   }
+
+  public renderDocument(content: string, title?: string, meta?: string, format: DocumentFormat = "markdown"): void {
+    this.canvas.render(
+      content,
+      title,
+      meta,
+      (block) => this.handleBlockSelect(block),
+      (label, checked, blockId) => this.handleDecisionToggle(label, checked, blockId),
+      format
+    );
+    this.reapplyAnnotatedNotes();
+  }
+
+  private handleDecisionToggle(label: string, checked: boolean, blockId: string): void {
+    this.noteSeq++;
+    const stateText = checked ? "[x] Approved" : "[ ] Unchecked";
+    const comment = `Decision choice: ${stateText} for "${label}"`;
+    this.composer.addNote({
+      id: `decision_${Date.now()}_${this.noteSeq}`,
+      blockId,
+      quote: label,
+      comment
+    });
+    this.canvas.markAnnotated(blockId, true);
+    this.statusRegion.announce(`Decision staged: ${stateText}`);
+  }
+
+  private reapplyAnnotatedNotes(): void {
+    const notes = this.composer.getNotes();
+    notes.forEach((n) => this.canvas.markAnnotated(n.blockId, true));
+  }
+
 
   public async loadFeedback(): Promise<void> {
     try {
@@ -108,12 +169,27 @@ export class ReviewApp {
     this.eventSource = new EventSource("/api/events");
     this.eventSource.addEventListener("snapshot", (event) => this.applyBatches(JSON.parse((event as MessageEvent).data), true));
     this.eventSource.addEventListener("batch", (event) => this.applyBatches([JSON.parse((event as MessageEvent).data)]));
+    this.eventSource.addEventListener("document_change", (event) => {
+      try {
+        const payload = JSON.parse((event as MessageEvent).data) as DocumentPayload;
+        if (payload.path === this.currentFilePath && payload.content) {
+          this.loadMarkdown(payload.content, payload.path.split("/").pop());
+          this.statusRegion.announce("Document updated live.");
+        }
+        if (payload.files) {
+          this.sidebar.setFiles(payload.files, this.currentFilePath);
+        }
+      } catch {}
+    });
   }
 
   private applyBatches(batches: BatchView[], replace: boolean = false): void {
     if (replace) this.batches.clear();
     for (const batch of batches) this.batches.set(batch.id, batch);
-    const latest = [...this.batches.values()].sort((a, b) => a.createdAt.localeCompare(b.createdAt)).at(-1);
+    const allBatches = [...this.batches.values()];
+    this.activityDrawer.setBatches(allBatches as BatchActivity[]);
+
+    const latest = allBatches.sort((a, b) => a.createdAt.localeCompare(b.createdAt)).at(-1);
     if (!latest) return;
     this.composer.setTargetPolicy(latest.artifactClass);
     const message = latest.result?.summary
@@ -144,8 +220,9 @@ export class ReviewApp {
       if (!data.content) return;
       this.currentFilePath = data.path || this.currentFilePath;
       this.composer.setTargetPolicy(data.artifactClass || "protected");
-      this.loadDocument(data.content, data.path ? data.path.split("/").pop() : "Document", undefined, data.format || "markdown");
+      this.renderDocument(data.content, data.path ? data.path.split("/").pop() : "Document", undefined, data.format || "markdown");
       await this.loadFeedback();
+
       this.statusRegion.announce("Document refreshed with the latest agent-applied changes.");
     } catch {
       // The streamed batch result remains visible even if a transient refresh fails.
@@ -240,10 +317,12 @@ export class ReviewApp {
       const isInput = /^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName || "");
       if (event.key === "?" && !isInput) {
         event.preventDefault();
-        alert("Shortcuts: [Shift + ?] Help | [Esc] Close / Blur | [Ctrl/Cmd + Enter] Send to Agent");
+        this.helpDialog.toggle();
       }
     });
   }
 }
 
 if (typeof window !== "undefined") (window as unknown as { reviewApp: ReviewApp }).reviewApp = new ReviewApp();
+
+

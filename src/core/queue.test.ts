@@ -3,15 +3,19 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import {
+  addAgentReply,
   claimNextBatch,
   createFeedbackBatch,
   getUnresolvedItems,
   gcFeedback,
   readBatches,
   readQueue,
+  resolveFeedbackItem,
   writeFeedbackItem,
   FeedbackItem
 } from "./queue.js";
+
+
 
 const anchor = {
   primary: { exact: "Node.js 18+ ESM", prefix: "", suffix: "" },
@@ -96,4 +100,45 @@ describe("Feedback Queue Manager", () => {
     expect(gcFeedback({ all: true }, testQueuePath)).toBe(1);
     expect(readQueue(testQueuePath)).toHaveLength(1);
   });
+
+  it("resolves feedback items, batches, and individual notes by id", () => {
+    writeFeedbackItem(sampleItem, testQueuePath);
+    const itemRes = resolveFeedbackItem("fb_001", testQueuePath);
+    expect(itemRes).toEqual({ resolved: true, id: "fb_001", type: "item" });
+    expect(getUnresolvedItems(undefined, testQueuePath)).toHaveLength(0);
+
+    const batch = createFeedbackBatch({
+      filePath: path.join(tmpDir, "docs.md"),
+      prompt: "Fix formatting",
+      notes: [{ id: "n_001", anchor, comment: "Fix typo" }]
+    }, tmpDir, testQueuePath);
+
+    const noteRes = resolveFeedbackItem("n_001", testQueuePath);
+    expect(noteRes).toEqual({ resolved: true, id: "n_001", type: "note" });
+
+    const batchRes = resolveFeedbackItem(batch.id, testQueuePath);
+    expect(batchRes).toEqual({ resolved: true, id: batch.id, type: "batch" });
+    expect(readBatches(testQueuePath)[0].status).toBe("resolved");
+  });
+
+  it("appends agent replies to an existing feedback batch", () => {
+    const batch = createFeedbackBatch({
+      filePath: path.join(tmpDir, "spec.md"),
+      prompt: "Add tests",
+      notes: []
+    }, tmpDir, testQueuePath);
+
+    const updated = addAgentReply(batch.id, "Added test cases and updated architecture docs", "agent", testQueuePath);
+    expect(updated).not.toBeNull();
+    expect(updated?.replies).toHaveLength(1);
+    expect(updated?.replies?.[0]).toMatchObject({
+      sender: "agent",
+      message: "Added test cases and updated architecture docs"
+    });
+
+    const refreshed = readBatches(testQueuePath)[0];
+    expect(refreshed.replies).toHaveLength(1);
+  });
 });
+
+
