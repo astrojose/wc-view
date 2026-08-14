@@ -47,18 +47,19 @@ export class FloatingComposer {
         <div id="target-policy" class="composer-policy" role="status">Protected project artifact — result requires your acceptance</div>
         <div id="batch-status" class="composer-status" aria-live="polite">Ready for feedback.</div>
         <button id="accept-result-btn" type="button" class="btn btn-primary" hidden>Accept and apply</button>
-        <div class="composer-summary-row" style="display:flex;align-items:center;justify-content:space-between">
-          <div style="display:flex;align-items:center;gap:var(--space-2)">
+        <div class="composer-summary-row">
+          <div class="composer-badge-group">
             <div id="chip-badge" class="chip-badge">🏷️ <span class="chip-count">0</span> notes attached</div>
             <button id="activity-drawer-btn" type="button" class="btn btn-ghost btn-sm" title="Open Activity & Dialogue Feed">
               💬 Feed <span id="unread-reply-badge" class="unread-badge" hidden>0</span>
             </button>
           </div>
-          <div class="composer-actions" style="display:flex;gap:var(--space-2)">
+          <div class="composer-actions">
             <button id="discard-btn" type="button" class="btn" title="Discard notes">Discard</button>
             <button id="submit-btn" type="button" class="btn btn-primary">Send to Agent</button>
           </div>
         </div>
+
 
         <div id="queued-notes-list" class="composer-queue" role="region" aria-label="Pending annotations"></div>
         <div class="composer-input-row">

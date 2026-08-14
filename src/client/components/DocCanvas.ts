@@ -11,8 +11,6 @@ export interface DocBlock {
 /**
  * Centered document reading canvas component.
  */
-export type DocumentFormat = "markdown" | "html";
-
 export class DocCanvas {
   private container: HTMLElement;
   private blocks: DocBlock[] = [];
@@ -37,12 +35,21 @@ export class DocCanvas {
     title?: string,
     meta?: string,
     onSelect?: (block: DocBlock) => void,
-    onDecisionToggle?: (label: string, checked: boolean, blockId: string) => void,
+    onDecisionToggleOrFormat?: ((label: string, checked: boolean, blockId: string) => void) | DocumentFormat,
     format: DocumentFormat = "markdown"
   ): void {
     this.onBlockSelect = onSelect;
-    this.onDecisionToggle = onDecisionToggle;
+    if (typeof onDecisionToggleOrFormat === "function") {
+      this.onDecisionToggle = onDecisionToggleOrFormat;
+    } else if (typeof onDecisionToggleOrFormat === "string") {
+      format = onDecisionToggleOrFormat;
+      this.onDecisionToggle = undefined;
+    } else {
+      this.onDecisionToggle = undefined;
+    }
+
     const htmlContent = format === "html" ? this.prepareHtmlContent(content) : renderMarkdown(content);
+
 
     const header = title || meta
       ? `<header>${title ? `<h1>${title}</h1>` : ""}${meta ? `<p class="doc-meta">${meta}</p>` : ""}</header>`

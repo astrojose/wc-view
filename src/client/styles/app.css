@@ -258,11 +258,13 @@ body {
 
 .composer-summary-row,
 .composer-actions,
+.composer-badge-group,
 .annotation-actions {
   display: flex;
   align-items: center;
   gap: var(--space-2);
 }
+
 
 .composer-summary-row {
   justify-content: space-between;
