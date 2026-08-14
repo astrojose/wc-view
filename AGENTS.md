@@ -56,5 +56,6 @@ Run type-check after coherent TypeScript changes. Run workflow validation after 
 ## Shared Skills
 
 - Canonical skills: `.agents/skills/`
+- Consumer companion skill: `skills/use-wc-view/`
 - Workflow policy: `.agents/workflows/workflow-contract/`
 - Release workflow: `.agents/skills/release-wcv/`

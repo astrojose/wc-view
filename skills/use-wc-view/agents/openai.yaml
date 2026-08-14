@@ -1,0 +1,4 @@
+interface:
+  display_name: "Use wc-view"
+  short_description: "Install and run the wc-view review CLI"
+  default_prompt: "Use $use-wc-view to open this Markdown or HTML workflow in wc-view."
