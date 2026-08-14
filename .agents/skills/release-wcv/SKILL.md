@@ -38,7 +38,7 @@ Run the wc-view release workflow end to end: changelog, versioning, verification
    - Determine the target semver version from the user request or package metadata.
 2. Prepare release files:
    - Set `package.json` and `package-lock.json` to the target version.
-   - Set `version` in `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` to the target version.
+   - Set `version` in `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`, and `plugin.json` (Agent Plugins 1.0 manifest) to the target version.
    - Update `CHANGELOG.md` with a dated `## [x.y.z] - YYYY-MM-DD` entry.
    - Keep an `## [Unreleased]` section at the top for future work.
    - Review `skills/use-wc-view/SKILL.md` against any CLI surface changes in this release (new/changed commands, flags, output formats) and update it if it has drifted.

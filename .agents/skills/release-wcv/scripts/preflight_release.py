@@ -20,6 +20,7 @@ BIN_NAME = "wc-view"
 PLUGIN_NAME = "wc-view"
 CLAUDE_PLUGIN_PATH = Path(".claude-plugin/plugin.json")
 CODEX_PLUGIN_PATH = Path(".codex-plugin/plugin.json")
+AGENT_PLUGINS_PATH = Path("plugin.json")
 DISALLOWED_PACK_PREFIXES = (
     ".agents/",
     ".claude/",
@@ -133,6 +134,12 @@ def main() -> int:
         fail(f"codex-plugin-name:{codex_plugin.get('name')}")
     if codex_plugin.get("version") != args.version:
         fail(f"codex-plugin-version:{codex_plugin.get('version')}!= {args.version}")
+
+    agent_plugin = read_json(root / AGENT_PLUGINS_PATH)
+    if agent_plugin.get("name") != PLUGIN_NAME:
+        fail(f"agent-plugin-name:{agent_plugin.get('name')}")
+    if agent_plugin.get("version") != args.version:
+        fail(f"agent-plugin-version:{agent_plugin.get('version')}!= {args.version}")
 
     try:
         changelog = changelog_path.read_text(encoding="utf-8")
