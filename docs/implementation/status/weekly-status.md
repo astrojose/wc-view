@@ -1,5 +1,15 @@
 # Weekly Status
 
+## 2026-08-14
+
+- Completed Phase 06 — Feedback Isolation and Bridge Hardening.
+  - Feedback batches persist in canonical workspace stores and carry workspace, session, and server-derived target provenance.
+  - Feedback CLI output defaults to one workspace and supports explicit target, session, legacy, and cross-workspace filters.
+  - Bridges claim only matching workspace batches, execute adapters asynchronously, renew leases, and validate claim ownership before results persist.
+  - Unapproved protected work uses proposal-only envelopes and cannot persist as `applied` before acceptance.
+  - REST and SSE batch state is scoped to each validated browser target; known writes broadcast directly and durable polling remains the recovery path.
+- Verification passed: TypeScript type-check, 49 Vitest tests, production build, workflow validation, CodeRabbit review remediation, and production-built multi-workspace/multi-target E2E.
+
 ## 2026-08-01
 
 - Completed Phase 01 — Canvas & Theme Foundation.

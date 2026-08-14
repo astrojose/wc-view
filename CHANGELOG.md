@@ -2,6 +2,26 @@
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-08-15
+
+### Added
+
+- Add canonical workspace, serve-session, and server-derived target provenance to durable feedback batches.
+- Add workspace, target, session, legacy, and cross-workspace filters to `wc-view feedback`.
+
+### Changed
+
+- Scope feedback stores and bridge claims by workspace instead of using one global queue.
+- Run bridge adapters asynchronously with renewable ownership leases and policy-specific envelopes.
+- Scope REST and SSE feedback state to each validated browser target while retaining durable polling recovery.
+- Require `--workspace <path>` for standalone bridge commands.
+
+### Fixed
+
+- Prevent browser payloads and mismatched approval or reply requests from selecting another document target.
+- Prevent unapproved protected work from persisting an `applied` result before explicit acceptance.
+- Recover stale queue locks safely and surface queue read failures instead of treating them as empty state.
+
 ## [0.7.0] - 2026-08-15
 
 ### Added

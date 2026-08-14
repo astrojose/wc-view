@@ -1,4 +1,5 @@
 import http from "node:http";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -11,6 +12,9 @@ import {
   FeedbackItem,
   readBatches,
   readQueue,
+  getLegacyQueuePath,
+  getWorkspaceStore,
+  initializeWorkspaceStore,
   writeFeedbackItem
 } from "../core/queue.js";
 
@@ -120,57 +124,98 @@ export function listMarkdownFiles(dir: string, baseDir: string = dir): string[] 
 }
 
 export function createServer(options: ServerOptions): http.Server {
-  const targetPath = options.targetPath ? path.resolve(options.targetPath) : process.cwd();
+  const requestedTargetPath = options.targetPath ? path.resolve(options.targetPath) : process.cwd();
+  const targetPath = fs.existsSync(requestedTargetPath) ? fs.realpathSync(requestedTargetPath) : requestedTargetPath;
   const workspacePath = fs.existsSync(targetPath) && fs.statSync(targetPath).isDirectory() ? targetPath : path.dirname(targetPath);
-  const eventClients = new Set<http.ServerResponse>();
-  let activeDocumentPath = "";
+  const workspaceStore = options.queuePath ? getWorkspaceStore(workspacePath) : initializeWorkspaceStore(workspacePath);
+  const queuePath = options.queuePath ?? workspaceStore.queuePath;
+  const sessionId = `serve_${crypto.randomUUID()}`;
+  const eventClients = new Map<http.ServerResponse, string>();
 
-  const servedDocumentPath = (): string => {
-    if (activeDocumentPath && fs.existsSync(activeDocumentPath)) return activeDocumentPath;
-    if (!fs.existsSync(targetPath)) return targetPath;
-    if (!fs.statSync(targetPath).isDirectory()) return targetPath;
-    const allFiles = listMarkdownFiles(targetPath);
-    const firstMarkdown = allFiles[0];
-    return firstMarkdown ? path.join(targetPath, firstMarkdown) : targetPath;
+  const defaultDocumentPath = (): string | undefined => {
+    if (!fs.existsSync(targetPath)) return undefined;
+    if (!fs.statSync(targetPath).isDirectory()) return fs.statSync(targetPath).isFile() && (isMarkdownFile(targetPath) || isHtmlFile(targetPath)) ? targetPath : undefined;
+    const first = getDirectoryDocument(listMarkdownFiles(targetPath));
+    return first ? fs.realpathSync(path.join(targetPath, first)) : undefined;
   };
-
-
-  const batchesForTarget = (): FeedbackBatch[] => readBatches(options.queuePath).filter((batch) => batch.filePath === servedDocumentPath());
+  const validatedDocumentPath = (url: URL): string | undefined => {
+    if (!fs.existsSync(targetPath) || !fs.statSync(targetPath).isDirectory()) return defaultDocumentPath();
+    const requested = url.searchParams.get("file");
+    if (!requested) return defaultDocumentPath();
+    const candidate = path.resolve(targetPath, requested);
+    const relative = path.relative(targetPath, candidate);
+    if (relative.startsWith(`..${path.sep}`) || relative === ".." || path.isAbsolute(relative) || !fs.existsSync(candidate) || !fs.statSync(candidate).isFile()) return undefined;
+    const canonicalCandidate = fs.realpathSync(candidate);
+    const canonicalRelative = path.relative(targetPath, canonicalCandidate);
+    if (canonicalRelative === ".." || canonicalRelative.startsWith(`..${path.sep}`) || path.isAbsolute(canonicalRelative) || (!isMarkdownFile(canonicalCandidate) && !isHtmlFile(canonicalCandidate))) return undefined;
+    return canonicalCandidate;
+  };
+  const requestDocumentPath = (url: URL, response: http.ServerResponse): string | undefined => {
+    const documentPath = validatedDocumentPath(url);
+    if (documentPath) return documentPath;
+    response.writeHead(400, { "Content-Type": "application/json" });
+    response.end(JSON.stringify({ error: "Invalid or unsupported document target." }));
+    return undefined;
+  };
+  const batchesForTarget = (documentPath: string): FeedbackBatch[] => readBatches(queuePath).filter((batch) => batch.filePath === documentPath);
   const writeEvent = (response: http.ServerResponse, event: "snapshot" | "batch" | "document_change", payload: unknown): void => {
     response.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
   };
-  const broadcast = (event: "snapshot" | "batch" | "document_change", payload: unknown): void => {
-    for (const client of eventClients) {
-      if (client.destroyed || client.writableEnded) {
-        eventClients.delete(client);
-        continue;
-      }
-      writeEvent(client, event, payload);
+  const broadcastBatch = (batch: FeedbackBatch): void => {
+    for (const [client, documentPath] of eventClients) {
+      if (client.destroyed || client.writableEnded) eventClients.delete(client);
+      else if (batch.filePath === documentPath) writeEvent(client, "batch", batch);
     }
   };
-
-  let lastBatchSnapshot = JSON.stringify(batchesForTarget());
-  const batchWatcher = setInterval(() => {
-    const snapshot = JSON.stringify(batchesForTarget());
-    if (snapshot === lastBatchSnapshot) return;
-    lastBatchSnapshot = snapshot;
-    broadcast("snapshot", JSON.parse(snapshot));
-  }, 300);
+  const broadcastDocument = (documentPath: string, payload: unknown): void => {
+    for (const [client, target] of eventClients) {
+      if (client.destroyed || client.writableEnded) eventClients.delete(client);
+      else if (target === documentPath) writeEvent(client, "document_change", payload);
+    }
+  };
+  const lastSnapshots = new Map<string, string>();
+  const publishSnapshots = (): void => {
+    const documents = new Set(eventClients.values());
+    const changed = new Map<string, unknown>();
+    for (const documentPath of documents) {
+      const snapshot = JSON.stringify(batchesForTarget(documentPath));
+      if (lastSnapshots.get(documentPath) === snapshot) continue;
+      lastSnapshots.set(documentPath, snapshot);
+      changed.set(documentPath, JSON.parse(snapshot));
+    }
+    for (const [client, documentPath] of eventClients) {
+      if (client.destroyed || client.writableEnded) eventClients.delete(client);
+      else if (changed.has(documentPath)) writeEvent(client, "snapshot", changed.get(documentPath));
+    }
+    for (const documentPath of lastSnapshots.keys()) if (!documents.has(documentPath)) lastSnapshots.delete(documentPath);
+  };
+  const batchWatcher = setInterval(publishSnapshots, 1_000);
+  let queueWatcher: fs.FSWatcher | undefined;
+  try {
+    const queueDirectory = path.dirname(queuePath);
+    const queueFilename = path.basename(queuePath);
+    fs.mkdirSync(queueDirectory, { recursive: true });
+    queueWatcher = fs.watch(queueDirectory, (_event, filename) => { if (!filename || filename === queueFilename) publishSnapshots(); });
+  } catch {}
 
   // Live document watcher
   let docWatchDebounce: NodeJS.Timeout | undefined;
+  let changedDocumentPath: string | undefined;
   let fileWatcher: fs.FSWatcher | undefined;
   try {
     if (fs.existsSync(targetPath)) {
-      fileWatcher = fs.watch(targetPath, { recursive: true }, () => {
+      fileWatcher = fs.watch(targetPath, { recursive: true }, (_event, filename) => {
+        const candidate = fs.statSync(targetPath).isDirectory() && filename ? path.resolve(targetPath, filename.toString()) : targetPath;
+        if (fs.existsSync(candidate) && fs.statSync(candidate).isFile() && (isMarkdownFile(candidate) || isHtmlFile(candidate))) changedDocumentPath = fs.realpathSync(candidate);
         clearTimeout(docWatchDebounce);
         docWatchDebounce = setTimeout(() => {
-          const currentDoc = servedDocumentPath();
-          if (fs.existsSync(currentDoc) && !fs.statSync(currentDoc).isDirectory()) {
+          const currentDoc = changedDocumentPath ?? defaultDocumentPath();
+          changedDocumentPath = undefined;
+          if (currentDoc && fs.existsSync(currentDoc) && !fs.statSync(currentDoc).isDirectory()) {
             try {
               const content = fs.readFileSync(currentDoc, "utf-8");
               const files = fs.statSync(targetPath).isDirectory() ? listMarkdownFiles(targetPath) : [path.basename(targetPath)];
-              broadcast("document_change", {
+              broadcastDocument(currentDoc, {
                 path: currentDoc,
                 content,
                 files,
@@ -199,82 +244,67 @@ export function createServer(options: ServerOptions): http.Server {
     const pathname = url.pathname;
 
     if (req.method === "GET" && pathname === "/api/events") {
+      const documentPath = requestDocumentPath(url, res);
+      if (!documentPath) return;
       res.writeHead(200, {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
         Connection: "keep-alive"
       });
-      writeEvent(res, "snapshot", batchesForTarget());
-      eventClients.add(res);
+      writeEvent(res, "snapshot", batchesForTarget(documentPath));
+      eventClients.set(res, documentPath);
       req.on("close", () => eventClients.delete(res));
       return;
     }
 
     if (req.method === "GET" && pathname === "/api/document") {
       let content = "# Welcome to wc-view\n\nNo document loaded.";
-      let docPath = targetPath;
+      const docPath = requestDocumentPath(url, res);
+      if (!docPath) return;
       let files: string[] = [];
 
       if (fs.existsSync(targetPath)) {
-        const stat = fs.statSync(targetPath);
-        if (stat.isDirectory()) {
-          files = listMarkdownFiles(targetPath);
-          const requestedRelFile = url.searchParams.get("file");
-          if (requestedRelFile) {
-            const candidate = path.resolve(targetPath, requestedRelFile);
-            if (candidate.startsWith(targetPath) && fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
-              docPath = candidate;
-            } else {
-              docPath = files[0] ? path.join(targetPath, files[0]) : targetPath;
-            }
-          } else {
-            docPath = files[0] ? path.join(targetPath, files[0]) : targetPath;
-          }
-
-          if (fs.existsSync(docPath) && fs.statSync(docPath).isFile()) {
-            content = fs.readFileSync(docPath, "utf-8");
-          }
-
-        } else {
-          docPath = targetPath;
-          files = [path.basename(targetPath)];
-          content = fs.readFileSync(targetPath, "utf-8");
-        }
+        files = fs.statSync(targetPath).isDirectory() ? listMarkdownFiles(targetPath) : [path.basename(targetPath)];
+        if (fs.existsSync(docPath) && fs.statSync(docPath).isFile()) content = fs.readFileSync(docPath, "utf-8");
       }
 
-      activeDocumentPath = docPath;
       res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ path: docPath, content, files, format: getDocumentFormat(docPath), artifactClass: classifyArtifact(docPath, workspacePath) }));
+      const relativePath = fs.existsSync(targetPath) && fs.statSync(targetPath).isDirectory() ? path.relative(targetPath, docPath).split(path.sep).join("/") : undefined;
+      res.end(JSON.stringify({ path: docPath, relativePath, content, files, format: getDocumentFormat(docPath), artifactClass: classifyArtifact(docPath, workspacePath), sessionId }));
       return;
     }
 
 
     if (req.method === "GET" && pathname === "/api/feedback") {
+      const documentPath = requestDocumentPath(url, res);
+      if (!documentPath) return;
       res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(readQueue(options.queuePath)));
+      res.end(JSON.stringify(readQueue(getLegacyQueuePath()).filter((item) => path.resolve(item.filePath) === documentPath)));
       return;
     }
 
     if (req.method === "POST" && pathname === "/api/feedback") {
+      const documentPath = requestDocumentPath(url, res);
+      if (!documentPath) return;
       readJsonBody(req, res, (body) => {
         try {
           const parsed = JSON.parse(body) as Partial<FeedbackItem>;
           if (!parsed || typeof parsed !== "object") throw new Error("Feedback payload must be an object.");
           if (parsed.id !== undefined && typeof parsed.id !== "string") throw new Error("Feedback id must be a string.");
-          if (parsed.filePath !== undefined && typeof parsed.filePath !== "string") throw new Error("File path must be a string.");
+          if (parsed.filePath !== undefined) throw new Error("filePath is server-derived and must not be supplied.");
           if (typeof parsed.comment !== "string" || !parsed.anchor || typeof parsed.anchor !== "object") {
             throw new Error("Feedback requires an anchor and comment.");
           }
           const saved = writeFeedbackItem({
             ...parsed,
             id: parsed.id || `fb_${Date.now()}`,
-            filePath: parsed.filePath || targetPath,
+            filePath: documentPath,
             status: parsed.status || "unresolved",
             anchor: parsed.anchor,
             comment: parsed.comment,
             createdAt: parsed.createdAt || new Date().toISOString(),
             updatedAt: parsed.updatedAt || new Date().toISOString()
-          }, options.queuePath);
+          }, getLegacyQueuePath());
           process.stderr.write(`wc-view feedback: Legacy note received for ${saved.filePath}\n`);
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end(JSON.stringify(saved));
@@ -287,27 +317,32 @@ export function createServer(options: ServerOptions): http.Server {
     }
 
     if (req.method === "GET" && pathname === "/api/batches") {
+      const documentPath = requestDocumentPath(url, res);
+      if (!documentPath) return;
       res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(batchesForTarget()));
+      res.end(JSON.stringify(batchesForTarget(documentPath)));
       return;
     }
 
     if (req.method === "POST" && pathname === "/api/batches") {
+      const documentPath = requestDocumentPath(url, res);
+      if (!documentPath) return;
       readJsonBody(req, res, (body) => {
         try {
           const parsed = JSON.parse(body) as Partial<Pick<FeedbackBatch, "id" | "filePath" | "prompt" | "notes">>;
           if (parsed.id !== undefined && typeof parsed.id !== "string") throw new Error("Batch id must be a string.");
-          if (parsed.filePath !== undefined && typeof parsed.filePath !== "string") throw new Error("File path must be a string.");
+          const forbidden = parsed as Record<string, unknown>;
+          for (const field of ["filePath", "workspacePath", "workspaceId", "sessionId"]) if (field in forbidden) throw new Error(`${field} is server-derived and must not be supplied.`);
           if (parsed.prompt !== undefined && typeof parsed.prompt !== "string") throw new Error("Prompt must be a string.");
           if (parsed.notes !== undefined && !Array.isArray(parsed.notes)) throw new Error("Notes must be an array.");
           const batch = createFeedbackBatch({
             id: parsed.id,
-            filePath: parsed.filePath || servedDocumentPath(),
+            filePath: documentPath,
+            sessionId,
             prompt: parsed.prompt || "",
             notes: parsed.notes || []
-          }, workspacePath, options.queuePath);
-          lastBatchSnapshot = JSON.stringify(batchesForTarget());
-          if (batch.filePath === servedDocumentPath()) broadcast("batch", batch);
+          }, workspacePath, queuePath);
+          broadcastBatch(batch);
           process.stderr.write(`wc-view feedback: Batch ${batch.id} queued for ${batch.filePath}\n`);
           res.writeHead(201, { "Content-Type": "application/json" });
           res.end(JSON.stringify(batch));
@@ -321,15 +356,16 @@ export function createServer(options: ServerOptions): http.Server {
 
     const acceptMatch = pathname.match(/^\/api\/batches\/([^/]+)\/accept$/);
     if (req.method === "POST" && acceptMatch) {
+      const documentPath = requestDocumentPath(url, res);
+      if (!documentPath) return;
       try {
-        const batch = approveBatch(decodeURIComponent(acceptMatch[1]), options.queuePath);
+        const batch = approveBatch(decodeURIComponent(acceptMatch[1]), queuePath, documentPath);
         if (!batch) {
           res.writeHead(404, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ error: "Feedback batch not found." }));
           return;
         }
-        lastBatchSnapshot = JSON.stringify(batchesForTarget());
-        if (batch.filePath === servedDocumentPath()) broadcast("batch", batch);
+        broadcastBatch(batch);
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify(batch));
       } catch (error) {
@@ -341,6 +377,8 @@ export function createServer(options: ServerOptions): http.Server {
 
     const replyMatch = pathname.match(/^\/api\/batches\/([^/]+)\/reply$/);
     if (req.method === "POST" && replyMatch) {
+      const documentPath = requestDocumentPath(url, res);
+      if (!documentPath) return;
       readJsonBody(req, res, (body) => {
         try {
           const parsed = JSON.parse(body) as { message: string; sender?: "agent" | "human" };
@@ -348,14 +386,13 @@ export function createServer(options: ServerOptions): http.Server {
             throw new Error("Reply requires a non-empty message string.");
           }
           const batchId = decodeURIComponent(replyMatch[1]);
-          const batch = addAgentReply(batchId, parsed.message, parsed.sender || "agent", options.queuePath);
+          const batch = addAgentReply(batchId, parsed.message, parsed.sender || "agent", queuePath, documentPath);
           if (!batch) {
             res.writeHead(404, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ error: "Feedback batch not found." }));
             return;
           }
-          lastBatchSnapshot = JSON.stringify(batchesForTarget());
-          if (batch.filePath === servedDocumentPath()) broadcast("batch", batch);
+          broadcastBatch(batch);
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end(JSON.stringify(batch));
         } catch (error) {
@@ -393,6 +430,7 @@ export function createServer(options: ServerOptions): http.Server {
     clearInterval(batchWatcher);
     clearTimeout(docWatchDebounce);
     try { fileWatcher?.close(); } catch {}
+    try { queueWatcher?.close(); } catch {}
   });
   return server;
 }

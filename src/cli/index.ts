@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createServer } from "../server/index.js";
-import { getUnresolvedItems, gcFeedback, resolveFeedbackItem, addAgentReply, FeedbackItem } from "../core/queue.js";
+import { getUnresolvedItems, getUnresolvedBatches, getWorkspaceStore, getLegacyQueuePath, listWorkspaceStores, gcFeedback, resolveFeedbackItem, addAgentReply, FeedbackItem, FeedbackBatch } from "../core/queue.js";
 import { runBridgeOnce, startBridge } from "../core/bridge.js";
 import { exportMarkdownFile } from "../core/export.js";
 
@@ -64,15 +64,18 @@ program
       throw new CommanderError(2, "wc-view.invalidHost", "wc-view serve only supports 127.0.0.1 loopback binding");
     }
     const server = createServer({ port, host: "127.0.0.1", targetPath });
-    let stopBridge: (() => void) | undefined;
+    const resolvedTarget = path.resolve(targetPath || process.cwd());
+    const workspacePath = fs.existsSync(resolvedTarget) && fs.statSync(resolvedTarget).isDirectory() ? resolvedTarget : path.dirname(resolvedTarget);
+    let stopBridge: (() => Promise<void>) | undefined;
     if (options.agentCommand) {
       stopBridge = startBridge({
         command: options.agentCommand,
-        bridgeId: `serve_${process.pid}`
+        bridgeId: `serve_${process.pid}`,
+        workspacePath
       });
     }
-    const shutdown = () => {
-      stopBridge?.();
+    const shutdown = async () => {
+      await stopBridge?.();
       server.close(() => process.exit(0));
     };
     process.once("SIGINT", shutdown);
@@ -103,8 +106,16 @@ const feedbackCmd = program
   .description("Pull structured review feedback payloads for agent consumption")
   .option("-u, --unresolved", "Filter to unresolved feedback items", true)
   .option("-f, --format <type>", "Output payload format (json|toon|markdown)", "json")
+  .option("--workspace <path>", "Workspace scope", process.cwd())
+  .option("--target <path>", "Filter by canonical target path")
+  .option("--session <id>", "Filter by originating serve session")
+  .option("--legacy", "Include unresolved legacy individual notes")
+  .option("--all-workspaces", "Explicitly list records from every known workspace")
   .action((options) => {
-    const items = getUnresolvedItems();
+    const stores = options.allWorkspaces ? listWorkspaceStores() : [getWorkspaceStore(options.workspace)];
+    const batches = stores.flatMap((store) => getUnresolvedBatches({ target: options.target, sessionId: options.session }, store.queuePath));
+    const legacyItems = options.legacy ? getUnresolvedItems(options.target, getLegacyQueuePath()) : [];
+    const items: Array<FeedbackBatch | FeedbackItem> = [...batches, ...legacyItems];
     if (options.format === "json") {
       process.stdout.write(`${JSON.stringify({ version: "1.0", total: items.length, items }, null, 2)}\n`);
       return;
@@ -115,9 +126,13 @@ const feedbackCmd = program
         return;
       }
       let md = `## Review Feedback (${items.length} unresolved)\n\n`;
-      items.forEach((item: FeedbackItem, idx: number) => {
-        const exact = item.anchor?.primary?.exact ? `> "${item.anchor.primary.exact}"\n\n` : "";
-        md += `### ${idx + 1}. \`${item.filePath}\` (${item.id})\n${exact}- **Comment**: ${item.comment}\n\n`;
+      items.forEach((item, idx: number) => {
+        if ("recordType" in item) {
+          md += `### ${idx + 1}. \`${item.filePath}\` (${item.id})\n- **Status**: ${item.status}\n- **Prompt**: ${item.prompt || "(notes only)"}\n- **Notes**: ${item.notes.length}\n\n`;
+        } else {
+          const exact = item.anchor?.primary?.exact ? `> "${item.anchor.primary.exact}"\n\n` : "";
+          md += `### ${idx + 1}. \`${item.filePath}\` (${item.id})\n${exact}- **Comment**: ${item.comment}\n\n`;
+        }
       });
       process.stdout.write(md);
       return;
@@ -127,7 +142,7 @@ const feedbackCmd = program
       return;
     }
     process.stdout.write(`count: ${items.length} unresolved\nfeedback[${items.length}]{id,status,filePath}:\n`);
-    items.forEach((item: FeedbackItem) => process.stdout.write(`  "${item.id}","${item.status}","${item.filePath}"\n`));
+    items.forEach((item) => process.stdout.write(`  "${item.id}","${item.status}","${item.filePath}"\n`));
   });
 
 feedbackCmd
@@ -167,11 +182,12 @@ feedbackCmd
 program
   .command("bridge")
   .description("Claim feedback batches and dispatch them to a local agent adapter")
-  .requiredOption("--command <command>", "Adapter command; receives one FeedbackBatch JSON object on stdin")
-  .option("--interval <ms>", "Queue polling interval", "500")
+  .requiredOption("--command <command>", "Adapter command; receives one policy-specific batch envelope on stdin")
+  .requiredOption("--workspace <path>", "Workspace whose queue may be claimed")
+  .option("--interval <ms>", "Queue recovery polling interval", "500")
   .option("--bridge-id <id>", "Stable bridge identity", `bridge_${process.pid}`)
   .option("--once", "Process at most one queued feedback batch and exit")
-  .action((options) => {
+  .action(async (options) => {
     const intervalMs = parseInt(options.interval, 10);
     if (!Number.isInteger(intervalMs) || intervalMs < 50) {
       throw new CommanderError(2, "wc-view.invalidInterval", "wc-view bridge requires --interval of at least 50 ms");
@@ -179,10 +195,11 @@ program
     const bridgeOptions = {
       command: options.command,
       bridgeId: options.bridgeId,
+      workspacePath: options.workspace,
       intervalMs
     };
     if (options.once) {
-      const result = runBridgeOnce(bridgeOptions);
+      const result = await runBridgeOnce(bridgeOptions);
       process.stdout.write(`${JSON.stringify({ processed: Boolean(result), batch: result || null })}\n`);
       return;
     }

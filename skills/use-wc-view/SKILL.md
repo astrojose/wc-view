@@ -29,7 +29,7 @@ wc-view serve docs/
 wc-view export README.md --out review.html
 
 # Pull unresolved feedback as a markdown checklist
-wc-view feedback --format markdown
+wc-view feedback --workspace . --format markdown
 ```
 
 ## Workflow
@@ -115,7 +115,7 @@ Pull structured review feedback payloads for agent consumption.
 wc-view feedback
 
 # Markdown checklist format
-wc-view feedback --format markdown
+wc-view feedback --workspace . --format markdown
 
 # JSON with explicit flags
 wc-view feedback --unresolved --format json
@@ -151,19 +151,20 @@ wc-view feedback reply batch_review_1 --message "Applied the requested changes t
 
 ### `wc-view bridge`
 
-Claim feedback batches from the queue and dispatch them to a local agent adapter command. The adapter receives one FeedbackBatch JSON object on stdin.
+Claim feedback batches from the queue and dispatch them to a local agent adapter command. The adapter receives one policy-specific `{ batch, policy }` envelope on stdin.
 
 ```bash
 # Continuous bridge
-wc-view bridge --command "codex exec"
+wc-view bridge --workspace . --command "codex exec"
 
 # Process one batch and exit
-wc-view bridge --command "codex exec" --once
+wc-view bridge --workspace . --command "codex exec" --once
 ```
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--command <cmd>` | (required) | Adapter command receiving batch JSON on stdin |
+| `--command <cmd>` | (required) | Adapter command receiving a policy-specific batch envelope on stdin |
+| `--workspace <path>` | (required) | Workspace whose queue may be claimed |
 | `--interval <ms>` | `500` | Queue polling interval (min 50ms) |
 | `--bridge-id <id>` | `bridge_<pid>` | Stable bridge identity for lease exclusivity |
 | `--once` | `false` | Process at most one queued batch and exit |
@@ -195,8 +196,8 @@ wc-view gc --days 7
 | "pull feedback", "show unresolved feedback" | `wc-view feedback [--format markdown]` |
 | "resolve this feedback", "mark as done" | `wc-view feedback resolve <id>` |
 | "reply to feedback", "respond to the reviewer" | `wc-view feedback reply <batchId> -m <text>` |
-| "start the agent bridge", "watch feedback" | `wc-view bridge --command <cmd>` or `wc-view serve <target> --agent-command <cmd>` |
-| "process one feedback batch" | `wc-view bridge --command <cmd> --once` |
+| "start the agent bridge", "watch feedback" | `wc-view bridge --workspace . --command <cmd>` or `wc-view serve <target> --agent-command <cmd>` |
+| "process one feedback batch" | `wc-view bridge --workspace . --command <cmd> --once` |
 | "clean up old feedback" | `wc-view gc [--all] [--days N]` |
 | "help", unfamiliar CLI usage | `wc-view --help` |
 
@@ -209,7 +210,7 @@ wc-view gc --days 7
 wc-view serve docs/ &
 
 # 2. Wait for feedback
-wc-view feedback --format json  # poll or use bridge
+wc-view feedback --workspace . --format json  # poll or use bridge
 
 # 3. Process feedback
 wc-view feedback resolve <id>
@@ -225,7 +226,7 @@ wc-view feedback reply <batchId> -m "Changes applied."
 wc-view serve docs/ --agent-command "my-agent process"
 
 # Or standalone bridge for one-shot processing
-wc-view bridge --command "my-agent process" --once
+wc-view bridge --workspace docs/ --command "my-agent process" --once
 ```
 
 ### Export for offline distribution

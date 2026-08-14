@@ -9,7 +9,7 @@ Local Markdown and HTML review surface for agent workflows.
 - npm package: `@astrojose/wc-view`
 - CLI binary: `wc-view`
 - Runtime: Node.js 18+
-- State path: `~/.wc-view/feedback/queue.jsonl`
+- State path: `~/.wc-view/feedback/workspaces/<workspace-id>/queue.jsonl`
 
 ## Install
 
@@ -69,13 +69,33 @@ wc-view export docs/design/architecture/tech-stack.md --out ./tech-stack.html
 Pull unresolved feedback for an agent:
 
 ```bash
-wc-view feedback --unresolved
+wc-view feedback --workspace . --unresolved
 ```
 
 Format feedback as a markdown checklist for PR comments:
 
 ```bash
-wc-view feedback --format markdown
+wc-view feedback --workspace . --format markdown
+```
+
+Filter feedback to one served target or session:
+
+```bash
+wc-view feedback --workspace . --target .wc-view-scratch.html
+wc-view feedback --workspace . --session <serve-session-id>
+```
+
+List legacy individual notes or explicitly inspect every workspace:
+
+```bash
+wc-view feedback --workspace . --legacy
+wc-view feedback --all-workspaces
+```
+
+Run a workspace-scoped bridge:
+
+```bash
+wc-view bridge --workspace . --command "my-agent process"
 ```
 
 Post an agent reply to a review batch:

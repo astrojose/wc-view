@@ -30,7 +30,7 @@ describe("Server & CLI Integration", () => {
 
   it("serves document metadata including artifact policy and non-cacheable client assets", async () => {
     const response = await fetch(`${baseUrl}/api/document`);
-    expect(await response.json()).toMatchObject({ path: testDocPath, artifactClass: "scratch", format: "markdown" });
+    expect(await response.json()).toMatchObject({ path: fs.realpathSync(testDocPath), artifactClass: "scratch", format: "markdown" });
     const client = await fetch(`${baseUrl}/main.js`);
     expect(client.headers.get("cache-control")).toBe("no-store");
     await client.text();
@@ -46,7 +46,7 @@ describe("Server & CLI Integration", () => {
 
     const response = await fetch(`${baseUrl}/api/document`);
     expect(await response.json()).toMatchObject({
-      path: testDocPath,
+      path: fs.realpathSync(testDocPath),
       artifactClass: "scratch",
       format: "html",
       content: expect.stringContaining("Payment Flow")
@@ -65,7 +65,7 @@ describe("Server & CLI Integration", () => {
 
     const response = await fetch(`${baseUrl}/api/document`);
     expect(await response.json()).toMatchObject({
-      path: htmlPath,
+      path: fs.realpathSync(htmlPath),
       artifactClass: "scratch",
       format: "html",
       content: expect.stringContaining("HTML First")
@@ -151,11 +151,42 @@ describe("Server & CLI Integration", () => {
 
       const switchResponse = await fetch(`${dirBaseUrl}/api/document?file=sub/nested.md`);
       const switchData = await switchResponse.json();
-      expect(switchData.path).toBe(subDoc);
+      expect(switchData.path).toBe(fs.realpathSync(subDoc));
       expect(switchData.content).toContain("Nested content");
     } finally {
       await new Promise<void>((resolve) => dirServer.close(() => resolve()));
     }
+  });
+
+  it("rejects client target authority and isolates batches by validated document", async () => {
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+    const firstPath = path.join(tmpDir, "first.md");
+    const secondPath = path.join(tmpDir, "second.md");
+    fs.writeFileSync(firstPath, "# First", "utf-8");
+    fs.writeFileSync(secondPath, "# Second", "utf-8");
+    server = createServer({ port: 0, host: "127.0.0.1", targetPath: tmpDir, queuePath });
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+
+    const rejected = await fetch(`${baseUrl}/api/batches?file=first.md`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: "bad", prompt: "Bad", notes: [], filePath: secondPath })
+    });
+    expect(rejected.status).toBe(400);
+
+    for (const file of ["first.md", "second.md"]) {
+      const response = await fetch(`${baseUrl}/api/batches?file=${file}`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: `batch_${file}`, prompt: file, notes: [] })
+      });
+      expect(response.status).toBe(201);
+    }
+
+    const firstBatches = await (await fetch(`${baseUrl}/api/batches?file=first.md`)).json();
+    const secondBatches = await (await fetch(`${baseUrl}/api/batches?file=second.md`)).json();
+    expect(firstBatches.map((batch: { id: string }) => batch.id)).toEqual(["batch_first.md"]);
+    expect(secondBatches.map((batch: { id: string }) => batch.id)).toEqual(["batch_second.md"]);
+    expect(firstBatches[0]).toMatchObject({ filePath: fs.realpathSync(firstPath), sessionId: expect.stringMatching(/^serve_/) });
   });
 
   it("handles agent replies via POST /api/batches/:id/reply", async () => {

@@ -27,6 +27,7 @@ interface BatchView {
 
 interface DocumentPayload {
   path?: string;
+  relativePath?: string;
   content?: string;
   files?: string[];
   format?: DocumentFormat;
@@ -44,6 +45,7 @@ export class ReviewApp {
   private sidebar: Sidebar;
   private activityDrawer: ActivityDrawer;
   private currentFilePath = "";
+  private currentRelativePath = "";
   private noteSeq = 0;
   private eventSource?: EventSource;
   private batches = new Map<string, BatchView>();
@@ -76,6 +78,7 @@ export class ReviewApp {
       const data = await response.json() as DocumentPayload;
       if (!data.content) return;
       this.currentFilePath = data.path || "";
+      this.currentRelativePath = data.relativePath || "";
       this.composer.setTargetPolicy(data.artifactClass || "protected");
       this.sidebar.setFiles(data.files || [], this.currentFilePath);
       this.renderDocument(data.content, undefined, undefined, data.format || "markdown");
@@ -93,10 +96,12 @@ export class ReviewApp {
       const data = await response.json() as DocumentPayload;
       if (!data.content) return;
       this.currentFilePath = data.path || "";
+      this.currentRelativePath = data.relativePath || relativePath;
       this.composer.setTargetPolicy(data.artifactClass || "protected");
       this.sidebar.setActivePath(this.currentFilePath);
       this.renderDocument(data.content, undefined, undefined, data.format || "markdown");
       await Promise.all([this.loadFeedback(), this.loadBatches()]);
+      this.connectEventStream();
       this.statusRegion.announce(`Loaded ${data.path ? data.path.split("/").pop() : "document"}`);
     } catch {
       // Error fetching document
@@ -141,7 +146,7 @@ export class ReviewApp {
 
   public async loadFeedback(): Promise<void> {
     try {
-      const response = await fetch("/api/feedback");
+      const response = await fetch(this.targetApiUrl("/api/feedback"));
       if (!response.ok) return;
       const article = document.querySelector("#doc-content") as HTMLElement;
       if (!article) return;
@@ -157,7 +162,7 @@ export class ReviewApp {
 
   private async loadBatches(): Promise<void> {
     try {
-      const response = await fetch("/api/batches");
+      const response = await fetch(this.targetApiUrl("/api/batches"));
       if (response.ok) this.applyBatches(await response.json(), true);
     } catch {
       // The page remains usable when no bridge endpoint is available.
@@ -166,7 +171,7 @@ export class ReviewApp {
 
   private connectEventStream(): void {
     this.eventSource?.close();
-    this.eventSource = new EventSource("/api/events");
+    this.eventSource = new EventSource(this.targetApiUrl("/api/events"));
     this.eventSource.addEventListener("snapshot", (event) => this.applyBatches(JSON.parse((event as MessageEvent).data), true));
     this.eventSource.addEventListener("batch", (event) => this.applyBatches([JSON.parse((event as MessageEvent).data)]));
     this.eventSource.addEventListener("document_change", (event) => {
@@ -214,11 +219,12 @@ export class ReviewApp {
 
   private async refreshDocumentFromServer(): Promise<void> {
     try {
-      const response = await fetch("/api/document");
+      const response = await fetch(this.targetApiUrl("/api/document"));
       if (!response.ok) return;
       const data = await response.json() as DocumentPayload;
       if (!data.content) return;
       this.currentFilePath = data.path || this.currentFilePath;
+      this.currentRelativePath = data.relativePath || this.currentRelativePath;
       this.composer.setTargetPolicy(data.artifactClass || "protected");
       this.renderDocument(data.content, undefined, undefined, data.format || "markdown");
       await this.loadFeedback();
@@ -258,12 +264,11 @@ export class ReviewApp {
 
   private async handleBatchSubmit(prompt: string, notes: NoteItem[]): Promise<boolean> {
     try {
-      const response = await fetch("/api/batches", {
+      const response = await fetch(this.targetApiUrl("/api/batches"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: `batch_${crypto.randomUUID()}`,
-          filePath: this.currentFilePath,
           prompt,
           notes: notes.map(({ id, anchor, comment }) => ({ id, anchor: anchor!, comment }))
         })
@@ -285,7 +290,7 @@ export class ReviewApp {
 
   private async handleBatchAcceptance(batchId: string): Promise<boolean> {
     try {
-      const response = await fetch(`/api/batches/${encodeURIComponent(batchId)}/accept`, { method: "POST" });
+      const response = await fetch(this.targetApiUrl(`/api/batches/${encodeURIComponent(batchId)}/accept`), { method: "POST" });
       if (!response.ok) throw new Error("The feedback batch could not be accepted.");
       const batch = await response.json() as BatchView;
       this.applyBatches([batch]);
@@ -310,6 +315,10 @@ export class ReviewApp {
         this.statusRegion.announce("Queue discarded.");
       }
     );
+  }
+
+  private targetApiUrl(pathname: string): string {
+    return this.currentRelativePath ? `${pathname}?file=${encodeURIComponent(this.currentRelativePath)}` : pathname;
   }
 
   private setupShortcuts(): void {

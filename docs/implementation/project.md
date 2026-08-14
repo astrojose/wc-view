@@ -24,15 +24,21 @@
 - [x] HTML scratch artifact rendering.
 - [x] Design-system visual polish.
 - [x] Composer density and applied refresh.
+- [x] phase-06-feedback-isolation-and-bridge-hardening.md
 
 ## Dependencies
 
 - Phase 05 implements adopted design in `docs/design/architecture/wc-view-system-flow.md`, `docs/design/interfaces/cli-contract.md`, `docs/design/data/feedback-schema.md`, `docs/design/interfaces/floating-bar-interaction-spec.md`, and `docs/design/product/ux-design-system.md`.
+- Phase 06 tasks execute sequentially: task 13 → task 14 → task 15.
 
 ## Linked Artifacts
 
 - phases: docs/implementation/phases/phase-05-automatic-agent-feedback.md
+- phases: docs/implementation/phases/phase-06-feedback-isolation-and-bridge-hardening.md
 - tasks: docs/implementation/tasks/task-09-automatic-agent-feedback-loop.md
+- tasks: docs/implementation/tasks/task-13-workspace-scoped-feedback-store-and-cli.md
+- tasks: docs/implementation/tasks/task-14-asynchronous-workspace-bridge.md
+- tasks: docs/implementation/tasks/task-15-server-target-and-sse-isolation.md
 - tasks: docs/implementation/tasks/task-10-html-scratch-artifacts.md
 - tasks: docs/implementation/tasks/task-11-design-system-visual-polish.md
 - tasks: docs/implementation/tasks/task-12-composer-density-and-applied-refresh.md

@@ -9,9 +9,10 @@
 
 - Users select text or elements and attach inline notes with robust layered anchors.
 - The composer displays active note badges and an optional prompt.
-- **Atomic batch submission** writes the prompt and all accumulated notes as one `FeedbackBatch`; notes are not persisted separately before submission.
+- **Atomic batch submission** writes the prompt and all accumulated notes as one server-scoped `FeedbackBatch`; notes are not persisted separately before submission.
+- The browser supplies only the batch idempotency key, prompt, and notes. The server derives workspace, session, and canonical target identity.
 - After submission, the floating bar shows the latest batch state: `queued`, `claimed`, `working`, `response_ready`, `applied`, `awaiting_acceptance`, `resolved`, `failed`, or `orphaned`.
-- The browser streams the latest agent result and keeps a lightweight affordance to recover prior batch results.
+- The browser streams the latest target-scoped agent result over SSE and keeps a lightweight affordance to recover prior target-scoped batch results.
 - The composer remains non-modal. It never traps focus.
 - An annotation whose quote cannot resolve is `orphaned`; it is never silently rebound.
 
@@ -31,7 +32,8 @@
 
 ## Acceptance Criteria
 
-- A single submit creates one durable batch containing every displayed note and the prompt.
+- A single submit creates one durable batch containing every displayed note, the prompt, and server-derived workspace/session/target provenance.
+- Two clients viewing different files in one served tree cannot change each other's batch target.
 - Submitting feedback shows a browser-visible state update without another user prompt.
 - `scratch` and `protected` policy is visible before submission.
 - A protected target has no automatic mutation path in the UI contract.

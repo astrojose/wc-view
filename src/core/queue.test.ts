@@ -7,6 +7,8 @@ import {
   claimNextBatch,
   createFeedbackBatch,
   getUnresolvedItems,
+  getUnresolvedBatches,
+  getWorkspaceStore,
   gcFeedback,
   readBatches,
   readQueue,
@@ -119,6 +121,25 @@ describe("Feedback Queue Manager", () => {
     const batchRes = resolveFeedbackItem(batch.id, testQueuePath);
     expect(batchRes).toEqual({ resolved: true, id: batch.id, type: "batch" });
     expect(readBatches(testQueuePath)[0].status).toBe("resolved");
+  });
+
+  it("uses one workspace identity for symlink and real paths and isolates stores", () => {
+    const workspaceA = path.join(tmpDir, "workspace-a");
+    const workspaceB = path.join(tmpDir, "workspace-b");
+    const alias = path.join(tmpDir, "workspace-alias");
+    fs.mkdirSync(workspaceA);
+    fs.mkdirSync(workspaceB);
+    fs.symlinkSync(workspaceA, alias);
+
+    expect(getWorkspaceStore(alias).workspaceId).toBe(getWorkspaceStore(workspaceA).workspaceId);
+    const queueA = path.join(tmpDir, "queue-a.jsonl");
+    const queueB = path.join(tmpDir, "queue-b.jsonl");
+    const first = createFeedbackBatch({ filePath: path.join(workspaceA, ".wc-view-scratch.md"), sessionId: "serve_a", prompt: "A", notes: [] }, workspaceA, queueA);
+    createFeedbackBatch({ filePath: path.join(workspaceB, ".wc-view-scratch.md"), sessionId: "serve_b", prompt: "B", notes: [] }, workspaceB, queueB);
+
+    expect(getUnresolvedBatches({ sessionId: "serve_a" }, queueA).map((batch) => batch.id)).toEqual([first.id]);
+    expect(readBatches(queueA)).toHaveLength(1);
+    expect(readBatches(queueB)).toHaveLength(1);
   });
 
   it("appends agent replies to an existing feedback batch", () => {
