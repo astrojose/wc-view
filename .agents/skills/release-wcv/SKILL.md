@@ -20,6 +20,7 @@ Run the wc-view release workflow end to end: changelog, versioning, verification
 ## Safety Rules
 
 - Never run `npm publish`, `git push`, `git push --tags`, or `gh release create` before showing the exact release plan and receiving explicit user approval in the current turn.
+- Ensure npm authentication is configured in `.npmrc` (`npm login`) prior to publishing.
 - Never discard, reset, or overwrite unrelated user changes.
 - Always commit release changes on the current branch. Do not create or switch branches during this release skill.
 - Always use `$git-commit-now` to create the release commit after verification, staging only the approved release files for the current branch.
@@ -56,7 +57,7 @@ Run the wc-view release workflow end to end: changelog, versioning, verification
 5. Publish only after approval:
    - Use `$git-commit-now` on the current branch to commit the approved release files with `chore(release): release v<x.y.z>`.
    - Create annotated tag `v<x.y.z>`.
-   - Run `npm publish --access public`.
+   - Run `npm publish --access public` (utilizes authentication in `.npmrc`).
    - Push the branch and tag.
    - Run `gh release create v<x.y.z> --title "v<x.y.z>" --notes-file <release-notes-file>`.
 6. Verify publication:

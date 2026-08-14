@@ -149,13 +149,15 @@ python3 .agents/skills/release-wcv/scripts/preflight_release.py --version 0.1.0
 
 ## Release
 
+Ensure npm authentication is set in `.npmrc` (`npm login`).
+
 Use the repo-local release skill:
 
 ```text
 /release-wcv
 ```
 
-The release workflow verifies typecheck, tests, build, workflow validation, changelog contents, npm package metadata, and npm tarball contents before any publish step. It requires explicit approval before `npm publish`, Git tag push, or GitHub Release creation.
+The release workflow verifies typecheck, tests, build, workflow validation, changelog contents, npm package metadata, and npm tarball contents before any publish step. It publishes using `npm publish --access public` (utilizing `.npmrc`) and requires explicit approval before publishing, Git tag push, or GitHub Release creation.
 
 ## Documentation
 

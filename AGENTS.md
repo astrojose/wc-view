@@ -51,7 +51,7 @@ Run type-check after coherent TypeScript changes. Run workflow validation after 
 - Keep generated viewer state outside the repository: `~/.wc-view/`.
 - Keep machine-readable CLI payloads on `stdout`; send diagnostics to `stderr`.
 - Preserve `wc-view` localhost binding to `127.0.0.1` unless an accepted design change says otherwise.
-- Do not run `npm publish`, `git push`, `git push --tags`, or `gh release create` without explicit user approval in the current turn.
+- Do not run `npm publish`, `git push`, `git push --tags`, or `gh release create` without explicit user approval in the current turn. Ensure npm authentication is configured via `.npmrc` (`npm login`).
 
 ## Shared Skills
 
