@@ -2,6 +2,26 @@
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-08-15
+
+### Added
+
+- Add installable plugin manifests for Claude Code (`.claude-plugin/`), OpenAI Codex (`.codex-plugin/`), and the vendor-neutral Agent Plugins 1.0 standard (`plugin.json`), covering Cursor and other spec-compliant clients.
+- Move the `use-wc-view` companion skill into the repository under `skills/use-wc-view/`.
+
+### Changed
+
+- Tokenize remaining hardcoded spacing and border values in the client stylesheet against the existing design-system scale.
+- Align floating composer action button sizing (`Discard`, `Send to Agent`, `Accept and apply`) with the existing compact `btn-sm` variant already used by the Feed button.
+- Document required npm `.npmrc` authentication for publishing in `AGENTS.md`, `README.md`, and the release skill.
+
+### Fixed
+
+- Remove inline styles from `FloatingComposer`; use design-system classes.
+- Fix a CSS specificity bug where elements with the native `hidden` attribute (e.g. the "Accept and apply" button) remained visible due to an equal-specificity class rule.
+- Fix the floating composer's text input overflowing its 44px tap-target floor due to padding stacking beyond `min-height`.
+- Stop rendering the reviewed document's filename as a page heading above the canvas.
+
 ## [0.6.0] - 2026-08-14
 
 ### Added

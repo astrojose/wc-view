@@ -46,7 +46,7 @@ export class FloatingComposer {
       <div class="floating-composer-bar">
         <div id="target-policy" class="composer-policy" role="status">Protected project artifact — result requires your acceptance</div>
         <div id="batch-status" class="composer-status" aria-live="polite">Ready for feedback.</div>
-        <button id="accept-result-btn" type="button" class="btn btn-primary" hidden>Accept and apply</button>
+        <button id="accept-result-btn" type="button" class="btn btn-primary btn-sm" hidden>Accept and apply</button>
         <div class="composer-summary-row">
           <div class="composer-badge-group">
             <div id="chip-badge" class="chip-badge">🏷️ <span class="chip-count">0</span> notes attached</div>
@@ -55,8 +55,8 @@ export class FloatingComposer {
             </button>
           </div>
           <div class="composer-actions">
-            <button id="discard-btn" type="button" class="btn" title="Discard notes">Discard</button>
-            <button id="submit-btn" type="button" class="btn btn-primary">Send to Agent</button>
+            <button id="discard-btn" type="button" class="btn btn-sm" title="Discard notes">Discard</button>
+            <button id="submit-btn" type="button" class="btn btn-primary btn-sm">Send to Agent</button>
           </div>
         </div>
 

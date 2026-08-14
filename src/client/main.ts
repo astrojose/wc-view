@@ -78,7 +78,7 @@ export class ReviewApp {
       this.currentFilePath = data.path || "";
       this.composer.setTargetPolicy(data.artifactClass || "protected");
       this.sidebar.setFiles(data.files || [], this.currentFilePath);
-      this.renderDocument(data.content, data.path ? data.path.split("/").pop() : "Document", undefined, data.format || "markdown");
+      this.renderDocument(data.content, undefined, undefined, data.format || "markdown");
       await Promise.all([this.loadFeedback(), this.loadBatches()]);
       this.connectEventStream();
     } catch {
@@ -95,7 +95,7 @@ export class ReviewApp {
       this.currentFilePath = data.path || "";
       this.composer.setTargetPolicy(data.artifactClass || "protected");
       this.sidebar.setActivePath(this.currentFilePath);
-      this.renderDocument(data.content, data.path ? data.path.split("/").pop() : "Document", undefined, data.format || "markdown");
+      this.renderDocument(data.content, undefined, undefined, data.format || "markdown");
       await Promise.all([this.loadFeedback(), this.loadBatches()]);
       this.statusRegion.announce(`Loaded ${data.path ? data.path.split("/").pop() : "document"}`);
     } catch {
@@ -173,7 +173,7 @@ export class ReviewApp {
       try {
         const payload = JSON.parse((event as MessageEvent).data) as DocumentPayload;
         if (payload.path === this.currentFilePath && payload.content) {
-          this.loadMarkdown(payload.content, payload.path.split("/").pop());
+          this.loadMarkdown(payload.content);
           this.statusRegion.announce("Document updated live.");
         }
         if (payload.files) {
@@ -220,7 +220,7 @@ export class ReviewApp {
       if (!data.content) return;
       this.currentFilePath = data.path || this.currentFilePath;
       this.composer.setTargetPolicy(data.artifactClass || "protected");
-      this.renderDocument(data.content, data.path ? data.path.split("/").pop() : "Document", undefined, data.format || "markdown");
+      this.renderDocument(data.content, undefined, undefined, data.format || "markdown");
       await this.loadFeedback();
 
       this.statusRegion.announce("Document refreshed with the latest agent-applied changes.");

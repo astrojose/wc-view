@@ -4,6 +4,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -44,7 +48,7 @@ body {
   flex-direction: column;
   gap: var(--space-3);
   padding-bottom: var(--space-4);
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: var(--border-width) solid var(--border-subtle);
 }
 
 .doc-canvas > header h1 {
@@ -118,7 +122,7 @@ body {
   font: var(--type-code);
   color: var(--fg-primary);
   background: var(--surface-inset);
-  border: 1px solid var(--border-subtle);
+  border: var(--border-width) solid var(--border-subtle);
   border-radius: var(--radius-sm);
   padding: 0.05rem var(--space-1);
 }
@@ -126,7 +130,7 @@ body {
 #doc-content :where(pre) {
   overflow: auto;
   background: var(--surface-inset);
-  border: 1px solid var(--border-subtle);
+  border: var(--border-width) solid var(--border-subtle);
   border-radius: var(--radius-sm);
   padding: var(--space-4);
   min-height: 6rem;
@@ -154,13 +158,13 @@ body {
   display: block;
   overflow-x: auto;
   background: var(--surface-card);
-  border: 1px solid var(--border-subtle);
+  border: var(--border-width) solid var(--border-subtle);
   border-radius: var(--radius);
 }
 
 #doc-content :where(th, td) {
   padding: var(--space-2) var(--space-3);
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: var(--border-width) solid var(--border-subtle);
   text-align: left;
   vertical-align: top;
   font: var(--type-ui);
@@ -182,7 +186,7 @@ body {
 
 #doc-content :where(hr) {
   border: 0;
-  border-top: 1px solid var(--border-subtle);
+  border-top: var(--border-width) solid var(--border-subtle);
   width: 100%;
 }
 
@@ -195,7 +199,7 @@ body {
 #doc-content :where(.mermaid) {
   min-height: 12rem;
   background: var(--surface-inset);
-  border: 1px solid var(--border-subtle);
+  border: var(--border-width) solid var(--border-subtle);
   border-radius: var(--radius);
   padding: var(--space-4);
 }
@@ -247,7 +251,7 @@ body {
 .floating-composer-bar {
   width: min(46rem, 100%);
   background-color: var(--surface-card);
-  border: 1px solid var(--border-strong);
+  border: var(--border-width) solid var(--border-strong);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-ambient);
   padding: var(--space-3);
@@ -284,7 +288,7 @@ body {
   flex: 1;
   min-height: var(--tap-min);
   background-color: var(--surface-inset);
-  border: 1px solid var(--border-subtle);
+  border: var(--border-width) solid var(--border-subtle);
   border-radius: var(--radius-sm);
   color: var(--fg-primary);
   padding: var(--space-3);
@@ -294,6 +298,10 @@ body {
 
 textarea.composer-input {
   resize: vertical;
+}
+
+input.composer-input {
+  padding: 0 var(--space-3);
 }
 
 .composer-input:focus {
@@ -459,7 +467,7 @@ textarea.composer-input {
 .composer-queue.open {
   max-height: 220px;
   overflow-y: auto;
-  border-top: 1px solid var(--border-subtle);
+  border-top: var(--border-width) solid var(--border-subtle);
   padding-top: var(--space-2);
 }
 
@@ -471,7 +479,7 @@ textarea.composer-input {
   font: var(--type-ui);
   padding: var(--space-2);
   background-color: var(--surface-inset);
-  border: 1px solid var(--border-subtle);
+  border: var(--border-width) solid var(--border-subtle);
   border-radius: var(--radius);
 }
 
@@ -526,7 +534,7 @@ textarea.composer-input {
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
   background: var(--surface-card);
-  border: 1px solid var(--border-strong);
+  border: var(--border-width) solid var(--border-strong);
   border-radius: var(--radius);
   box-shadow: var(--shadow-ambient);
   font: var(--type-meta);
@@ -541,7 +549,7 @@ textarea.composer-input {
 
 .annotation-popover {
   background-color: var(--surface-card);
-  border: 1px solid var(--border-strong);
+  border: var(--border-width) solid var(--border-strong);
   border-radius: var(--radius);
   box-shadow: var(--shadow-popover);
   padding: var(--pad-card);
@@ -568,7 +576,7 @@ textarea.composer-input {
 .dialog-card {
   width: min(24rem, calc(100% - var(--space-8)));
   background-color: var(--surface-card);
-  border: 1px solid var(--border-strong);
+  border: var(--border-width) solid var(--border-strong);
   border-radius: var(--radius);
   box-shadow: var(--shadow-popover);
   padding: var(--space-5);
@@ -639,7 +647,7 @@ body.has-sidebar .doc-canvas {
   bottom: 0;
   width: 17rem;
   background-color: var(--surface-card);
-  border-right: 1px solid var(--border-subtle);
+  border-right: var(--border-width) solid var(--border-subtle);
   display: flex;
   flex-direction: column;
   z-index: 80;
@@ -685,7 +693,7 @@ body.has-sidebar .doc-canvas {
 .sidebar-filter-input {
   width: 100%;
   background-color: var(--surface-inset);
-  border: 1px solid var(--border-subtle);
+  border: var(--border-width) solid var(--border-subtle);
   border-radius: var(--radius);
   color: var(--fg-primary);
   padding: var(--space-2) var(--space-3);
@@ -712,7 +720,7 @@ body.has-sidebar .doc-canvas {
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
   background: transparent;
-  border: 1px solid transparent;
+  border: var(--border-width) solid transparent;
   border-radius: var(--radius-sm);
   color: var(--fg-secondary);
   font: var(--type-ui);
@@ -786,7 +794,7 @@ body.has-sidebar .doc-canvas {
 .mermaid-error {
   padding: var(--space-3);
   background-color: var(--surface-inset);
-  border-left: 3px solid var(--status-unresolved);
+  border-left: var(--annotation-bar-width) solid var(--status-unresolved);
   border-radius: var(--radius-sm);
   color: var(--fg-secondary);
   font: var(--type-body);
@@ -815,7 +823,7 @@ body.has-sidebar .doc-canvas {
   transform: translate(-50%, -50%);
   width: min(32rem, calc(100% - var(--space-8)));
   background-color: var(--surface-card);
-  border: 1px solid var(--border-strong);
+  border: var(--border-width) solid var(--border-strong);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-popover);
   padding: var(--space-5);
@@ -866,7 +874,7 @@ body.has-sidebar .doc-canvas {
 .shortcuts-table td {
   padding: var(--space-2) var(--space-1);
   font: var(--type-ui);
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: var(--border-width) solid var(--border-subtle);
   color: var(--fg-secondary);
 }
 
@@ -877,11 +885,11 @@ body.has-sidebar .doc-canvas {
 
 kbd {
   display: inline-block;
-  padding: 0.15rem 0.4rem;
+  padding: var(--space-1) var(--space-2);
   font: var(--type-code);
   font-size: 0.75rem;
   background-color: var(--surface-raised);
-  border: 1px solid var(--border-subtle);
+  border: var(--border-width) solid var(--border-subtle);
   border-radius: var(--radius-sm);
   box-shadow: 0 1px 0 var(--border-strong);
   color: var(--fg-primary);
@@ -907,7 +915,7 @@ kbd {
   bottom: 0;
   width: min(28rem, 100vw);
   background-color: var(--surface-card);
-  border-left: 1px solid var(--border-subtle);
+  border-left: var(--border-width) solid var(--border-subtle);
   box-shadow: var(--shadow-popover);
   display: flex;
   flex-direction: column;
@@ -925,7 +933,7 @@ kbd {
   align-items: center;
   justify-content: space-between;
   padding: var(--space-4) var(--space-5);
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: var(--border-width) solid var(--border-subtle);
 }
 
 .drawer-title-group {
@@ -942,7 +950,7 @@ kbd {
 
 .drawer-status-chip {
   font: var(--type-meta);
-  padding: 0.2rem 0.5rem;
+  padding: var(--space-1) var(--space-2);
   background-color: rgba(34, 197, 94, 0.15);
   color: #22c55e;
   border-radius: var(--radius-pill);
@@ -974,7 +982,7 @@ kbd {
 
 .activity-card {
   background-color: var(--surface-raised);
-  border: 1px solid var(--border-subtle);
+  border: var(--border-width) solid var(--border-subtle);
   border-radius: var(--radius);
   padding: var(--space-4);
   display: flex;
@@ -997,7 +1005,7 @@ kbd {
 .activity-status {
   font: var(--type-meta);
   font-size: 0.75rem;
-  padding: 0.15rem 0.4rem;
+  padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-sm);
   text-transform: capitalize;
 }
@@ -1022,7 +1030,7 @@ kbd {
   background-color: var(--surface-inset);
   padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-sm);
-  border-left: 3px solid var(--annotation-bar);
+  border-left: var(--annotation-bar-width) solid var(--annotation-bar);
 }
 
 .activity-note-item blockquote {
@@ -1056,7 +1064,7 @@ kbd {
 
 .reply-agent {
   background-color: var(--surface-inset);
-  border: 1px solid var(--border-strong);
+  border: var(--border-width) solid var(--border-strong);
 }
 
 .reply-author {
@@ -1098,7 +1106,7 @@ kbd {
   background-color: var(--accent-action);
   color: #fff;
   border-radius: var(--radius-pill);
-  padding: 0.1rem 0.4rem;
+  padding: var(--space-1) var(--space-2);
   font-size: 0.7rem;
   font-weight: bold;
 }
