@@ -1,7 +1,7 @@
 {
   "name": "wc-view",
   "description": "Local Markdown and HTML review surface for agent workflows",
-  "version": "0.8.3",
+  "version": "0.9.0",
   "author": {
     "name": "astrojose",
     "url": "https://github.com/astrojose"

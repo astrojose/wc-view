@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-08-15
+
+### Added
+
+- Widen the HTML artifact canvas to ~3/4 of the available content area, sidebar-aware, via a `format`-scoped `.doc-canvas.is-html` modifier. Markdown stays at `68-76ch`.
+- Align `.theme-toggle` to follow the active canvas width under both Markdown and HTML formats, with and without the directory-serve sidebar.
+- Add a `use-wc-view` companion-skill guardrail against nesting `.doc-canvas` width wrappers inside scratch HTML.
+
 ## [0.8.3] - 2026-08-15
 
 ### Changed
