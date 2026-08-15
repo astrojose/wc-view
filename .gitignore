@@ -4,6 +4,10 @@ __pycache__/
 
 # Generated viewer state lives in ~/.wc-view, never in the repo
 .wc-view/
+.wc-view-scratch*.md
+
+# Transient gh release --notes-file payloads; content lives in CHANGELOG.md
+.release-notes-v*.md
 
 # Build & Dependencies
 dist/
