@@ -16,6 +16,15 @@ proposed
 
 - Define the missing boundary in `docs/design` and add corresponding execution tasks in `docs/implementation`.
 
+## Decision Required
+
+- Accept the proposed ownership boundary.
+
+## Approval Boundary
+
+- Authorizes: update the named design and implementation documents.
+- Does not authorize: code changes, pushes, releases, deployments, or production writes.
+
 ## Expected Design Impact
 
 - Update one design artifact with approved ownership and constraints.

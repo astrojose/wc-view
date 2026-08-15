@@ -18,6 +18,15 @@ proposed
 
 -
 
+## Decision Required
+
+-
+
+## Approval Boundary
+
+- Authorizes:
+- Does not authorize:
+
 ## Expected Design Impact
 
 -

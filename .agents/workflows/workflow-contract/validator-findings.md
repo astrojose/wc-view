@@ -12,6 +12,20 @@ Script fallback:
 python3 .agents/workflows/workflow-contract/scripts/validate_workflow.py
 ```
 
+Validators check structure and mechanically consistent declarations. They do not prove evidence truth, infer approval, or equate `WORKFLOW:ok` with product completeness.
+
+## CONFIG
+
+Sample finding:
+
+```text
+CONFIG:repo.config.json:unsupported-version:expected-2:follow-compatibility/migrate-v0.3.0-to-v0.4.0.md
+```
+
+Meaning: the config is old or lacks required schema-v2 policy. CONFIG stops the pipeline so later checks do not crash or produce misleading findings.
+
+Fix: follow the migration guide, preserve consumer-specific values, and rerun validation.
+
 ## STRUCTURE
 
 Sample finding:
@@ -59,15 +73,49 @@ Sample finding:
 TRANSITIONS:docs/changes/proposed/my-proposal.md:invalid-proposal-status:accepted
 ```
 
-Meaning:
-
-- Proposal status under `## Status` is not listed in `statuses.proposal.allowed`.
+Meaning: a proposal, task, or phase status is not allowed by schema v2.
 
 Fix:
 
 1. Replace status with an allowed value.
 2. Or update `repo.config.json` status policy if intentionally changing process.
 3. Re-run validator.
+
+## READINESS
+
+Sample finding:
+
+```text
+READINESS:docs/implementation/tasks/auth.md:invalid-class-status:incident:review
+```
+
+Meaning: class/status compatibility or required class-specific context is invalid.
+
+Fix: reclassify from evidence before Review, or restore the status allowed for the current class. Populate Authority, Investigation, or Cross-Repository Coordination where required.
+
+## SCOPE
+
+Sample finding:
+
+```text
+SCOPE:docs/implementation/tasks/a.md:conflict:src/auth:docs/implementation/tasks/b.md
+```
+
+Meaning: two `in-progress` tasks claim the same mutable scope.
+
+Fix: assign distinct ownership or return one task to a non-executing status. A task leaving Review for `in-progress` must resolve the conflict first.
+
+## RECONCILIATION
+
+Sample finding:
+
+```text
+RECONCILIATION:docs/implementation/tasks/auth.md:done-requires-passing-evidence:AC-02
+```
+
+Meaning: criterion IDs/evidence coverage, reviewed context, evidence results, or status/outcome mapping is inconsistent.
+
+Fix: record actual evidence, return failed checks to `in-progress`, or use the appropriate blocked/cancelled outcome. Never invent evidence.
 
 ## REFERENCES
 
@@ -102,6 +150,8 @@ Procedure:
    - `STRUCTURE` (path moved/removed): move the file's content to the new location. Do not delete the source until its content lives at the target.
    - `REFERENCES` (legacy path): repoint the reference to the current path. Do not delete the sentence that carries the intent.
    - `METADATA` (missing/renamed headings): add or rename headings to the current template shape, keeping existing body content under the correct heading.
+   - `READINESS` (invalid class/context): classify from current evidence and populate only known facts.
+   - `RECONCILIATION` (missing proof): preserve the gap and use `blocked` with the appropriate outcome.
    - `STRUCTURE` design subdirectories: `docs/design/*` subdirectories are on-demand. Do not recreate old empty ones. If content exists, keep it where it is — older names (`domain`, `data-models`) remain valid. Do not rename existing subdirectories to match new suggestions.
 3. Reorganize only enough to pass. Do not merge, split, or rewrite approved design truth as part of an upgrade — that is a separate, human-approved change captured in `docs/changes/proposed/`.
 4. Re-run the validator. Confirm `WORKFLOW:ok`.

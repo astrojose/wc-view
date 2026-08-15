@@ -45,6 +45,44 @@ Core rule:
 > Truth exists only after approval.
 > Agents execute approved truth, not unresolved thinking.
 
+## Adaptive Execution
+
+Every non-trivial workstream declares its current mode, work class, task status, authority, and next gate.
+
+| Dimension | Values | Purpose |
+|---|---|---|
+| Mode | `Thinking`, `Investigation`, `Execution`, `Review` | Current agent activity |
+| Class | `direct`, `planned`, `decision`, `incident` | Required governance lane |
+| Coordination | `single-repo`, `cross-repo` | Repository and contract ownership |
+
+Classification order:
+
+1. Unknown failure cause or remedy → `incident`.
+2. Unresolved behavior or system decision → `decision`.
+3. Accepted behavior requiring coordinated implementation → `planned`.
+4. Bounded behavior-preserving work → `direct`.
+5. Unclear classification → `decision`.
+
+Accepted intent, bounded scope, explicit authority, acceptance criteria, and verification must precede permanent changes. Investigation may change hypotheses. Any discovery that changes accepted behavior, contracts, architecture, data semantics, or material scope returns to Thinking.
+
+```md
+Workflow
+
+- Mode: Investigation
+- Class: incident
+- Task status: not applicable
+- Authority: read-only diagnostics
+- Next gate: reclassify from evidence
+```
+
+Approval requests state the decision, authorized scope, excluded actions, a bold scoped reply phrase, and a model-agnostic `Low`, `Medium`, or `High` reasoning-effort recommendation for the next action. Approval is explicit and scoped; it never expands from silence, reactions, annotations, inference, or ambiguous language.
+
+## Evidence-Backed Completion
+
+Implementation stops in `review` before completion. Review maps every acceptance criterion to evidence, records the reviewed revision and environment, and compares design, implementation, scope, and documentation.
+
+Only `reconciled-and-verified` work is `done`. Incomplete proof, design drift, or a required decision is `blocked`. Reverted or superseded work is `cancelled`. Status reports index these outcomes; they do not replace task evidence.
+
 ## Agentic Engineering Flow
 
 ```mermaid
@@ -52,6 +90,7 @@ sequenceDiagram
     participant Dev as Developer
     participant Docs as Workflow Docs
     participant Agent as Agent
+    participant Evidence as Investigation
     participant Code as Codebase
     participant Review as Review
 
@@ -61,8 +100,10 @@ sequenceDiagram
 
     Agent->>Docs: Read workflow contract
     Agent->>Docs: Validate layer rules
-    Agent->>Docs: Read design truth and execution plan
-    Agent->>Code: Execute bounded task
+    Agent->>Docs: Read relevant design and execution context
+    Agent->>Evidence: Reproduce uncertain behavior when required
+    Evidence->>Agent: Reclassify from evidence
+    Agent->>Code: Execute bounded work
     Agent->>Review: Submit code, tests, and PR
 
     Review->>Docs: Reconcile code vs docs
@@ -118,13 +159,15 @@ It:
 - creates missing workflow docs structure
 - creates or repairs local skill links
 - links `CLAUDE.md` to `AGENTS.md`; it does not create `GEMINI.md`
-- validates structure, metadata, transitions, and references
+- validates schema v2 configuration, structure, metadata, class readiness, scope, statuses, reconciliation, and references
+- runs the standard-library validator regression suite
 
 It does not:
 
 - edit an existing `AGENTS.md`
 - decide repo-specific design truth
 - replace review of `repo.config.json`
+- verify that recorded product evidence is true or infer approval
 
 After bootstrap, review:
 
@@ -149,13 +192,13 @@ Add this to the consuming repo:
 
 ## Start Here
 
-1. Classify the task.
-2. Run `python3 .agents/workflows/workflow-contract/scripts/validate_workflow.py`.
-3. Read `docs/design/`.
-4. Read `docs/implementation/`.
+1. Read the canonical workflow policy.
+2. Classify layer, lifecycle state, mode, work class, and coordination.
+3. Declare mode, class, task status, authority, and next gate for non-trivial work.
+4. Read `docs/design/` and `docs/implementation/`.
 5. If behavior is unresolved, read or create `docs/changes/proposed/`.
-6. Load required repo skill(s).
-7. Inspect target service code before editing.
+6. Load required repo skill(s) and inspect target code.
+7. Run `python3 .agents/workflows/workflow-contract/scripts/validate_workflow.py`.
 ```
 
 Optional reinforcement:
@@ -194,6 +237,7 @@ Put unresolved behavior in `docs/changes/proposed` until accepted.
 - `spec/`: canonical workflow policy, lifecycle, guardrails, and task standard
 - `templates/`: reusable document templates
 - `scripts/validate_workflow.py`: canonical workflow validator
+- `tests/`: validator regression suite and scenario fixtures
 - `compatibility/`: migration guides and compatibility shims
 - `examples/`: example documentation and workflow usage
 - `repo.config.json`: repo-level workflow configuration
@@ -211,7 +255,10 @@ Script fallback:
 ```bash
 python3 .agents/workflows/workflow-contract/scripts/init_workflow_contract.py
 python3 .agents/workflows/workflow-contract/scripts/validate_workflow.py
+python3 -m unittest discover -s .agents/workflows/workflow-contract/tests -p 'test_*.py'
 ```
+
+`WORKFLOW:ok` proves structural and mechanically checkable consistency only. It is not product verification, evidence attestation, or approval.
 
 ## Update Workflow
 

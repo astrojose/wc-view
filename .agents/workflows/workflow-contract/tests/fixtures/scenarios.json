@@ -1,0 +1,15 @@
+[
+  {"name": "valid-direct", "class": "direct", "status": "in-progress", "outcome": "pending", "valid": true},
+  {"name": "valid-planned", "class": "planned", "status": "in-progress", "outcome": "pending", "multiline_agent_context": true, "valid": true},
+  {"name": "incident-reclassified-planned", "class": "planned", "status": "in-progress", "outcome": "pending", "reclassified": "incident", "valid": true},
+  {"name": "incident-reclassified-decision", "class": "decision", "status": "blocked", "outcome": "decision-required", "reclassified": "incident", "valid": true},
+  {"name": "implemented-unverified", "class": "planned", "status": "blocked", "outcome": "implemented-unverified", "evidence_result": "not-run", "valid": true},
+  {"name": "design-drift", "class": "planned", "status": "blocked", "outcome": "design-drift", "valid": true},
+  {"name": "cross-repository", "class": "planned", "status": "in-progress", "outcome": "pending", "coordination": "cross-repo", "valid": true},
+  {"name": "reconciled-done", "class": "planned", "status": "done", "outcome": "reconciled-and-verified", "evidence_result": "pass", "valid": true},
+  {"name": "invalid-done-incomplete-evidence", "class": "planned", "status": "done", "outcome": "reconciled-and-verified", "evidence_result": "not-run", "reviewed_revision": "", "valid": false, "finding": "RECONCILIATION:"},
+  {"name": "reverted-cancelled", "class": "planned", "status": "cancelled", "outcome": "reverted", "valid": true},
+  {"name": "superseded-cancelled", "class": "planned", "status": "cancelled", "outcome": "superseded", "valid": true},
+  {"name": "invalid-decision-execution", "class": "decision", "status": "in-progress", "outcome": "pending", "valid": false, "finding": "READINESS:"},
+  {"name": "invalid-incident-review", "class": "incident", "status": "review", "outcome": "pending", "valid": false, "finding": "READINESS:"}
+]

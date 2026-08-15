@@ -4,7 +4,7 @@
 
 ## Status
 
-- `pending | in-progress | blocked | done`
+- `pending | in-progress | blocked | review | done | cancelled`
 - Last updated: YYYY-MM-DD
 
 ## Objective
@@ -15,11 +15,11 @@
 
 -
 
-## Included Features
+## Features
 
 -
 
-## Task Checklist
+## Tasks
 
 - [ ] 
 

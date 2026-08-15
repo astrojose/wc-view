@@ -2,8 +2,14 @@
 
 ## Status
 
-- `in-progress`
-- Last updated: 2026-06-15
+- `done`
+- Last updated: 2026-08-12
+
+## Work Classification
+
+- Class: planned
+- Coordination: single-repo
+- Reclassified from: not applicable
 
 ## Linked Phase
 
@@ -12,41 +18,76 @@
 ## Agent Context
 
 - Skills: workflow-contract
+- Proposal: not applicable
 - Design docs: docs/design/architecture/system-overview.md
-- Constraints: docs changes only; no service code edits
+- Constraints: documentation and workflow configuration only
 - Do not touch: services/
+
+## Authority
+
+- Allowed: update workflow documents and configuration
+- Requires approval: implementation outside the accepted task scope
+- Prohibited: service code, deployment, and production writes
 
 ## Objective
 
-Align implementation artifacts so workflow validation passes consistently.
+Make the workflow contract pass its configured validation suite.
 
 ## Scope Boundary
 
-**In scope:**
-- docs/implementation/ — all phase, task, and status files
-- .agents/workflows/workflow-contract/repo.config.json
-
-**Out of scope:**
-- docs/design/ — no design truth changes
-- Service source code
+- In scope: docs/implementation/ and repo.config.json
+- Out of scope: docs/design/ and service source code
 
 ## Acceptance Criteria
 
-- [ ] `python3 .agents/workflows/workflow-contract/scripts/validate_workflow.py` exits with `WORKFLOW:ok`
-- [ ] All required section headings are present in every task and phase doc
-- [ ] No stale legacy references detected by REFERENCES check
+- [x] AC-01: The workflow validator exits with `WORKFLOW:ok`.
+- [x] AC-02: Every task contains the required schema v2 headings.
 
 ## Dependencies
 
--
+- Accepted workflow design.
 
 ## Implementation Checklist
 
-- [x] Confirm required docs locations and ownership
-- [ ] Add missing section headings to implementation docs
-- [ ] Re-run workflow validation and capture result
+- [x] Align task documents with schema v2.
+- [x] Run validation and tests.
 
 ## Verification
 
-- Command: `python3 .agents/workflows/workflow-contract/scripts/validate_workflow.py`
-- Evidence: all six validator categories return `ok`
+- Command: `make check`
+- Evidence: recorded under Reconciliation.
+
+## Investigation
+
+- Not applicable: planned work.
+
+## Cross-Repository Coordination
+
+- Not applicable: single-repo work.
+
+## Reconciliation
+
+- Outcome: reconciled-and-verified
+- Reviewed revision: abc1234
+- Environment: local disposable consumer
+- Reviewed at: 2026-08-12T12:00:00Z
+- Reviewer: repository maintainer
+
+### Acceptance Evidence
+
+| Criterion | Result | Evidence |
+|---|---|---|
+| AC-01 | pass | `make check` ended with `WORKFLOW:ok` |
+| AC-02 | pass | `METADATA:ok` and `READINESS:ok` |
+
+### Alignment
+
+- Design vs implementation: aligned
+- Planned vs actual scope: no variance
+- Documentation drift: none found
+- Deferred gaps: none
+- Newly discovered decisions: none
+
+### Follow-up
+
+- None.

@@ -16,6 +16,26 @@
 
 ---
 
+## v0.4.0-rc.1
+
+**Breaking release candidate — see `compatibility/migrate-v0.3.0-to-v0.4.0.md`.**
+
+### Added
+
+- Adaptive operating modes, work classes, independent coordination profiles, scoped approvals, and provider-agnostic reasoning guidance.
+- Review and reconciliation lifecycle with criterion-level evidence.
+- Schema v2 configuration, fail-fast `CONFIG`, class-aware `READINESS`, `RECONCILIATION`, and standard-library regression tests.
+
+### Changed
+
+- Task and phase statuses now include `review` and `cancelled`.
+- `done` requires `reconciled-and-verified`; `cancelled` requires `reverted` or `superseded`.
+- Task, proposal, decision-log, status, and reconciliation templates implement the v2 contract.
+
+This release candidate does not migrate consumer evidence automatically. Follow the migration guide and never invent historical proof.
+
+---
+
 ## v0.2.2
 
 ### Added

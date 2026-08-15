@@ -9,17 +9,34 @@ from workflow_paths import project_root, workflow_root
 
 ROOT = project_root()
 WORKFLOW_ROOT = workflow_root()
+CONFIG_SCRIPT = "validate_config.py"
 SCRIPTS = [
     "validate_structure.py",
     "validate_metadata.py",
     "validate_readiness.py",
     "validate_scope_conflicts.py",
     "validate_transitions.py",
+    "validate_reconciliation.py",
     "validate_references.py",
 ]
 
 
 def main() -> int:
+    config_result = subprocess.run(
+        [sys.executable, str(WORKFLOW_ROOT / "scripts" / CONFIG_SCRIPT)],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if config_result.stdout:
+        print(config_result.stdout.strip())
+    if config_result.stderr:
+        print(config_result.stderr.strip())
+    if config_result.returncode != 0:
+        print("WORKFLOW:failed:config")
+        return 1
+
     failures = 0
     for script in SCRIPTS:
         path = WORKFLOW_ROOT / "scripts" / script

@@ -3,5 +3,5 @@
   "title": "Workflow Contract",
   "description": "Planning-first documentation workflow with source-of-truth layers, templates, guardrails, and validators.",
   "skill": "workflow-contract",
-  "version": "0.3.0"
+  "version": "0.4.0-rc.1"
 }

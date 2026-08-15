@@ -1,60 +1,38 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import re
-import sys
 import json
-from pathlib import Path
+import sys
 
+from workflow_document import status
 from workflow_paths import config_path, project_root
 
 ROOT = project_root()
-CONFIG_PATH = config_path()
-STATUS_RE = re.compile(r"^## Status\s*$", re.MULTILINE)
 
 
-def load_config() -> dict:
-    with CONFIG_PATH.open("r", encoding="utf-8") as file:
-        return json.load(file)
-
-
-def extract_status(text: str) -> str | None:
-    if not STATUS_RE.search(text):
-        return None
-
-    lines = text.splitlines()
-    for index, line in enumerate(lines):
-        if line.strip() == "## Status":
-            for next_line in lines[index + 1 : index + 6]:
-                cleaned = next_line.strip().lstrip("-").strip().strip("`").lower()
-                if cleaned:
-                    return cleaned
-    return None
+def validate_statuses(errors: list[str], paths, artifact: str, allowed: set[str]) -> None:
+    for path in sorted(paths):
+        if path.name in {"README.md", "backlog.md"}:
+            continue
+        value = status(path.read_text(encoding="utf-8", errors="ignore"))
+        if value not in allowed:
+            errors.append(f"TRANSITIONS:{path.relative_to(ROOT).as_posix()}:invalid-{artifact}-status:{value or 'missing'}")
 
 
 def main() -> int:
-    config = load_config()
-    enabled = bool(config.get("validation", {}).get("enable_transitions", True))
-    if not enabled:
+    config = json.loads(config_path().read_text(encoding="utf-8"))
+    if not config.get("validation", {}).get("enable_transitions", True):
         print("TRANSITIONS:skipped")
         return 0
 
-    proposed_dir = ROOT / config["paths"]["changes_proposed"]
-    allowed = set(config.get("statuses", {}).get("proposal", {}).get("allowed", []))
     errors: list[str] = []
-
-    for path in sorted(proposed_dir.glob("*.md")):
-        text = path.read_text(encoding="utf-8", errors="ignore")
-        status = extract_status(text)
-        if status and status not in allowed:
-            rel = path.relative_to(ROOT).as_posix()
-            errors.append(f"TRANSITIONS:{rel}:invalid-proposal-status:{status}")
+    validate_statuses(errors, (ROOT / config["paths"]["changes_proposed"]).glob("*.md"), "proposal", set(config["statuses"]["proposal"]["allowed"]))
+    validate_statuses(errors, (ROOT / config["paths"]["implementation_tasks"]).glob("*.md"), "task", set(config["statuses"]["task"]["allowed"]))
+    validate_statuses(errors, (ROOT / config["paths"]["implementation_phases"]).glob("*.md"), "phase", set(config["statuses"]["phase"]["allowed"]))
 
     if errors:
-        for err in errors:
-            print(err)
+        print("\n".join(errors))
         return 1
-
     print("TRANSITIONS:ok")
     return 0
 

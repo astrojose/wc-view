@@ -1,90 +1,91 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import re
-import sys
 import json
-from pathlib import Path
+import sys
 
+from workflow_document import acceptance_criteria, field, is_populated, section_is_populated, status
 from workflow_paths import config_path, project_root
 
 ROOT = project_root()
-CONFIG_PATH = config_path()
 
-# Lines that count as empty content inside a section.
-_EMPTY_LINE = re.compile(
-    r"^\s*("
-    r"-\s*\[\s*\]\s*"   # - [ ]
-    r"|-\s*$"           # bare -
-    r"|`{3}.*"          # code fence open/close
-    r"|\*\*[^*]+\*\*:\s*"  # sub-labels like **In scope:**
-    r"|(Command|Evidence|Skills|Design docs|Constraints|Do not touch):\s*"  # empty key-value pairs
-    r")\s*$"
-)
+CLASS_STATUSES = {
+    "direct": {"pending", "in-progress", "blocked", "review", "done", "cancelled"},
+    "planned": {"pending", "in-progress", "blocked", "review", "done", "cancelled"},
+    "decision": {"pending", "blocked", "cancelled"},
+    "incident": {"pending", "in-progress", "blocked", "cancelled"},
+}
 
 
-def load_config() -> dict:
-    with CONFIG_PATH.open("r", encoding="utf-8") as file:
-        return json.load(file)
-
-
-def extract_status(text: str) -> str | None:
-    for index, line in enumerate(text.splitlines()):
-        if line.strip() == "## Status":
-            for next_line in text.splitlines()[index + 1 : index + 6]:
-                cleaned = next_line.strip().lstrip("-").strip().strip("`").lower()
-                if cleaned:
-                    return cleaned
-    return None
-
-
-def section_is_populated(text: str, heading: str) -> bool:
-    pattern = rf"^## {re.escape(heading)}\s*$"
-    match = re.search(pattern, text, re.MULTILINE)
-    if not match:
-        return False
-    after = text[match.end():]
-    next_section = re.search(r"^## ", after, re.MULTILINE)
-    content = after[: next_section.start()] if next_section else after
-    for line in content.splitlines():
-        if line.strip() and not _EMPTY_LINE.match(line):
-            return True
-    return False
+def require_field(errors: list[str], rel: str, text: str, heading: str, label: str) -> None:
+    if not is_populated(field(text, heading, label)):
+        errors.append(f"READINESS:{rel}:requires-content:{heading}:{label}")
 
 
 def main() -> int:
-    config = load_config()
-    enabled = bool(config.get("validation", {}).get("enable_readiness", True))
-    if not enabled:
+    config = json.loads(config_path().read_text(encoding="utf-8"))
+    if not config.get("validation", {}).get("enable_readiness", True):
         print("READINESS:skipped")
         return 0
 
-    task_dir = ROOT / config["paths"]["implementation_tasks"]
     errors: list[str] = []
+    task_dir = ROOT / config["paths"]["implementation_tasks"]
+    allowed_classes = set(config["classification"]["work_classes"])
+    allowed_coordination = set(config["classification"]["coordination_profiles"])
 
     for path in sorted(task_dir.glob("*.md")):
         if path.name == "backlog.md":
             continue
         text = path.read_text(encoding="utf-8", errors="ignore")
-        status = extract_status(text)
         rel = path.relative_to(ROOT).as_posix()
+        task_status = status(text)
+        work_class = field(text, "Work Classification", "Class").lower()
+        coordination = field(text, "Work Classification", "Coordination").lower()
+        reclassified = field(text, "Work Classification", "Reclassified from").lower()
 
-        if status == "in-progress":
-            for section in ["Acceptance Criteria", "Scope Boundary"]:
-                if not section_is_populated(text, section):
-                    errors.append(
-                        f"READINESS:{rel}:in-progress-requires-content:{section}"
-                    )
+        if work_class not in allowed_classes:
+            errors.append(f"READINESS:{rel}:invalid-class:{work_class or 'missing'}")
+            continue
+        if coordination not in allowed_coordination:
+            errors.append(f"READINESS:{rel}:invalid-coordination:{coordination or 'missing'}")
+        if reclassified not in {"incident", "not applicable"}:
+            errors.append(f"READINESS:{rel}:invalid-reclassified-from:{reclassified or 'missing'}")
+        if task_status not in CLASS_STATUSES[work_class]:
+            errors.append(f"READINESS:{rel}:invalid-class-status:{work_class}:{task_status or 'missing'}")
 
-        if status == "done":
-            if not section_is_populated(text, "Verification"):
-                errors.append(f"READINESS:{rel}:done-requires-verification-evidence")
+        if work_class in {"direct", "planned"}:
+            if not section_is_populated(text, "Objective") and not section_is_populated(text, "Goal"):
+                errors.append(f"READINESS:{rel}:requires-content:Objective|Goal")
+            for heading in ["Scope Boundary", "Verification"]:
+                if not section_is_populated(text, heading):
+                    errors.append(f"READINESS:{rel}:requires-content:{heading}")
+            for label in ["Allowed", "Requires approval", "Prohibited"]:
+                require_field(errors, rel, text, "Authority", label)
+            if not acceptance_criteria(text):
+                errors.append(f"READINESS:{rel}:requires-criterion-ids")
+
+        if work_class == "planned":
+            for label in ["Skills", "Design docs", "Constraints", "Do not touch"]:
+                require_field(errors, rel, text, "Agent Context", label)
+            if not section_is_populated(text, "Dependencies"):
+                errors.append(f"READINESS:{rel}:planned-requires-dependencies")
+            if not section_is_populated(text, "Implementation Checklist"):
+                errors.append(f"READINESS:{rel}:planned-requires-checklist")
+
+        if work_class == "decision":
+            require_field(errors, rel, text, "Agent Context", "Proposal")
+
+        if work_class == "incident":
+            for label in ["Symptom", "Environment", "Safety boundary", "Reproduction", "Evidence"]:
+                require_field(errors, rel, text, "Investigation", label)
+
+        if coordination == "cross-repo":
+            for label in ["Participating repositories", "Shared contracts", "Invariants", "Integration owner", "Dependency order"]:
+                require_field(errors, rel, text, "Cross-Repository Coordination", label)
 
     if errors:
-        for err in errors:
-            print(err)
+        print("\n".join(errors))
         return 1
-
     print("READINESS:ok")
     return 0
 

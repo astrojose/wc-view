@@ -13,12 +13,12 @@
 
 - Documentation alignment, task sequencing, and validation readiness.
 
-## Included Features
+## Features
 
 - Core docs structure in place.
 - Initial implementation tasks defined.
 
-## Task Checklist
+## Tasks
 
 - [x] Create project implementation summary.
 - [ ] Complete first execution task.

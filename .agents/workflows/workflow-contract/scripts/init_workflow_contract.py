@@ -115,13 +115,26 @@ def placeholder_for(path: Path, config: dict) -> str:
             "## Implementation Checklist\n\n- [ ] \n"
         )
     if rel == "docs/implementation/status/weekly-status.md":
-        return f"# Weekly Status\n\n## {today}\n\n-\n"
+        headings = [
+            "Summary", "Completed", "In Progress", "Awaiting Review",
+            "Reconciled and Verified", "Implemented but Unverified",
+            "Decisions Required", "Blockers", "Cancelled",
+        ]
+        sections = "".join(f"### {heading}\n\n-\n\n" for heading in headings)
+        return f"# Weekly Status\n\n## {today}\n\n{sections}"
+    if rel == "docs/implementation/reviews/README.md":
+        return (
+            "# Reconciliation Reports\n\n"
+            "Use a report for reviews spanning multiple tasks or repositories. "
+            "Single-task reconciliation remains in the task document.\n"
+        )
     if rel == "docs/changes/README.md":
         return "# Proposed Changes\n\nUnresolved deltas only.\n"
     if rel == "docs/changes/template.md":
         return (
             "# Proposal Title\n\n## Status\n\nproposed\n\n## Context\n\n-\n\n"
-            "## Problem\n\n-\n\n## Proposed Change\n\n-\n"
+            "## Problem\n\n-\n\n## Proposed Change\n\n-\n\n"
+            "## Decision Required\n\n-\n\n## Approval Boundary\n\n-\n"
         )
     return ""
 

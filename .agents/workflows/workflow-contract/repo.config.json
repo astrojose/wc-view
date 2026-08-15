@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "repo": {
     "docs_root": "docs"
   },
@@ -9,6 +9,7 @@
     "implementation_project": "docs/implementation/project.md",
     "implementation_phases": "docs/implementation/phases",
     "implementation_tasks": "docs/implementation/tasks",
+    "implementation_reviews": "docs/implementation/reviews",
     "implementation_status": "docs/implementation/status",
     "changes_root": "docs/changes",
     "changes_proposed": "docs/changes/proposed",
@@ -23,10 +24,12 @@
     "docs/implementation/phases",
     "docs/implementation/tasks",
     "docs/implementation/status",
+    "docs/implementation/reviews",
     "docs/changes/proposed",
     ".agents/workflows/workflow-contract/spec",
     ".agents/workflows/workflow-contract/templates",
-    ".agents/workflows/workflow-contract/scripts"
+    ".agents/workflows/workflow-contract/scripts",
+    ".agents/workflows/workflow-contract/tests/fixtures"
   ],
   "required_files": [
     "AGENTS.md",
@@ -35,6 +38,7 @@
     "docs/implementation/project.md",
     "docs/implementation/tasks/backlog.md",
     "docs/implementation/status/weekly-status.md",
+    "docs/implementation/reviews/README.md",
     "docs/changes/README.md",
     "docs/changes/template.md",
     ".agents/workflows/workflow-contract/README.md",
@@ -45,8 +49,12 @@
     ".agents/workflows/workflow-contract/spec/task-spec.md",
     ".agents/workflows/workflow-contract/scripts/init_workflow_contract.py",
     ".agents/workflows/workflow-contract/scripts/validate_workflow.py",
+    ".agents/workflows/workflow-contract/scripts/validate_config.py",
     ".agents/workflows/workflow-contract/scripts/validate_readiness.py",
-    ".agents/workflows/workflow-contract/scripts/validate_scope_conflicts.py"
+    ".agents/workflows/workflow-contract/scripts/validate_scope_conflicts.py",
+    ".agents/workflows/workflow-contract/scripts/validate_reconciliation.py",
+    ".agents/workflows/workflow-contract/scripts/workflow_document.py",
+    ".agents/workflows/workflow-contract/templates/reconciliation-report.md"
   ],
   "disallowed_directories": [
     "docs/changes/approved",
@@ -63,6 +71,7 @@
     "enable_readiness": true,
     "enable_scope_conflicts": true,
     "enable_transitions": true,
+    "enable_reconciliation": true,
     "enable_references": true
   },
   "statuses": {
@@ -78,7 +87,9 @@
         "pending",
         "in-progress",
         "blocked",
-        "done"
+        "review",
+        "done",
+        "cancelled"
       ]
     },
     "phase": {
@@ -86,8 +97,47 @@
         "pending",
         "in-progress",
         "blocked",
-        "done"
+        "review",
+        "done",
+        "cancelled"
       ]
+    }
+  },
+  "classification": {
+    "work_classes": [
+      "direct",
+      "planned",
+      "decision",
+      "incident"
+    ],
+    "coordination_profiles": [
+      "single-repo",
+      "cross-repo"
+    ]
+  },
+  "reconciliation": {
+    "outcomes": [
+      "pending",
+      "reconciled-and-verified",
+      "implemented-unverified",
+      "design-drift",
+      "decision-required",
+      "reverted",
+      "superseded"
+    ],
+    "evidence_results": [
+      "pass",
+      "fail",
+      "blocked",
+      "not-run"
+    ],
+    "status_outcomes": {
+      "pending": ["pending"],
+      "in-progress": ["pending"],
+      "review": ["pending"],
+      "blocked": ["implemented-unverified", "design-drift", "decision-required"],
+      "done": ["reconciled-and-verified"],
+      "cancelled": ["reverted", "superseded"]
     }
   },
   "transitions": {
@@ -106,6 +156,22 @@
         "on-hold",
         "proposed"
       ]
+    },
+    "task": {
+      "pending": ["pending", "in-progress", "blocked", "cancelled"],
+      "in-progress": ["in-progress", "blocked", "review", "cancelled"],
+      "blocked": ["blocked", "pending", "in-progress", "cancelled"],
+      "review": ["review", "in-progress", "blocked", "done", "cancelled"],
+      "done": ["done"],
+      "cancelled": ["cancelled"]
+    },
+    "phase": {
+      "pending": ["pending", "in-progress", "blocked", "cancelled"],
+      "in-progress": ["in-progress", "blocked", "review", "cancelled"],
+      "blocked": ["blocked", "pending", "in-progress", "cancelled"],
+      "review": ["review", "in-progress", "blocked", "done", "cancelled"],
+      "done": ["done"],
+      "cancelled": ["cancelled"]
     }
   },
   "exceptions": {

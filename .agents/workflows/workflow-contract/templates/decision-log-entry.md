@@ -6,6 +6,19 @@
 
 YYYY-MM-DD
 
+## Accepted By
+
+-
+
+## Accepted At
+
+YYYY-MM-DDTHH:MM:SSZ
+
+## Source Proposal
+
+- Path:
+- Revision:
+
 ## Decision
 
 -
@@ -15,5 +28,13 @@ YYYY-MM-DD
 -
 
 ## Impacted Docs
+
+-
+
+## Authorized Scope
+
+-
+
+## Excluded Actions
 
 -

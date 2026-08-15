@@ -14,7 +14,27 @@
 
 -
 
+## Awaiting Review
+
+-
+
+## Reconciled and Verified
+
+-
+
+## Implemented but Unverified
+
+-
+
+## Decisions Required
+
+-
+
 ## Blockers
+
+-
+
+## Cancelled
 
 -
 

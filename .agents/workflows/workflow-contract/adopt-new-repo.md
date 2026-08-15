@@ -22,6 +22,8 @@ Plain `agents-setup init` only creates agent wiring and does not create `docs/`.
 3. Add the required snippet below to `AGENTS.md`.
 4. Tune `.agents/workflows/workflow-contract/repo.config.json` for your repo paths and constraints.
 
+Upgrading an existing consumer from v0.3.0 requires `compatibility/migrate-v0.3.0-to-v0.4.0.md`. Preserve consumer-specific config values and existing intent; never fabricate historical evidence to satisfy reconciliation.
+
 `make check` does not edit an existing `AGENTS.md`. Add the snippet manually so repo-specific agent instructions stay intentional.
 
 Manual fallback:
@@ -37,6 +39,7 @@ Done when:
 - `AGENTS.md` contains `Workflow Authority` and `Start Here`.
 - `.agents/workflows/workflow-contract/repo.config.json` reflects your repo's paths and constraints.
 - `python3 .agents/workflows/workflow-contract/scripts/validate_workflow.py` ends with `WORKFLOW:ok`.
+- Validator tests pass with `python3 -m unittest discover -s .agents/workflows/workflow-contract/tests -p 'test_*.py'`.
 
 ## Manual Fallback (No Make)
 
@@ -55,13 +58,13 @@ python3 .agents/workflows/workflow-contract/scripts/validate_workflow.py
 
 ## Start Here
 
-1. Classify the task.
-2. Run `python3 .agents/workflows/workflow-contract/scripts/validate_workflow.py`.
-3. Read `docs/design/`.
-4. Read `docs/implementation/`.
+1. Read the canonical workflow policy.
+2. Classify layer, lifecycle state, mode, work class, and coordination.
+3. For non-trivial work, declare mode, class, task status, authority, and next gate.
+4. Read `docs/design/` and `docs/implementation/`.
 5. If behavior is unresolved, read or create `docs/changes/proposed/`.
-6. Load required repo skill(s).
-7. Inspect target service code before editing.
+6. Load required repo skill(s) and inspect target code.
+7. Run `python3 .agents/workflows/workflow-contract/scripts/validate_workflow.py`.
 ```
 
 ## Optional AGENTS.md Reinforcement
