@@ -622,14 +622,15 @@ body.has-sidebar .doc-canvas {
 }
 
 body.has-sidebar .doc-canvas.is-html {
-  --html-available: calc(100vw - 17rem);
+  /* 100% of body excludes the scrollbar, unlike 100vw */
+  --html-available: calc(100% - 17rem);
   width: min(calc(0.75 * var(--html-available)), var(--measure-html-max, 90rem));
   margin-left: calc(17rem + (var(--html-available) - min(calc(0.75 * var(--html-available)), var(--measure-html-max, 90rem))) / 2);
   margin-right: auto;
 }
 
 body.has-sidebar .theme-toggle.is-html {
-  --html-available: calc(100vw - 17rem);
+  --html-available: calc(100% - 17rem);
   width: min(calc(0.75 * var(--html-available)), var(--measure-html-max, 90rem));
   margin-left: calc(17rem + (var(--html-available) - min(calc(0.75 * var(--html-available)), var(--measure-html-max, 90rem))) / 2);
   margin-right: auto;
