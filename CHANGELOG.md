@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-08-15
+
+### Fixed
+
+- Center the sidebar-aware HTML artifact canvas using body-relative width (`100%`) instead of `100vw`, so classic (always-visible) scrollbars no longer skew centering.
+
 ## [0.9.0] - 2026-08-15
 
 ### Added
