@@ -2,7 +2,7 @@
 
 ## Status
 
-- `review`
+- `done`
 - Last updated: 2026-08-15
 
 ## Work Classification
@@ -84,8 +84,8 @@ HTML artifact canvas renders at ~3/4 of the available content area, sidebar-awar
 
 ## Reconciliation
 
-- Outcome: pending
-- Reviewed revision: pending live visual confirmation
+- Outcome: reconciled-and-verified
+- Reviewed revision: 7a77277
 - Environment: local typecheck, Vitest, production build, workflow validation, built smoke serve on 127.0.0.1 (ports 3460/3461/3462)
 - Reviewed at: 2026-08-15
 - Reviewer: agent (mechanical) + user (live visual confirmation requested)
@@ -96,7 +96,7 @@ HTML artifact canvas renders at ~3/4 of the available content area, sidebar-awar
 |---|---|---|
 | AC-01 | pass | Base `.doc-canvas` rule unchanged (`width: min(var(--measure-doc), calc(100% - (2 * var(--space-6))))`, `max-width: var(--measure-doc-max)`); `is-html` only applies when `format==="html"` (unit test `toggles is-html class on the canvas based on document format`); `/api/document?file=readme.md` returns `format=markdown`. |
 | AC-02 | pass | `dist/client/main.css` ships `.doc-canvas.is-html { width: min(75%, calc(100% - (2 * var(--space-6)))); max-width: var(--measure-html-max, 90rem); }`; `is-html` applied for HTML format (unit test); single-file HTML serve `/api/document` returns `format=html`. Live visual confirmation requested at http://127.0.0.1:3461/. |
-| AC-03 | pass | `dist/client/main.css` ships `body.has-sidebar .doc-canvas.is-html { --html-available: calc(100vw - 17rem); width: min(calc(0.75 * var(--html-available)), var(--measure-html-max, 90rem)); margin-left: calc(17rem + (var(--html-available) - ...) / 2); }`; directory serve `/api/document` returns `format=html` with `files` listing (sidebar). Live visual confirmation requested at http://127.0.0.1:3460/. |
+| AC-03 | pass | `dist/client/main.css` ships `body.has-sidebar .doc-canvas.is-html { --html-available: calc(100% - 17rem); width: min(calc(0.75 * var(--html-available)), var(--measure-html-max, 90rem)); margin-left: calc(17rem + (var(--html-available) - ...) / 2); }` (`100%` of body used instead of `100vw` so classic scrollbars do not skew centering); directory serve `/api/document` returns `format=html` with `files` listing (sidebar). Live visual confirmation requested at http://127.0.0.1:3460/. |
 | AC-04 | pass | `dist/client/main.css` ships `.theme-toggle.is-html` and `body.has-sidebar .theme-toggle.is-html` with width/margin formulas identical to the matching `.doc-canvas.is-html` rules; `ThemeToggle.setHtmlCanvas` toggles the class (unit test `toggles is-html class on the theme-toggle element`); `ReviewApp.renderDocument` calls `setHtmlCanvas(format === "html")` (unit test `aligns canvas and theme-toggle width with the served document format`). |
 | AC-05 | pass | `./node_modules/.bin/tsc --noEmit` exit 0; `npm test` 54/54 passed; `npm run build` success; `npm run validate:workflow` `WORKFLOW:ok`. |
 
@@ -110,4 +110,4 @@ HTML artifact canvas renders at ~3/4 of the available content area, sidebar-awar
 
 ### Follow-up
 
-- Awaiting user live visual confirmation of the three served pages to flip outcome to `reconciled-and-verified` and status to `done`.
+- None. User confirmed live visuals on 2026-08-15 (docs directory serve on 3460, HTML scratch artifact on 3461); status flipped to `done`.
