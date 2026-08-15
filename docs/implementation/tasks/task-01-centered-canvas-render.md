@@ -3,7 +3,13 @@
 ## Status
 
 - `done`
-- Last updated: 2026-08-01
+- Last updated: 2026-08-15
+
+## Work Classification
+
+- Class: planned
+- Coordination: single-repo
+- Reclassified from: not applicable
 
 ## Linked Phase
 
@@ -12,9 +18,16 @@
 ## Agent Context
 
 - Skills: workflow-contract
+- Proposal: not applicable
 - Design docs: docs/design/product/ux-design-system.md
 - Constraints: No sidebars. No CDN dependencies. Reading column must stay reachable without entering review controls.
 - Do not touch: feedback queue, CLI, annotation anchoring code (later phases).
+
+## Authority
+
+- Allowed: Markdown-to-HTML canvas rendering and centered-column layout in `src/core/markdown.ts` and `src/client/`.
+- Requires approval: layout or measure changes outside the accepted 68-76ch reading column.
+- Prohibited: feedback queue, CLI, annotation anchoring, CDN dependencies, package publish, git push, and GitHub release creation.
 
 ## Objective
 
@@ -32,13 +45,13 @@ Render a Markdown document in a full-width centered column, `68-76ch` wide, with
 
 ## Acceptance Criteria
 
-- [x] Rendered document column width is clamped between `68ch` and `76ch` at all viewport widths ≥ 480px.
-- [x] No sidebar element (left or right) exists in the rendered DOM.
-- [x] Page has zero external CDN script or stylesheet requests (verified via network trace).
+- [x] AC-01: Rendered document column width is clamped between `68ch` and `76ch` at all viewport widths ≥ 480px.
+- [x] AC-02: No sidebar element (left or right) exists in the rendered DOM.
+- [x] AC-03: Page has zero external CDN script or stylesheet requests (verified via network trace).
 
 ## Dependencies
 
-- None.
+- None recorded.
 
 ## Implementation Checklist
 
@@ -49,5 +62,41 @@ Render a Markdown document in a full-width centered column, `68-76ch` wide, with
 
 ## Verification
 
-- Command: `npm test` (verified via `src/core/markdown.test.ts` and `src/client/components/Components.test.ts`).
-- Evidence: Vitest 7/7 tests passed; DOM inspection verified `DocCanvas` container renders at `width: min(72ch, 100%)` with `<main role="main">` and zero sidebars.
+- Command: `npm test` (`src/core/markdown.test.ts`, `src/client/components/Components.test.ts`).
+- Evidence: recorded under Reconciliation.
+
+## Investigation
+
+- Not applicable: planned work.
+
+## Cross-Repository Coordination
+
+- Not applicable: single-repo work.
+
+## Reconciliation
+
+- Outcome: reconciled-and-verified
+- Reviewed revision: 3ad1fd8c40f6
+- Environment: local Vitest
+- Reviewed at: 2026-08-01T00:00:00Z
+- Reviewer: recorded from original task verification during v0.4.0-rc.1 migration
+
+### Acceptance Evidence
+
+| Criterion | Result | Evidence |
+|---|---|---|
+| AC-01 | pass | Vitest 7/7 passed; DOM inspection recorded `DocCanvas` at `width: min(72ch, 100%)` with `<main role="main">` |
+| AC-02 | pass | DOM inspection recorded zero sidebar elements |
+| AC-03 | pass | Load check recorded zero external CDN script or stylesheet requests |
+
+### Alignment
+
+- Design vs implementation: aligned with recorded evidence at 3ad1fd8c40f6
+- Planned vs actual scope: no variance recorded
+- Documentation drift: directory-serve later added `.doc-sidebar`; unresolved in `docs/changes/proposed/wc-view-html-artifact-canvas-width.md`
+- Deferred gaps: HTML artifact canvas width remains proposed
+- Newly discovered decisions: none recorded at original completion
+
+### Follow-up
+
+- None.

@@ -3,11 +3,31 @@
 ## Status
 
 - `done`
-- Last updated: 2026-08-01
+- Last updated: 2026-08-15
+
+## Work Classification
+
+- Class: planned
+- Coordination: single-repo
+- Reclassified from: not applicable
 
 ## Linked Phase
 
 - phase-05-automatic-agent-feedback.md
+
+## Agent Context
+
+- Skills: workflow-contract
+- Proposal: not applicable
+- Design docs: docs/design/architecture/wc-view-system-flow.md, docs/design/interfaces/cli-contract.md, docs/design/data/feedback-schema.md, docs/design/interfaces/floating-bar-interaction-spec.md, docs/design/product/ux-design-system.md
+- Constraints: Preserve loopback-only binding, user-local feedback storage, stdout/stderr discipline, non-modal composer behavior, and protected-target mutation boundary.
+- Do not touch: `wc-view Design System/`, external network integrations, package publishing configuration.
+
+## Authority
+
+- Allowed: batch persistence, bridge command, batch HTTP/SSE, and composer atomic submission in the listed source files.
+- Requires approval: agent-specific SDK integrations or automatic mutation of non-scratch files.
+- Prohibited: `wc-view Design System/` edits, external network integrations, package publishing configuration, git push, and GitHub release creation.
 
 ## Objective
 
@@ -29,29 +49,65 @@ Implement durable feedback batches, a command-driven local bridge, and browser-v
 
 ## Acceptance Criteria
 
-- `POST /api/batches` persists one batch containing every submitted note and the prompt.
-- `GET /api/events` sends a current batch snapshot followed by batch transition events.
-- `wc-view bridge --command <command> --once` claims one queued batch, passes it as JSON on stdin, and records the adapter result.
-- A scratch batch can reach `applied`; a protected batch reaches `awaiting_acceptance` when its adapter returns that result.
-- The composer does not POST individual notes before batch submit and shows durable status after submission.
-- `npm test`, `./node_modules/.bin/tsc --noEmit`, and `npm run validate:workflow` exit 0.
+- [x] AC-01: `POST /api/batches` persists one batch containing every submitted note and the prompt.
+- [x] AC-02: `GET /api/events` sends a current batch snapshot followed by batch transition events.
+- [x] AC-03: `wc-view bridge --command <command> --once` claims one queued batch, passes it as JSON on stdin, and records the adapter result.
+- [x] AC-04: A scratch batch can reach `applied`; a protected batch reaches `awaiting_acceptance` when its adapter returns that result.
+- [x] AC-05: The composer does not POST individual notes before batch submit and shows durable status after submission.
+- [x] AC-06: `npm test`, `./node_modules/.bin/tsc --noEmit`, and `npm run validate:workflow` exit 0.
 
-## Agent Context
+## Dependencies
 
-- Skills: workflow-contract
-- Design docs: docs/design/architecture/wc-view-system-flow.md, docs/design/interfaces/cli-contract.md, docs/design/data/feedback-schema.md, docs/design/interfaces/floating-bar-interaction-spec.md, docs/design/product/ux-design-system.md
-- Constraints: Preserve loopback-only binding, user-local feedback storage, stdout/stderr discipline, non-modal composer behavior, and protected-target mutation boundary.
-- Do not touch: `wc-view Design System/`, external network integrations, package publishing configuration.
+- Phases 01-04 complete. Adopted bridge design in the listed design docs.
 
 ## Implementation Checklist
 
-1. Add feedback batch, artifact classification, claim, transition, and result operations with queue tests.
-2. Add batch REST endpoints and snapshot/batch SSE events with integration tests.
-3. Add command adapter bridge and optional serve startup with machine-readable adapter I/O.
-4. Change browser submission to one batch write and render server-streamed work state.
-5. Reconcile implementation status and run verification.
+- [x] Add feedback batch, artifact classification, claim, transition, and result operations with queue tests.
+- [x] Add batch REST endpoints and snapshot/batch SSE events with integration tests.
+- [x] Add command adapter bridge and optional serve startup with machine-readable adapter I/O.
+- [x] Change browser submission to one batch write and render server-streamed work state.
+- [x] Reconcile implementation status and run verification.
 
 ## Verification
 
 - Commands: `./node_modules/.bin/tsc --noEmit`; `npm test`; `npm run validate:workflow`; `npm run build`.
-- Evidence: 24 Vitest tests passed. Production-built E2E verified `queued` → bridge claim/dispatch → `applied` with adapter result returned through `/api/batches`.
+- Evidence: recorded under Reconciliation.
+
+## Investigation
+
+- Not applicable: planned work.
+
+## Cross-Repository Coordination
+
+- Not applicable: single-repo work.
+
+## Reconciliation
+
+- Outcome: reconciled-and-verified
+- Reviewed revision: d56d9e428422
+- Environment: local typecheck, Vitest, production build, and production-built E2E
+- Reviewed at: 2026-08-01T00:00:00Z
+- Reviewer: recorded from original task verification during v0.4.0-rc.1 migration
+
+### Acceptance Evidence
+
+| Criterion | Result | Evidence |
+|---|---|---|
+| AC-01 | pass | 24 Vitest tests passed, including batch persist of notes and prompt |
+| AC-02 | pass | Production-built E2E recorded SSE snapshot then transition events |
+| AC-03 | pass | Production-built E2E recorded `queued` → bridge claim/dispatch |
+| AC-04 | pass | Production-built E2E recorded `applied` with adapter result through `/api/batches` |
+| AC-05 | pass | Composer tests recorded atomic batch submit and durable status |
+| AC-06 | pass | typecheck, 24 Vitest tests, and workflow validation exited 0 |
+
+### Alignment
+
+- Design vs implementation: aligned with recorded evidence at d56d9e428422
+- Planned vs actual scope: no variance recorded
+- Documentation drift: none found
+- Deferred gaps: none recorded
+- Newly discovered decisions: none recorded
+
+### Follow-up
+
+- None.

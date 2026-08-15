@@ -3,7 +3,13 @@
 ## Status
 
 - `done`
-- Last updated: 2026-08-01
+- Last updated: 2026-08-15
+
+## Work Classification
+
+- Class: planned
+- Coordination: single-repo
+- Reclassified from: not applicable
 
 ## Linked Phase
 
@@ -12,9 +18,16 @@
 ## Agent Context
 
 - Skills: workflow-contract
+- Proposal: not applicable
 - Design docs: docs/design/data/feedback-schema.md, docs/design/interfaces/floating-bar-interaction-spec.md
 - Constraints: Ensure primary, secondary, and tertiary anchor tiers are extracted correctly from rendered text.
 - Do not touch: canvas rendering (task-01), theme tokens (task-02), CLI/queue (Phase 04).
+
+## Authority
+
+- Allowed: anchor extraction and resolution in `src/client/anchoring.ts`, `DocCanvas.ts`, and ReviewApp.
+- Requires approval: queue persistence or CLI changes.
+- Prohibited: canvas rendering, theme tokens, CLI/queue, package publish, git push, and GitHub release creation.
 
 ## Objective
 
@@ -31,17 +44,15 @@ Implement primary (quote+context), secondary (structural scope), and tertiary (p
 - Local feedback queue storage.
 - CLI serve command.
 
-
-
 ## Acceptance Criteria
 
-- [x] Selecting an element produces primary, secondary, and tertiary anchor tiers per `docs/design/data/feedback-schema.md`.
-- [x] Resolving an anchor matches primary quote+context, falls back to secondary structural scope, or tertiary position hint.
-- [x] An anchor that no longer resolves is marked `orphaned`, never silently re-bound.
+- [x] AC-01: Selecting an element produces primary, secondary, and tertiary anchor tiers per `docs/design/data/feedback-schema.md`.
+- [x] AC-02: Resolving an anchor matches primary quote+context, falls back to secondary structural scope, or tertiary position hint.
+- [x] AC-03: An anchor that no longer resolves is marked `orphaned`, never silently re-bound.
 
 ## Dependencies
 
-- None (open decision 1 resolved).
+- Markdown dialect and DOM text-offset anchors are adopted in `docs/design/architecture/tech-stack.md` and `docs/design/data/feedback-schema.md`.
 
 ## Implementation Checklist
 
@@ -51,5 +62,41 @@ Implement primary (quote+context), secondary (structural scope), and tertiary (p
 
 ## Verification
 
-- Command: `npm test` (verified via `src/client/anchoring.test.ts`).
-- Evidence: Vitest passed all 3 unit tests for 3-tier anchor extraction, quote resolution, and orphaned marking.
+- Command: `npm test` (`src/client/anchoring.test.ts`).
+- Evidence: recorded under Reconciliation.
+
+## Investigation
+
+- Not applicable: planned work.
+
+## Cross-Repository Coordination
+
+- Not applicable: single-repo work.
+
+## Reconciliation
+
+- Outcome: reconciled-and-verified
+- Reviewed revision: ee08c82e802c
+- Environment: local Vitest
+- Reviewed at: 2026-08-01T00:00:00Z
+- Reviewer: recorded from original task verification during v0.4.0-rc.1 migration
+
+### Acceptance Evidence
+
+| Criterion | Result | Evidence |
+|---|---|---|
+| AC-01 | pass | `src/client/anchoring.test.ts` recorded 3-tier extraction |
+| AC-02 | pass | `src/client/anchoring.test.ts` recorded quote resolution fallback |
+| AC-03 | pass | `src/client/anchoring.test.ts` recorded orphaned marking |
+
+### Alignment
+
+- Design vs implementation: aligned with recorded evidence at ee08c82e802c
+- Planned vs actual scope: no variance recorded
+- Documentation drift: none found
+- Deferred gaps: none recorded
+- Newly discovered decisions: none recorded
+
+### Follow-up
+
+- None.

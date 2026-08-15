@@ -11,7 +11,7 @@
 
 - A submitted batch contains the optional prompt (`""` when omitted) and all selected notes in one atomic write.
 - The browser supplies a client-generated batch id as an idempotency key; a retry with that id returns the original batch without resetting its state.
-- Each note retains a layered anchor:
+- Each note retains a layered anchor whose text coordinate space is normalized DOM text-content offsets over rendered blocks:
   - Primary: rendered-text `exact` quote plus `prefix` and `suffix`.
   - Secondary: heading slug, element type, and occurrence index.
   - Tertiary: line range or offset hint; never trusted without quote re-validation.
@@ -27,7 +27,8 @@
 - Storage path: `~/.wc-view/feedback/workspaces/<workspace-id>/queue.jsonl`.
 - Workspace metadata path: `~/.wc-view/feedback/workspaces/<workspace-id>/workspace.json`.
 - `workspace-id` is a stable SHA-256 digest of the realpath-resolved workspace path.
-- Queue mutation model: JSONL, with one current record per id written through atomic file replacement.
+- Queue mutation model: JSONL, with one current record per id written through atomic file replacement. Latest record per id wins.
+- `wc-view gc` purges `resolved` records older than 30 days by default. `--all` purges all `resolved` records regardless of age.
 - Queue reads distinguish empty state, malformed records, and filesystem failure; filesystem failure is never returned as an empty queue.
 - Queue locks contain owner and timestamp metadata and permit conservative stale-lock recovery.
 - Artifact class is `scratch` for a workspace-local `.wc-view-scratch*.md` or `.wc-view-scratch*.html` target; all other targets are `protected` unless a future contract adds stricter classes.

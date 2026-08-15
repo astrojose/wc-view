@@ -4,7 +4,7 @@
 
 - `wc-view` is a local Markdown and HTML review surface for agent workflows, designed as an independent CLI tool and localhost web interface.
 - UI/UX design truth and visual tokens are defined in `wc-view Design System/` (and summarized in `docs/design/product/ux-design-system.md`).
-- Markdown and explicit human acceptance are authoritative; browser feedback is unapproved input stored in user-local state (`~/.wc-view/feedback/queue.jsonl`).
+- Markdown and explicit human acceptance are authoritative; browser feedback is unapproved input stored in user-local workspace queues under `~/.wc-view/feedback/workspaces/`.
 
 ## Requirements & Constraints
 
@@ -22,7 +22,7 @@
 | **Runtime & Language** | Node.js (≥ 18) & TypeScript (ES2022, ESM `"type": "module"`) | Ubiquitous across AI agent environments (Codex, Claude Code, Antigravity, OpenCode, Cursor). Provides strict type safety for CLI contracts and feedback schemas. |
 | **CLI Framework** | `commander` | Lightweight, zero-dependency argument parser with subcommand dispatch (`serve`, `feedback`, `gc`). |
 | **Local HTTP Server** | Native Node.js `http` module | Sub-50ms cold startup time, zero external framework bloat, strict control over loopback `127.0.0.1` binding. |
-| **Markdown Engine** | `marked` (+ GFM extension) | Ultra-fast client/server Markdown parsing with deterministic heading slug generation and HTML output. |
+| **Markdown Engine** | `marked` (+ GFM) | Standard GFM Markdown parsing. Anchor text uses normalized DOM text-content offsets over rendered blocks. |
 | **HTML Artifact Mode** | Local HTML fragments or documents | Rich scratch visualizations render inside the styled wc-view shell without changing the feedback and acceptance model. |
 | **Diagram Engine** | `mermaid` | Client-side diagram rendering using pre-reserved height containers (`reservedHeight`) to prevent cumulative layout shift. |
 | **UI Design System** | Vanilla CSS (`wc-view Design System/`) | Direct adoption of the 100% complete CSS custom properties, tokens, and components from `wc-view Design System/`. |

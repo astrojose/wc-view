@@ -3,7 +3,13 @@
 ## Status
 
 - `done`
-- Last updated: 2026-08-01
+- Last updated: 2026-08-15
+
+## Work Classification
+
+- Class: planned
+- Coordination: single-repo
+- Reclassified from: not applicable
 
 ## Linked Phase
 
@@ -12,9 +18,16 @@
 ## Agent Context
 
 - Skills: workflow-contract
+- Proposal: not applicable
 - Design docs: docs/design/product/ux-design-system.md
 - Constraints: WCAG 2.2 AA minimum. Native HTML controls before ARIA. Never convey state by color alone.
 - Do not touch: composer/floating bar interaction logic (Phase 02) — this task covers only landmark structure and base focus order.
+
+## Authority
+
+- Allowed: landmark structure, base tab order, reduced-motion rules, focus indicators, and 44px targets for controls introduced here.
+- Requires approval: annotation keyboard behavior or `aria-live` status announcements reserved for later phases.
+- Prohibited: composer/floating-bar interaction logic, package publish, git push, and GitHub release creation.
 
 ## Objective
 
@@ -34,14 +47,14 @@ Establish semantic landmark regions (document, review queue, composer, status) a
 
 ## Acceptance Criteria
 
-- [x] Document, review queue, composer, and status each expose a distinct native or ARIA landmark role.
-- [x] Tab order allows reaching and reading the full document without focus entering any review control.
-- [x] All interactive elements introduced in this task have a visible focus indicator and a minimum 44 CSS-pixel hit target.
-- [x] Reduced-motion preference disables non-essential transitions/animations.
+- [x] AC-01: Document, review queue, composer, and status each expose a distinct native or ARIA landmark role.
+- [x] AC-02: Tab order allows reaching and reading the full document without focus entering any review control.
+- [x] AC-03: All interactive elements introduced in this task have a visible focus indicator and a minimum 44 CSS-pixel hit target.
+- [x] AC-04: Reduced-motion preference disables non-essential transitions/animations.
 
 ## Dependencies
 
-- None.
+- None recorded.
 
 ## Implementation Checklist
 
@@ -52,5 +65,42 @@ Establish semantic landmark regions (document, review queue, composer, status) a
 
 ## Verification
 
-- Command: `npm test` (verified via `src/client/components/Components.test.ts`).
-- Evidence: Landmark roles (`<main role="main">`, `<footer role="region">`, `<div role="status">`) verified in test suite; 44px min target and `@media (prefers-reduced-motion: reduce)` rules verified in `app.css`.
+- Command: `npm test` (`src/client/components/Components.test.ts`).
+- Evidence: recorded under Reconciliation.
+
+## Investigation
+
+- Not applicable: planned work.
+
+## Cross-Repository Coordination
+
+- Not applicable: single-repo work.
+
+## Reconciliation
+
+- Outcome: reconciled-and-verified
+- Reviewed revision: 3ad1fd8c40f6
+- Environment: local Vitest
+- Reviewed at: 2026-08-01T00:00:00Z
+- Reviewer: recorded from original task verification during v0.4.0-rc.1 migration
+
+### Acceptance Evidence
+
+| Criterion | Result | Evidence |
+|---|---|---|
+| AC-01 | pass | Components tests recorded `<main role="main">`, `<footer role="region">`, and `<div role="status">` |
+| AC-02 | pass | Keyboard-only navigation recorded document reachability without entering review controls |
+| AC-03 | pass | `app.css` recorded 44px min target and visible focus rules |
+| AC-04 | pass | `app.css` recorded `@media (prefers-reduced-motion: reduce)` rules |
+
+### Alignment
+
+- Design vs implementation: aligned with recorded evidence at 3ad1fd8c40f6
+- Planned vs actual scope: no variance recorded
+- Documentation drift: none found
+- Deferred gaps: none recorded
+- Newly discovered decisions: none recorded
+
+### Follow-up
+
+- None.

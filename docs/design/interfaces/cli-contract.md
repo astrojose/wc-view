@@ -8,16 +8,18 @@
 
 ## Requirements
 
-- `wc-view serve`: render a Markdown or HTML file, or a docs tree, in a loopback-only browser UI.
+- `wc-view serve`: render a Markdown or HTML file, or a docs tree, in a loopback-only browser UI. A file path serves that document only; a directory path enables docs-tree navigation.
 - `wc-view feedback --unresolved`: list unresolved feedback batches and legacy items for one workspace by default.
 - `wc-view bridge --workspace <path> --command <command>`: watch one workspace's durable batches, claim work, invoke an adapter, and persist result state.
 - `wc-view gc`: garbage-collect resolved feedback records.
 - Machine-readable payloads write only to standard output; diagnostics write only to standard error.
-- The server binds exclusively to `127.0.0.1`.
+- The server binds exclusively to `127.0.0.1`. REST endpoints accept local loopback client requests.
+- Durable queue writes use atomic file replacement.
 
 ## Decisions
 
 - `serve` generates a `sessionId`, resolves a canonical workspace, and may receive `--agent-command <command>` to start one bridge scoped to that workspace.
+- A file path argument serves a single-document view. A directory path argument enables docs-tree navigation.
 - A standalone bridge requires `--workspace <path>`.
 - The adapter receives one policy-specific batch envelope on standard input and returns its JSON result on standard output.
 - An unapproved protected envelope is proposal-only and omits a writable target contract; an approved or scratch envelope includes the canonical target path.
@@ -48,7 +50,7 @@
   - `--interval <ms>`: recovery poll interval.
   - `--bridge-id <id>`: optional stable bridge identity.
   - `--once`: process at most one workspace-scoped batch and exit.
-- `wc-view gc [-a, --all] [-d, --days <number>]`.
+- `wc-view gc [-a, --all] [-d, --days <number>]`: default retention is 30 days for `resolved` records; `--all` purges all `resolved` records.
 
 ### HTTP API
 
