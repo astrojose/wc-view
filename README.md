@@ -13,18 +13,62 @@ Local Markdown and HTML review surface for agent workflows.
 
 ## Install
 
-Use without installing:
+### CLI
+
+Run the latest CLI without a global install:
 
 ```bash
-npx @astrojose/wc-view --help
+npx --yes @astrojose/wc-view@latest --help
 ```
 
-Install globally:
+For a persistent `wc-view` command, install globally:
 
 ```bash
 npm install -g @astrojose/wc-view
 wc-view --help
 ```
+
+### Claude Code
+
+Add the GitHub marketplace and install the plugin:
+
+```bash
+claude plugin marketplace add astrojose/wc-view
+claude plugin install wc-view@wc-view
+claude plugin list
+```
+
+Inside an interactive Claude Code session, use:
+
+```text
+/plugin marketplace add astrojose/wc-view
+/plugin install wc-view@wc-view
+```
+
+### Codex CLI
+
+Add the GitHub marketplace and install the plugin:
+
+```bash
+codex plugin marketplace add astrojose/wc-view
+codex plugin add wc-view@wc-view
+codex plugin list
+```
+
+Start a new Codex thread after installation so it loads the plugin's skills.
+
+### Local plugin testing
+
+When testing an uncommitted checkout, use the local marketplace instead:
+
+```bash
+claude plugin marketplace add .
+codex plugin marketplace add .
+```
+
+### Other agent harnesses
+
+The repository also includes the vendor-neutral Agent Plugins 1.0 manifest at `plugin.json`. Harnesses that support that standard can install the repository through their plugin or marketplace command. There is no universal CLI for other harnesses; use their local-plugin installation flow.
 
 Use from a local checkout:
 
