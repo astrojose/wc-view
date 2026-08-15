@@ -6,8 +6,9 @@ pending
 
 ## Objective
 
-- Remaining unresolved behavior lives in `docs/changes/proposed/`.
+- No unresolved proposals remain in `docs/changes/proposed/`.
 
 ## Implementation Checklist
 
-- [ ] Adopt or close `docs/changes/proposed/wc-view-html-artifact-canvas-width.md`.
+- [x] Adopted `docs/changes/proposed/wc-view-html-artifact-canvas-width.md` into `docs/design/product/ux-design-system.md`; proposal removed.
+- [ ] Implement the accepted HTML canvas width contract under `docs/implementation/tasks/task-16-html-canvas-width.md`.

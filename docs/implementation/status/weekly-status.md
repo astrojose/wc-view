@@ -7,12 +7,14 @@
 - Migrated implementation tasks, weekly status, and open proposals to workflow-contract v0.4.0-rc.1 schema.
 - Adopted the five completed open decisions into `docs/design/` and removed `docs/changes/proposed/wc-view-open-decisions.md`.
 - Existing completed work stays `done` with `reconciled-and-verified` from recorded original verification, not new product evidence.
+- Adopted `wc-view-html-artifact-canvas-width` proposal into design truth and implemented task-16 (HTML-scoped wider canvas, sidebar-aware; Markdown unchanged).
 
 ### Completed
 
 - Workflow-contract upgrade to v0.4.0-rc.1.
 - Schema v2 headings, `AC-NN` identifiers, and reconciliation blocks on tasks 01-15.
 - Adopted Markdown/GFM+DOM-offset anchors, `gc` 30-day retention, JSONL atomic queue mutation, loopback REST trust, and file-versus-directory serve into design docs.
+- task-16 implementation: `.doc-canvas.is-html` and `.theme-toggle.is-html` CSS, `is-html` class wiring in `DocCanvas`/`ThemeToggle`/`ReviewApp`, tests.
 
 ### In Progress
 
@@ -20,7 +22,7 @@
 
 ### Awaiting Review
 
-- None.
+- task-16-html-canvas-width.md: implementation complete; awaiting live visual confirmation of served pages to reconcile `done`.
 
 ### Reconciled and Verified
 
@@ -29,11 +31,11 @@
 
 ### Implemented but Unverified
 
-- None.
+- None. (task-16 is in `review`, not `implemented-unverified`.)
 
 ### Decisions Required
 
-- `docs/changes/proposed/wc-view-html-artifact-canvas-width.md` remains unresolved.
+- None. `docs/changes/proposed/wc-view-html-artifact-canvas-width.md` was adopted into `docs/design/product/ux-design-system.md` and removed from proposed.
 
 ### Blockers
 
@@ -45,7 +47,7 @@
 
 ### Next Focus
 
-- Keep `docs/changes/proposed/wc-view-html-artifact-canvas-width.md` as unresolved intent. Do not treat it as design truth.
+- Confirm task-16 served pages visually, then reconcile to `done`.
 
 ## 2026-08-14
 

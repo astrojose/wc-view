@@ -8,7 +8,7 @@
 
 ## Current Priorities
 
-- No active implementation phase.
+- Implement accepted HTML artifact canvas width contract (task-16-html-canvas-width.md).
 
 ## Active Phases
 
@@ -42,4 +42,5 @@
 - tasks: docs/implementation/tasks/task-10-html-scratch-artifacts.md
 - tasks: docs/implementation/tasks/task-11-design-system-visual-polish.md
 - tasks: docs/implementation/tasks/task-12-composer-density-and-applied-refresh.md
+- tasks: docs/implementation/tasks/task-16-html-canvas-width.md
 - status: docs/implementation/status/weekly-status.md

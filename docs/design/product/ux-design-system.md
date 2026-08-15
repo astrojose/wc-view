@@ -8,7 +8,8 @@
 
 ## Requirements
 
-- Full-width centered document reading area (`68-76ch`) with no persistent sidebar.
+- Markdown reading area is centered at `68-76ch`; HTML artifact canvas targets ~3/4 of the available content area, sidebar-aware.
+- Single-file serve has no sidebar; directory-serve ships a fixed 17rem `.doc-sidebar` with a matching `body.has-sidebar .doc-canvas` offset.
 - CSS custom properties support native dark/light adaptation.
 - Use Inter, JetBrains Mono, and Playfair Display with system fallbacks; zero external CDN dependencies.
 - Meet WCAG 2.2 AA with semantic landmarks, visible focus, 44 CSS-pixel targets, keyboard equivalents, reduced motion, and `aria-live="polite"` status updates.
@@ -22,6 +23,12 @@
 
 ## Decisions
 
+- Markdown canvas measure: `width: min(var(--measure-doc), calc(100% - (2 * var(--space-6))))`, capped at `max-width: var(--measure-doc-max)` (`68-76ch`).
+- HTML artifact canvas measure: a `format`-scoped modifier (`.doc-canvas.is-html`) targets ~3/4 of the available content area, capped to keep comfortable line lengths.
+  - No sidebar (single-file serve): ~3/4 of the full viewport width.
+  - Sidebar open (directory-serve): ~3/4 of the space remaining after the fixed 17rem `.doc-sidebar`.
+- `.theme-toggle` follows the same width formula as `.doc-canvas` so it stays aligned under both Markdown and HTML canvases.
+- `body.has-sidebar .doc-canvas` `margin-left` is keyed to the canvas measure; the HTML-scoped wide canvas uses its own offset/width pairing.
 - Dark palette: base `#121212`, cards `#1C1C1C`, borders `#2C2C2C`, ring `#D1CFC0`, accents `#F26A4B`, `#D9CFC2`, `#8E8A83`.
 - Light palette: base `#FCFCFC`, cards `#FFFFFF`, borders `#E4E4E7`, ring `#18181B`, zinc accents.
 - Highlight annotated elements with `border-left: 3px solid var(--ring-accent)` and `background: rgba(209, 207, 192, 0.06)`.
@@ -34,7 +41,9 @@
 
 ## Acceptance Criteria
 
-- Reading column renders at `68-76ch` with no persistent sidebar.
+- Markdown reading column renders at `68-76ch` and is unchanged by the HTML canvas modifier.
+- HTML artifact canvas (`.doc-canvas.is-html`) renders at ~3/4 of the available content area, with and without the directory-serve sidebar.
+- `.theme-toggle` aligns to the active canvas width under both Markdown and HTML formats.
 - Dark and light palettes match the defined hex values.
 - Target policy and non-color work state are available to keyboard and screen-reader users.
 - INP ≤ 200 ms (p75), CLS ≤ 0.1, and WCAG 2.2 AA are verified before delivery.
