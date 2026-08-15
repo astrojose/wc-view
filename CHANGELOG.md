@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [0.8.2] - 2026-08-15
+
+### Changed
+
+- Use version-isolated `npx` execution for the `use-wc-view` companion skill, defaulting to the latest release with an explicit version override for reproducible workflows.
+- Document autonomous feedback handling through the workspace bridge so agents can react to browser feedback without manual polling prompts.
+- Document browser-based npm OTP approval in the release workflow without exposing credentials or tokens.
+
 ## [0.8.1] - 2026-08-15
 
 ### Fixed

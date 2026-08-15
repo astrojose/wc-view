@@ -21,6 +21,7 @@ Run the wc-view release workflow end to end: changelog, versioning, verification
 
 - Never run `npm publish`, `git push`, `git push --tags`, or `gh release create` before showing the exact release plan and receiving explicit user approval in the current turn.
 - Ensure npm authentication is configured in `.npmrc` (`npm login`) prior to publishing.
+- Treat npm browser OTP approval as part of the normal publish flow. Never ask the user to paste an OTP or authentication token into chat.
 - Never discard, reset, or overwrite unrelated user changes.
 - Always commit release changes on the current branch. Do not create or switch branches during this release skill.
 - Always use `$git-commit-now` to create the release commit after verification, staging only the approved release files for the current branch.
@@ -58,12 +59,48 @@ Run the wc-view release workflow end to end: changelog, versioning, verification
    - Use `$git-commit-now` on the current branch to commit the approved release files with `chore(release): release v<x.y.z>`.
    - Create annotated tag `v<x.y.z>`.
    - Run `npm publish --access public` (utilizes authentication in `.npmrc`).
+   - If npm returns `EOTP` with a masked browser URL, follow **Browser OTP Approval** below; do not push or create the GitHub Release until npm publication is verified.
    - Push the branch and tag.
    - Run `gh release create v<x.y.z> --title "v<x.y.z>" --notes-file <release-notes-file>`.
 6. Verify publication:
    - Run `npm view @astrojose/wc-view@<x.y.z> version`.
    - Run `gh release view v<x.y.z>`.
    - Report npm package, tag, GitHub Release URL, and verification commands.
+
+## Browser OTP Approval
+
+Use this flow when non-interactive `npm publish` returns `EOTP` and masks the browser URL:
+
+1. Start the same publish command in a durable pseudo-terminal. Prefer a tracked terminal session that survives tool-response boundaries:
+
+   ```bash
+   tmux new-session -d -s wc-view-npm-publish \
+     "cd <repo> && script -q /tmp/wc-view-npm-auth.txt npm publish --access public"
+   ```
+
+   - Reuse an existing dedicated session only after confirming it belongs to the same package and version.
+   - When durable terminal tooling is unavailable, run `script -q /tmp/wc-view-npm-auth.txt npm publish --access public` in a foreground pseudo-terminal and keep it alive until approval completes.
+
+2. Poll the transcript until npm emits the full URL:
+
+   ```bash
+   grep -Eo 'https://www\.npmjs\.com/auth/cli/[[:alnum:]-]+' /tmp/wc-view-npm-auth.txt | tail -1
+   ```
+
+3. Print that URL to the user and ask them to approve it in the browser. Do not expose the registry completion URL, retrieved token, `.npmrc`, or OTP material.
+4. Keep the original publish process alive. Do not launch a second publish while it is waiting for approval.
+5. After the user confirms approval, wait for the original process to exit and inspect its output.
+6. Verify publication before proceeding:
+
+   ```bash
+   npm view @astrojose/wc-view@<x.y.z> version
+   ```
+
+7. If the waiting process was interrupted or its result is ambiguous:
+   - Run the npm verification command first.
+   - If the target version exists, treat publication as complete and continue with branch/tag push and GitHub Release creation.
+   - Retry `npm publish --access public` only when the target version is absent.
+   - If a retry says the version was previously published, verify the registry and continue rather than treating it as a release failure.
 
 ## Changelog Format
 
