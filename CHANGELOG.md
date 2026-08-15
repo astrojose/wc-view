@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.8.3] - 2026-08-15
+
+### Changed
+
+- Publish releases to npm via a GitHub Actions workflow (`.github/workflows/publish.yml`) triggered by the pushed version tag, instead of running `npm publish` locally with browser OTP approval.
+
 ## [0.8.2] - 2026-08-15
 
 ### Changed
