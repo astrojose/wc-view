@@ -43,6 +43,19 @@ describe("Phase 1 & 2 Client Components", () => {
     expect(element?.textContent).not.toContain("<section>");
   });
 
+  it("toggles is-html class on the canvas based on document format", () => {
+    const canvas = new DocCanvas("test-format-canvas");
+
+    canvas.render("# Markdown", undefined, undefined, undefined, "markdown");
+    expect(document.getElementById("test-format-canvas")?.classList.contains("is-html")).toBe(false);
+
+    canvas.render("<section>HTML artifact</section>", undefined, undefined, undefined, "html");
+    expect(document.getElementById("test-format-canvas")?.classList.contains("is-html")).toBe(true);
+
+    canvas.render("# Back to markdown", undefined, undefined, undefined, "markdown");
+    expect(document.getElementById("test-format-canvas")?.classList.contains("is-html")).toBe(false);
+  });
+
   it("preserves inline styles from full HTML artifact documents", () => {
     const canvas = new DocCanvas("test-full-html-canvas");
     canvas.render("<!doctype html><html><head><style>.hero{color:red}</style></head><body><main class=\"hero\">Artifact</main></body></html>", undefined, undefined, undefined, "html");

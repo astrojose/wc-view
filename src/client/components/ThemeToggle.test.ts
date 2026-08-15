@@ -23,4 +23,17 @@ describe("ThemeToggle Component", () => {
     expect(document.documentElement.dataset.theme).toBe("dark");
     expect(toggle.getTheme()).toBe("dark");
   });
+
+  it("toggles is-html class on the theme-toggle element to align with the canvas", () => {
+    const toggle = new ThemeToggle("dark");
+    const el = document.getElementById("theme-toggle");
+    expect(el).not.toBeNull();
+    expect(el?.classList.contains("is-html")).toBe(false);
+
+    toggle.setHtmlCanvas(true);
+    expect(el?.classList.contains("is-html")).toBe(true);
+
+    toggle.setHtmlCanvas(false);
+    expect(el?.classList.contains("is-html")).toBe(false);
+  });
 });

@@ -50,6 +50,7 @@ export class DocCanvas {
 
     const htmlContent = format === "html" ? this.prepareHtmlContent(content) : renderMarkdown(content);
 
+    this.container.classList.toggle("is-html", format === "html");
 
     const header = title || meta
       ? `<header>${title ? `<h1>${title}</h1>` : ""}${meta ? `<p class="doc-meta">${meta}</p>` : ""}</header>`

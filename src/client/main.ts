@@ -124,6 +124,7 @@ export class ReviewApp {
       (label, checked, blockId) => this.handleDecisionToggle(label, checked, blockId),
       format
     );
+    this.themeToggle.setHtmlCanvas(format === "html");
     this.reapplyAnnotatedNotes();
   }
 

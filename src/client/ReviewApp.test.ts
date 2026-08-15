@@ -86,4 +86,44 @@ describe("ReviewApp streamed refresh", () => {
 
     expect(documentFetches).toBe(2);
   });
+
+  it("aligns canvas and theme-toggle width with the served document format", async () => {
+    let documentContent = "<h1>Artifact</h1>";
+    let documentFormat = "html";
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url === "/api/document") {
+        return {
+          ok: true,
+          json: async () => ({
+            path: "/workspace/.wc-view-scratch.html",
+            content: documentContent,
+            format: documentFormat,
+            artifactClass: "scratch"
+          })
+        } as Response;
+      }
+      if (url === "/api/feedback" || url === "/api/batches") {
+        return { ok: true, json: async () => [] } as Response;
+      }
+      throw new Error(`Unexpected fetch ${url}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await import("./main.js");
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(document.getElementById("doc-canvas")?.classList.contains("is-html")).toBe(true);
+    expect(document.getElementById("theme-toggle")?.classList.contains("is-html")).toBe(true);
+
+    documentFormat = "markdown";
+    documentContent = "# Markdown";
+    fetchMock.mockClear();
+    const app = (window as unknown as { reviewApp: { renderDocument: (c: string, t?: string, m?: string, f?: "markdown" | "html") => void } }).reviewApp;
+    app.renderDocument("# Markdown", undefined, undefined, "markdown");
+
+    expect(document.getElementById("doc-canvas")?.classList.contains("is-html")).toBe(false);
+    expect(document.getElementById("theme-toggle")?.classList.contains("is-html")).toBe(false);
+  });
 });

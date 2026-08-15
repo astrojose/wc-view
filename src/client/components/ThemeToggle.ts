@@ -39,6 +39,11 @@ export class ThemeToggle {
     return this.currentTheme;
   }
 
+  public setHtmlCanvas(active: boolean): void {
+    const el = document.getElementById("theme-toggle");
+    if (el) el.classList.toggle("is-html", active);
+  }
+
   private applyTheme(theme: "dark" | "light"): void {
     document.documentElement.dataset.theme = theme;
   }

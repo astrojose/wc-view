@@ -43,6 +43,11 @@ body {
   gap: var(--block-flow);
 }
 
+.doc-canvas.is-html {
+  width: min(75%, calc(100% - (2 * var(--space-6))));
+  max-width: var(--measure-html-max, 90rem);
+}
+
 .doc-canvas > header {
   display: flex;
   flex-direction: column;
@@ -518,6 +523,11 @@ input.composer-input {
   color: var(--fg-muted);
 }
 
+.theme-toggle.is-html {
+  width: min(75%, calc(100% - (2 * var(--space-6))));
+  max-width: var(--measure-html-max, 90rem);
+}
+
 .theme-toggle-label {
   font: var(--type-meta);
   color: var(--fg-muted);
@@ -609,6 +619,20 @@ input.composer-input {
 
 body.has-sidebar .doc-canvas {
   margin-left: max(18rem, calc(50vw - var(--measure-doc-max) / 2));
+}
+
+body.has-sidebar .doc-canvas.is-html {
+  --html-available: calc(100vw - 17rem);
+  width: min(calc(0.75 * var(--html-available)), var(--measure-html-max, 90rem));
+  margin-left: calc(17rem + (var(--html-available) - min(calc(0.75 * var(--html-available)), var(--measure-html-max, 90rem))) / 2);
+  margin-right: auto;
+}
+
+body.has-sidebar .theme-toggle.is-html {
+  --html-available: calc(100vw - 17rem);
+  width: min(calc(0.75 * var(--html-available)), var(--measure-html-max, 90rem));
+  margin-left: calc(17rem + (var(--html-available) - min(calc(0.75 * var(--html-available)), var(--measure-html-max, 90rem))) / 2);
+  margin-right: auto;
 }
 
 .sidebar-toggle-btn {
@@ -1137,6 +1161,14 @@ kbd {
   .doc-canvas,
   .theme-toggle {
     width: calc(100% - (2 * var(--space-4)));
+  }
+
+  .doc-canvas.is-html,
+  .theme-toggle.is-html {
+    width: calc(100% - (2 * var(--space-4)));
+    max-width: none;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .doc-canvas {
