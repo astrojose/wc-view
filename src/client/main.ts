@@ -32,6 +32,7 @@ interface DocumentPayload {
   files?: string[];
   format?: DocumentFormat;
   artifactClass?: "scratch" | "protected";
+  bridgeActive?: boolean;
 }
 
 export class ReviewApp {
@@ -80,6 +81,7 @@ export class ReviewApp {
       this.currentFilePath = data.path || "";
       this.currentRelativePath = data.relativePath || "";
       this.composer.setTargetPolicy(data.artifactClass || "protected");
+      this.activityDrawer.setBridgeStatus(Boolean(data.bridgeActive));
       this.sidebar.setFiles(data.files || [], this.currentFilePath);
       this.renderDocument(data.content, undefined, undefined, data.format || "markdown");
       await Promise.all([this.loadFeedback(), this.loadBatches()]);
@@ -98,6 +100,7 @@ export class ReviewApp {
       this.currentFilePath = data.path || "";
       this.currentRelativePath = data.relativePath || relativePath;
       this.composer.setTargetPolicy(data.artifactClass || "protected");
+      this.activityDrawer.setBridgeStatus(Boolean(data.bridgeActive));
       this.sidebar.setActivePath(this.currentFilePath);
       this.renderDocument(data.content, undefined, undefined, data.format || "markdown");
       await Promise.all([this.loadFeedback(), this.loadBatches()]);

@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-08-15
+
+### Fixed
+
+- Surface `wc-view serve` port conflicts as a clean, actionable CLI error instead of an unhandled `EADDRINUSE` stack trace.
+- Warn on `wc-view serve` startup when a workspace already has queued feedback batches but no `--agent-command` bridge is attached, so they don't silently sit unprocessed.
+- Show a "No Agent Attached" status chip in the browser's Review Activity drawer whenever the serving process has no agent bridge, replacing the always-on "Live Feed" chip that gave no signal that feedback would go unprocessed.
+
 ## [0.8.0] - 2026-08-15
 
 ### Added

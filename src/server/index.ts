@@ -24,6 +24,7 @@ export interface ServerOptions {
   host: string;
   targetPath?: string;
   queuePath?: string;
+  agentBridgeActive?: boolean;
 }
 
 export type DocumentFormat = "markdown" | "html";
@@ -129,6 +130,7 @@ export function createServer(options: ServerOptions): http.Server {
   const workspacePath = fs.existsSync(targetPath) && fs.statSync(targetPath).isDirectory() ? targetPath : path.dirname(targetPath);
   const workspaceStore = options.queuePath ? getWorkspaceStore(workspacePath) : initializeWorkspaceStore(workspacePath);
   const queuePath = options.queuePath ?? workspaceStore.queuePath;
+  const agentBridgeActive = Boolean(options.agentBridgeActive);
   const sessionId = `serve_${crypto.randomUUID()}`;
   const eventClients = new Map<http.ServerResponse, string>();
 
@@ -270,7 +272,7 @@ export function createServer(options: ServerOptions): http.Server {
 
       res.writeHead(200, { "Content-Type": "application/json" });
       const relativePath = fs.existsSync(targetPath) && fs.statSync(targetPath).isDirectory() ? path.relative(targetPath, docPath).split(path.sep).join("/") : undefined;
-      res.end(JSON.stringify({ path: docPath, relativePath, content, files, format: getDocumentFormat(docPath), artifactClass: classifyArtifact(docPath, workspacePath), sessionId }));
+      res.end(JSON.stringify({ path: docPath, relativePath, content, files, format: getDocumentFormat(docPath), artifactClass: classifyArtifact(docPath, workspacePath), sessionId, bridgeActive: agentBridgeActive }));
       return;
     }
 

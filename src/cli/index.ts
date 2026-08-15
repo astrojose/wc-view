@@ -54,7 +54,7 @@ program
   .option("-p, --port <number>", "Port to bind localhost server", "3456")
   .option("-H, --host <string>", "Host interface to bind", "127.0.0.1")
   .option("--agent-command <command>", "Start a local agent bridge with this adapter command")
-  .action((targetPath, options) => {
+  .action(async (targetPath, options) => {
     const port = parseInt(options.port, 10);
     if (!Number.isInteger(port) || port < 1 || port > 65535) {
       throw new CommanderError(2, "wc-view.invalidPort", "wc-view serve requires --port between 1 and 65535");
@@ -63,7 +63,7 @@ program
     if (host !== "127.0.0.1" && host !== "localhost") {
       throw new CommanderError(2, "wc-view.invalidHost", "wc-view serve only supports 127.0.0.1 loopback binding");
     }
-    const server = createServer({ port, host: "127.0.0.1", targetPath });
+    const server = createServer({ port, host: "127.0.0.1", targetPath, agentBridgeActive: Boolean(options.agentCommand) });
     const resolvedTarget = path.resolve(targetPath || process.cwd());
     const workspacePath = fs.existsSync(resolvedTarget) && fs.statSync(resolvedTarget).isDirectory() ? resolvedTarget : path.dirname(resolvedTarget);
     let stopBridge: (() => Promise<void>) | undefined;
@@ -73,6 +73,12 @@ program
         bridgeId: `serve_${process.pid}`,
         workspacePath
       });
+    } else {
+      const store = getWorkspaceStore(workspacePath);
+      const pendingCount = getUnresolvedBatches({}, store.queuePath).filter((batch) => batch.status === "queued").length;
+      if (pendingCount > 0) {
+        process.stderr.write(`wc-view serve: ${pendingCount} feedback batch(es) already queued with no agent bridge attached. Pass --agent-command <cmd>, or run 'wc-view bridge --workspace ${workspacePath} --command <cmd>', so they get processed.\n`);
+      }
     }
     const shutdown = async () => {
       await stopBridge?.();
@@ -80,9 +86,22 @@ program
     };
     process.once("SIGINT", shutdown);
     process.once("SIGTERM", shutdown);
-    server.listen(port, "127.0.0.1", () => {
-      process.stderr.write(`wc-view serve: Localhost server active on http://127.0.0.1:${port}\n`);
-      if (options.agentCommand) process.stderr.write("wc-view serve: Local agent bridge active.\n");
+    let listening = false;
+    await new Promise<void>((resolve, reject) => {
+      server.on("error", (error: NodeJS.ErrnoException) => {
+        if (!listening && error.code === "EADDRINUSE") {
+          reject(new CommanderError(1, "wc-view.portInUse", `wc-view serve: port ${port} is already in use. Pass --port <number> for a different port, or stop the process bound to it.`));
+          return;
+        }
+        if (!listening) { reject(error); return; }
+        process.stderr.write(`wc-view serve: server error - ${error.message}\n`);
+      });
+      server.listen(port, "127.0.0.1", () => {
+        listening = true;
+        process.stderr.write(`wc-view serve: Localhost server active on http://127.0.0.1:${port}\n`);
+        if (options.agentCommand) process.stderr.write("wc-view serve: Local agent bridge active.\n");
+        resolve();
+      });
     });
   });
 

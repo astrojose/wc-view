@@ -17,9 +17,11 @@ export class ActivityDrawer {
   private isOpen: boolean = false;
   private unreadCount: number = 0;
   private onUnreadChange?: (count: number) => void;
+  private bridgeActive: boolean;
 
-  constructor(onUnreadChange?: (count: number) => void) {
+  constructor(onUnreadChange?: (count: number) => void, bridgeActive: boolean = true) {
     this.onUnreadChange = onUnreadChange;
+    this.bridgeActive = bridgeActive;
     let existing = document.getElementById("activity-drawer-container");
     if (!existing) {
       existing = document.createElement("div");
@@ -28,6 +30,20 @@ export class ActivityDrawer {
     }
     this.container = existing;
     this.render();
+  }
+
+  public setBridgeStatus(active: boolean): void {
+    this.bridgeActive = active;
+    const chip = this.container.querySelector(".drawer-status-chip");
+    if (!chip) return;
+    chip.textContent = active ? "Live Feed" : "No Agent Attached";
+    chip.classList.toggle("chip-warning", !active);
+    chip.setAttribute(
+      "title",
+      active
+        ? "An agent bridge is attached and will process new feedback automatically."
+        : "No agent bridge is attached to this server. Feedback will stay queued until one is started (wc-view serve --agent-command <cmd>)."
+    );
   }
 
   public setBatches(batches: BatchActivity[]): void {
@@ -95,6 +111,8 @@ export class ActivityDrawer {
 
     const backdrop = this.container.querySelector(".drawer-backdrop");
     backdrop?.addEventListener("click", () => this.hide());
+
+    this.setBridgeStatus(this.bridgeActive);
   }
 
   private renderActivityList(): void {

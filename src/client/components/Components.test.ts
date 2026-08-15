@@ -250,6 +250,23 @@ describe("Phase 1 & 2 Client Components", () => {
     drawer.toggle();
     expect(document.querySelector(".activity-drawer")?.classList.contains("visible")).toBe(true);
   });
+
+  it("reflects agent bridge status on the drawer status chip", async () => {
+    const { ActivityDrawer } = await import("./ActivityDrawer.js");
+    const drawer = new ActivityDrawer(undefined, true);
+
+    const chip = () => document.querySelector(".drawer-status-chip");
+    expect(chip()?.textContent).toBe("Live Feed");
+    expect(chip()?.classList.contains("chip-warning")).toBe(false);
+
+    drawer.setBridgeStatus(false);
+    expect(chip()?.textContent).toBe("No Agent Attached");
+    expect(chip()?.classList.contains("chip-warning")).toBe(true);
+
+    drawer.setBridgeStatus(true);
+    expect(chip()?.textContent).toBe("Live Feed");
+    expect(chip()?.classList.contains("chip-warning")).toBe(false);
+  });
 });
 
 

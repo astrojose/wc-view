@@ -36,6 +36,19 @@ describe("Server & CLI Integration", () => {
     await client.text();
   });
 
+  it("reports whether an agent bridge is attached via document metadata", async () => {
+    const noBridge = await fetch(`${baseUrl}/api/document`);
+    expect(await noBridge.json()).toMatchObject({ bridgeActive: false });
+
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+    server = createServer({ port: 0, host: "127.0.0.1", targetPath: testDocPath, queuePath, agentBridgeActive: true });
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+
+    const withBridge = await fetch(`${baseUrl}/api/document`);
+    expect(await withBridge.json()).toMatchObject({ bridgeActive: true });
+  });
+
   it("serves HTML scratch artifacts as scratch HTML documents", async () => {
     await new Promise<void>((resolve) => server.close(() => resolve()));
     testDocPath = path.join(tmpDir, ".wc-view-scratch-flow.html");
