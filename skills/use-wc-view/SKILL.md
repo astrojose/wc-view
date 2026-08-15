@@ -270,3 +270,4 @@ npx --yes "$WC_VIEW_PACKAGE" export docs/design/product.md --out /tmp/product-re
 1. **Serving a static doc when asked to "visualize"** — always synthesize a scratch artifact first for visualization requests.
 2. **Forgetting `--format markdown`** — when the user wants human-readable feedback output, use `--format markdown` instead of the default JSON.
 3. **Resolving different versions within one workflow** — set `WC_VIEW_PACKAGE="@astrojose/wc-view@${WC_VIEW_VERSION:-latest}"` once, then reuse `npx --yes "$WC_VIEW_PACKAGE" ...` for every command.
+4. **Adding a `.doc-canvas` width wrapper inside scratch HTML** — the server already owns canvas width (68-76ch for Markdown, ~3/4 of content area for HTML). Author scratch content as plain semantic HTML; don't re-apply canvas width classes.
