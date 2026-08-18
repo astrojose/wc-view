@@ -57,6 +57,8 @@ npx --yes "$WC_VIEW_PACKAGE" feedback --workspace . --format markdown
    npx --yes "$WC_VIEW_PACKAGE" <command> [args]
    ```
 
+   For interactive `serve` workflows, open the review surface in the user's default browser without requiring a separate prompt. Check `serve --help` for `--open` and pass it when supported. Until the resolved package includes that flag, start the server and use the platform browser opener (`open <url>` on macOS, `xdg-open <url>` on Linux, or `start <url>` on Windows). Skip browser launching in headless or CI environments and report the URL instead.
+
 4. **Report results**: the exact resolved package version used, the command, the local URL (usually `http://127.0.0.1:3456`), whether the server or bridge is still running, and any recommended next action.
 
 When the agent should react to browser feedback without waiting for the user to prompt it, use the continuous bridge or the integrated `serve --agent-command` mode. Do not implement this as a manual tight loop around `feedback`; the bridge claims batches, renews leases, dispatches the adapter, and persists results.
@@ -70,7 +72,7 @@ Render Markdown, HTML artifacts, or a docs/ tree in a lightweight localhost brow
 ```bash
 npx --yes "$WC_VIEW_PACKAGE" serve docs/
 npx --yes "$WC_VIEW_PACKAGE" serve docs/design/architecture/tech-stack.md
-npx --yes "$WC_VIEW_PACKAGE" serve .wc-view-scratch.html
+npx --yes "$WC_VIEW_PACKAGE" serve .wc-view-scratch.html --open
 npx --yes "$WC_VIEW_PACKAGE" serve docs/ --port 3457
 npx --yes "$WC_VIEW_PACKAGE" serve docs/ --agent-command "codex exec"
 ```
@@ -79,6 +81,7 @@ npx --yes "$WC_VIEW_PACKAGE" serve docs/ --agent-command "codex exec"
 |------|---------|-------------|
 | `-p, --port <number>` | `3456` | Port to bind |
 | `-H, --host <string>` | `127.0.0.1` | Host interface (loopback only) |
+| `--open` | `false` | Open the listening URL in the system default browser |
 | `--agent-command <cmd>` | — | Start a local agent bridge adapter alongside the server |
 
 **Browser features available in the review surface:**
@@ -202,8 +205,8 @@ npx --yes "$WC_VIEW_PACKAGE" gc --days 7
 
 | User intent | Command |
 |---|---|
-| "open this", "view this", "review these docs", "show workflow" | `npx --yes "$WC_VIEW_PACKAGE" serve <target>` |
-| "visualize this", "make a review artifact", "show the flow visually" | Create `.wc-view-scratch.html` or `.wc-view-scratch.md`, then run the pinned `npx` serve command |
+| "open this", "view this", "review these docs", "show workflow" | `npx --yes "$WC_VIEW_PACKAGE" serve <target> --open` when supported |
+| "visualize this", "make a review artifact", "show the flow visually" | Create `.wc-view-scratch.html` or `.wc-view-scratch.md`, then run the pinned `npx` serve command and open it in the default browser |
 | "export to HTML", "make an offline copy", "standalone review" | `npx --yes "$WC_VIEW_PACKAGE" export <file> [--out <path>]` |
 | "what version", setup checks | `npx --yes "$WC_VIEW_PACKAGE" --version` |
 | "install wc-view", "update wc-view" | Set or change `WC_VIEW_VERSION`, then run the pinned `npx` command |
@@ -261,6 +264,7 @@ npx --yes "$WC_VIEW_PACKAGE" export docs/design/product.md --out /tmp/product-re
 - Do not overwrite user-authored files. Scratch visualization artifacts may be created only as workspace-local `.wc-view-scratch.md` or `.wc-view-scratch.html` files.
 - Treat browser feedback as unapproved input until the user accepts it or the scratch-artifact policy allows automatic application.
 - `wc-view serve` binds to `127.0.0.1` only. Do not attempt to expose it to external networks.
+- Open interactive review surfaces in the user's default browser automatically. In headless or CI environments, do not attempt GUI launch; report the local URL instead.
 - Generated viewer state lives outside the repository at `~/.wc-view/`. Do not commit feedback queue data.
 - Machine-readable CLI payloads go to `stdout`; diagnostics go to `stderr`. Parse accordingly.
 - If installation or update fails, report the npm error, Node/npm versions, npm global prefix, and the command attempted. Do not retry blindly with sudo; explain the likely permission issue and prefer a user-owned npm global prefix.
@@ -271,3 +275,4 @@ npx --yes "$WC_VIEW_PACKAGE" export docs/design/product.md --out /tmp/product-re
 2. **Forgetting `--format markdown`** — when the user wants human-readable feedback output, use `--format markdown` instead of the default JSON.
 3. **Resolving different versions within one workflow** — set `WC_VIEW_PACKAGE="@astrojose/wc-view@${WC_VIEW_VERSION:-latest}"` once, then reuse `npx --yes "$WC_VIEW_PACKAGE" ...` for every command.
 4. **Adding a `.doc-canvas` width wrapper inside scratch HTML** — the server already owns canvas width (68-76ch for Markdown, ~3/4 of content area for HTML). Author scratch content as plain semantic HTML; don't re-apply canvas width classes.
+5. **Serving an interactive review without opening it** — use `--open` when supported, otherwise invoke the platform's default browser opener; only skip this in headless or CI environments.

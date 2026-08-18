@@ -104,6 +104,12 @@ Use a custom port:
 wc-view serve docs/ --port 3457
 ```
 
+Open the artifact in the system default browser after the server starts:
+
+```bash
+wc-view serve .wc-view-scratch.html --open
+```
+
 Export standalone offline HTML:
 
 ```bash

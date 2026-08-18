@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [0.9.2] - 2026-08-19
+
+### Added
+
+- Add `wc-view serve --open` to launch the review surface in the system default browser on macOS, Linux, and Windows.
+- Teach the `use-wc-view` companion skill to open interactive review surfaces automatically, with compatibility fallback for older CLI versions and headless environments.
+
 ## [0.9.1] - 2026-08-15
 
 ### Fixed

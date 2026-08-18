@@ -7,6 +7,7 @@ import { createServer } from "../server/index.js";
 import { getUnresolvedItems, getUnresolvedBatches, getWorkspaceStore, getLegacyQueuePath, listWorkspaceStores, gcFeedback, resolveFeedbackItem, addAgentReply, FeedbackItem, FeedbackBatch } from "../core/queue.js";
 import { runBridgeOnce, startBridge } from "../core/bridge.js";
 import { exportMarkdownFile } from "../core/export.js";
+import { openDefaultBrowser } from "./open-browser.js";
 
 const program = new Command();
 
@@ -53,6 +54,7 @@ program
   .description("Render Markdown, HTML artifacts, or a docs/ tree in a lightweight localhost browser UI")
   .option("-p, --port <number>", "Port to bind localhost server", "3456")
   .option("-H, --host <string>", "Host interface to bind", "127.0.0.1")
+  .option("--open", "Open the artifact in the system default browser")
   .option("--agent-command <command>", "Start a local agent bridge with this adapter command")
   .action(async (targetPath, options) => {
     const port = parseInt(options.port, 10);
@@ -98,7 +100,9 @@ program
       });
       server.listen(port, "127.0.0.1", () => {
         listening = true;
-        process.stderr.write(`wc-view serve: Localhost server active on http://127.0.0.1:${port}\n`);
+        const url = `http://127.0.0.1:${port}`;
+        process.stderr.write(`wc-view serve: Localhost server active on ${url}\n`);
+        if (options.open) openDefaultBrowser(url);
         if (options.agentCommand) process.stderr.write("wc-view serve: Local agent bridge active.\n");
         resolve();
       });

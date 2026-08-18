@@ -39,6 +39,7 @@
 - `wc-view serve [path]`
   - `-p, --port <number>`: default `3456`.
   - `-h, --host <string>`: default `127.0.0.1`; non-loopback hosts are rejected.
+  - `--open`: open the listening URL in the system default browser after the server starts.
   - `--agent-command <command>`: optional local bridge adapter command.
 - `wc-view feedback --unresolved [--format <json|toon|markdown>]`
   - `--workspace <path>`: workspace scope; defaults to the canonical current directory.
