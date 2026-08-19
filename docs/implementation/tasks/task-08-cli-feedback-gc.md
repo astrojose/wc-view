@@ -78,7 +78,7 @@ Implement `wc-view feedback --unresolved [--format ...]` and `wc-view gc` agains
 - Reviewed revision: ee08c82e802c
 - Environment: local Vitest and built CLI
 - Reviewed at: 2026-08-01T00:00:00Z
-- Reviewer: recorded from original task verification during v0.4.0-rc.1 migration
+- Reviewer: original verification record migrated to workflow-contract v0.4.0-rc.1
 
 ### Acceptance Evidence
 
@@ -90,7 +90,7 @@ Implement `wc-view feedback --unresolved [--format ...]` and `wc-view gc` agains
 
 ### Alignment
 
-- Design vs implementation: aligned with recorded evidence at ee08c82e802c
+- Design vs implementation: aligned at ee08c82e802c
 - Planned vs actual scope: no variance recorded
 - Documentation drift: none found
 - Deferred gaps: none recorded

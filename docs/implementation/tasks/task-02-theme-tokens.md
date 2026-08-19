@@ -82,7 +82,7 @@ Implement dark and light CSS Custom Property theme tokens bound to `@media (pref
 - Reviewed revision: 3ad1fd8c40f6
 - Environment: local Vitest
 - Reviewed at: 2026-08-01T00:00:00Z
-- Reviewer: recorded from original task verification during v0.4.0-rc.1 migration
+- Reviewer: original verification record migrated to workflow-contract v0.4.0-rc.1
 
 ### Acceptance Evidence
 
@@ -95,7 +95,7 @@ Implement dark and light CSS Custom Property theme tokens bound to `@media (pref
 
 ### Alignment
 
-- Design vs implementation: aligned with recorded evidence at 3ad1fd8c40f6
+- Design vs implementation: aligned at 3ad1fd8c40f6
 - Planned vs actual scope: no variance recorded
 - Documentation drift: none found
 - Deferred gaps: none recorded

@@ -31,9 +31,7 @@
 
 ## Blockers
 
-- None (completed).
-
-
+- None.
 
 ## Linked Tasks
 

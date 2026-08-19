@@ -87,7 +87,7 @@ Tighten the floating composer proportions, refresh the rendered document when an
 - Reviewed revision: f9d606c2c56c
 - Environment: local typecheck, Vitest, production build, and built browser smoke on 127.0.0.1:3463
 - Reviewed at: 2026-08-01T00:00:00Z
-- Reviewer: recorded from original task verification during v0.4.0-rc.1 migration
+- Reviewer: original verification record migrated to workflow-contract v0.4.0-rc.1
 
 ### Acceptance Evidence
 
@@ -102,7 +102,7 @@ Tighten the floating composer proportions, refresh the rendered document when an
 
 ### Alignment
 
-- Design vs implementation: aligned with recorded evidence at f9d606c2c56c
+- Design vs implementation: aligned at f9d606c2c56c
 - Planned vs actual scope: no variance recorded
 - Documentation drift: published `npx -y @astrojose/wc-view@0.5.1 --version` smoke recorded stale `0.4.0`; patch release later resolved npm `.bin` symlink package-metadata lookup
 - Deferred gaps: none recorded

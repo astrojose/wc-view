@@ -88,7 +88,7 @@ Persist and query feedback through canonical workspace stores so default CLI ope
 - Reviewed revision: 05e949bc3f86
 - Environment: local typecheck, Vitest, and production ESM build
 - Reviewed at: 2026-08-14T00:00:00Z
-- Reviewer: recorded from original task verification during v0.4.0-rc.1 migration
+- Reviewer: original verification record migrated to workflow-contract v0.4.0-rc.1
 
 ### Acceptance Evidence
 
@@ -105,7 +105,7 @@ Persist and query feedback through canonical workspace stores so default CLI ope
 
 ### Alignment
 
-- Design vs implementation: aligned with recorded evidence at 05e949bc3f86
+- Design vs implementation: aligned at 05e949bc3f86
 - Planned vs actual scope: no variance recorded
 - Documentation drift: none found
 - Deferred gaps: none recorded

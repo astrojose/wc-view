@@ -22,16 +22,17 @@
 
 ### Awaiting Review
 
-- task-16-html-canvas-width.md: implementation complete; awaiting live visual confirmation of served pages to reconcile `done`.
+- None.
 
 ### Reconciled and Verified
 
 - Tasks 01-12 against original 2026-08-01 verification notes.
 - Tasks 13-15 against original 2026-08-14 verification notes.
+- task-16 against 2026-08-15 typecheck, tests, build, workflow validation, smoke serve, and live visual confirmation.
 
 ### Implemented but Unverified
 
-- None. (task-16 is in `review`, not `implemented-unverified`.)
+- None.
 
 ### Decisions Required
 
@@ -47,7 +48,7 @@
 
 ### Next Focus
 
-- Confirm task-16 served pages visually, then reconcile to `done`.
+- None active.
 
 ## 2026-08-14
 

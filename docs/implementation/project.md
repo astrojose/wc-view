@@ -8,7 +8,7 @@
 
 ## Current Priorities
 
-- Implement accepted HTML artifact canvas width contract (task-16-html-canvas-width.md).
+- None active.
 
 ## Active Phases
 
@@ -28,8 +28,9 @@
 
 ## Dependencies
 
-- Phase 05 implements adopted design in `docs/design/architecture/wc-view-system-flow.md`, `docs/design/interfaces/cli-contract.md`, `docs/design/data/feedback-schema.md`, `docs/design/interfaces/floating-bar-interaction-spec.md`, and `docs/design/product/ux-design-system.md`.
-- Phase 06 tasks execute sequentially: task 13 → task 14 → task 15.
+- None active.
+- Phase 05 design context: `docs/design/architecture/wc-view-system-flow.md`, `docs/design/interfaces/cli-contract.md`, `docs/design/data/feedback-schema.md`, `docs/design/interfaces/floating-bar-interaction-spec.md`, `docs/design/product/ux-design-system.md`.
+- Phase 06 execution order was task 13 → task 14 → task 15.
 
 ## Linked Artifacts
 

@@ -12,8 +12,8 @@
 ## Scope
 
 - Floating bar states (collapsed toast, expanded history/pending list), selection chip badges, non-modal composer, keyboard/focus behavior.
-- Excludes: writing to `~/.wc-view/feedback/queue.jsonl` (blocked — see Phase 04) and annotation anchor resolution (blocked — see Phase 03).
-- In-scope submission behavior is limited to invoking a local in-memory batch handoff function. This is a temporary implementation seam to sequence around the Phase 04 blocker, not a designed interface — Phase 04 replaces it with the real atomic write to `~/.wc-view/feedback/queue.jsonl`.
+- Excludes: durable feedback queue writes (Phase 04) and annotation anchor resolution (Phase 03).
+- Submission uses a local in-memory handoff until Phase 04 adds atomic queue writes.
 
 ## Features
 
@@ -35,7 +35,7 @@
 
 ## Blockers
 
-- None. (Depends on Phase 01 theme tokens and landmarks being available for styling and focus order.)
+- None.
 
 ## Linked Tasks
 

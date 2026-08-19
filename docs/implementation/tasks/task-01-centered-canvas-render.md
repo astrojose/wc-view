@@ -79,7 +79,7 @@ Render a Markdown document in a full-width centered column, `68-76ch` wide, with
 - Reviewed revision: 3ad1fd8c40f6
 - Environment: local Vitest
 - Reviewed at: 2026-08-01T00:00:00Z
-- Reviewer: recorded from original task verification during v0.4.0-rc.1 migration
+- Reviewer: original verification record migrated to workflow-contract v0.4.0-rc.1
 
 ### Acceptance Evidence
 
@@ -91,10 +91,10 @@ Render a Markdown document in a full-width centered column, `68-76ch` wide, with
 
 ### Alignment
 
-- Design vs implementation: aligned with recorded evidence at 3ad1fd8c40f6
+- Design vs implementation: aligned at 3ad1fd8c40f6
 - Planned vs actual scope: no variance recorded
-- Documentation drift: directory-serve later added `.doc-sidebar`; unresolved in `docs/changes/proposed/wc-view-html-artifact-canvas-width.md`
-- Deferred gaps: HTML artifact canvas width remains proposed
+- Documentation drift: directory-serve later added `.doc-sidebar`; resolved by task-16 HTML canvas width adoption.
+- Deferred gaps: none recorded
 - Newly discovered decisions: none recorded at original completion
 
 ### Follow-up

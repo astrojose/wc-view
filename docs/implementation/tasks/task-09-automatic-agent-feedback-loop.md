@@ -87,7 +87,7 @@ Implement durable feedback batches, a command-driven local bridge, and browser-v
 - Reviewed revision: d56d9e428422
 - Environment: local typecheck, Vitest, production build, and production-built E2E
 - Reviewed at: 2026-08-01T00:00:00Z
-- Reviewer: recorded from original task verification during v0.4.0-rc.1 migration
+- Reviewer: original verification record migrated to workflow-contract v0.4.0-rc.1
 
 ### Acceptance Evidence
 
@@ -102,7 +102,7 @@ Implement durable feedback batches, a command-driven local bridge, and browser-v
 
 ### Alignment
 
-- Design vs implementation: aligned with recorded evidence at d56d9e428422
+- Design vs implementation: aligned at d56d9e428422
 - Planned vs actual scope: no variance recorded
 - Documentation drift: none found
 - Deferred gaps: none recorded

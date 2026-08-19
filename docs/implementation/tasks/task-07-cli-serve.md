@@ -78,7 +78,7 @@ Implement `wc-view serve` to render Markdown files or a `docs/` tree in a localh
 - Reviewed revision: ee08c82e802c
 - Environment: local Vitest
 - Reviewed at: 2026-08-01T00:00:00Z
-- Reviewer: recorded from original task verification during v0.4.0-rc.1 migration
+- Reviewer: original verification record migrated to workflow-contract v0.4.0-rc.1
 
 ### Acceptance Evidence
 
@@ -90,7 +90,7 @@ Implement `wc-view serve` to render Markdown files or a `docs/` tree in a localh
 
 ### Alignment
 
-- Design vs implementation: aligned with recorded evidence at ee08c82e802c
+- Design vs implementation: aligned at ee08c82e802c
 - Planned vs actual scope: no variance recorded
 - Documentation drift: none found
 - Deferred gaps: none recorded

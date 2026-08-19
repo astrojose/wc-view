@@ -89,7 +89,7 @@ Bring the production review surface closer to `wc-view Design System/` for docum
 - Reviewed revision: 18d21d4b215c
 - Environment: local typecheck, Vitest, production build, and system Chrome smoke on 127.0.0.1:3462
 - Reviewed at: 2026-08-01T00:00:00Z
-- Reviewer: recorded from original task verification during v0.4.0-rc.1 migration
+- Reviewer: original verification record migrated to workflow-contract v0.4.0-rc.1
 
 ### Acceptance Evidence
 
@@ -104,10 +104,10 @@ Bring the production review surface closer to `wc-view Design System/` for docum
 
 ### Alignment
 
-- Design vs implementation: aligned with recorded evidence at 18d21d4b215c
+- Design vs implementation: aligned at 18d21d4b215c
 - Planned vs actual scope: no variance recorded
-- Documentation drift: constraint "no sidebars" later diverged in directory-serve; unresolved in `docs/changes/proposed/wc-view-html-artifact-canvas-width.md`
-- Deferred gaps: HTML artifact canvas width remains proposed
+- Documentation drift: constraint "no sidebars" later diverged in directory-serve; resolved by task-16 HTML canvas width adoption.
+- Deferred gaps: none recorded
 - Newly discovered decisions: none recorded at original completion
 
 ### Follow-up
