@@ -2,6 +2,10 @@
   "name": "@astrojose/wc-view",
   "version": "0.9.3",
   "description": "Local Markdown review surface for agent workflows",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/astrojose/wc-view"
+  },
   "publishConfig": {
     "access": "public"
   },
