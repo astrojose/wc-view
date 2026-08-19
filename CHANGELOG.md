@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.9.3] - 2026-08-19
+
+### Fixed
+
+- Publish releases through npm trusted publishing via GitHub OIDC, removing the CI `NPM_TOKEN` path that triggered OTP failures.
+
 ## [0.9.2] - 2026-08-19
 
 ### Added
