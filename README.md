@@ -219,7 +219,7 @@ Run TypeScript type-check:
 Run release preflight for the current version:
 
 ```bash
-python3 .agents/skills/release-wcv/scripts/preflight_release.py --version 0.1.0
+python3 .agents/skills/release-wcv/scripts/preflight_release.py --version "$(node -p "require('./package.json').version")"
 ```
 
 ## Release

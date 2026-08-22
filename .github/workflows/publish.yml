@@ -19,6 +19,9 @@ jobs:
           registry-url: "https://registry.npmjs.org"
           package-manager-cache: false
       - run: npm ci
+      - run: ./node_modules/.bin/tsc --noEmit
       - run: npm run build
       - run: npm test
+      - run: npm install --global @anthropic-ai/claude-code@latest
+      - run: claude plugin validate .
       - run: npm publish --access public --provenance
