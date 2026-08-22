@@ -91,6 +91,25 @@ node dist/bin/wc-view.js --help
 
 ## Usage
 
+### Example: Visualize, review, and iterate
+
+Ask your agent to visualize an idea, such as: "Visualize the checkout retry
+flow." The agent synthesizes `.wc-view-scratch.html`, then serves it for
+review:
+
+```bash
+wc-view serve .wc-view-scratch.html --open
+```
+
+Attach feedback in the browser. The agent reads the feedback, proposes or
+applies the requested changes according to your workflow, then posts its
+status back to the review batch. Accept protected project changes explicitly.
+
+```bash
+wc-view feedback --workspace . --unresolved
+wc-view feedback reply <batchId> --message "Updated the retry flow for review."
+```
+
 Render a documentation tree:
 
 ```bash
