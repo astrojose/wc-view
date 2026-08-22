@@ -1,7 +1,7 @@
 {
   "name": "@astrojose/wc-view",
   "version": "0.9.3",
-  "description": "Local Markdown review surface for agent workflows",
+  "description": "Interactive local workspace for reviewing and iterating on Markdown and agent-generated HTML artifacts",
   "repository": {
     "type": "git",
     "url": "https://github.com/astrojose/wc-view"

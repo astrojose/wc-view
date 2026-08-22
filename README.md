@@ -1,8 +1,19 @@
 # wc-view
 
-Local Markdown and HTML review surface for agent workflows.
+Interactive artifact workspace for human-agent collaboration.
 
-`wc-view` renders Markdown files, styled HTML artifacts, or documentation trees in a localhost browser UI and stores review feedback in user-local state for agent reconciliation.
+`wc-view` gives people and active agents a shared local surface for inspecting
+and iterating on work. Serve existing Markdown or documentation folders when
+that is the intent, or serve an HTML artifact synthesized during a design,
+implementation, troubleshooting, or brainstorming discussion. Anchor feedback
+to the artifact and route it back through the local agent bridge.
+
+## What It Is For
+
+- Turn an active discussion into an inspectable Markdown or HTML artifact.
+- Review the artifact in a local browser and attach precise feedback.
+- Let an agent process feedback while keeping protected project changes subject
+  to explicit human acceptance.
 
 ## Package
 

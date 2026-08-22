@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "wc-view",
-  "description": "Local Markdown and HTML review surface for agent workflows",
+  "description": "Interactive local workspace for reviewing and iterating on Markdown and agent-generated HTML artifacts",
   "version": "0.9.3",
   "author": {
     "name": "astrojose",
@@ -16,6 +16,9 @@
     "docs",
     "review",
     "cli",
-    "agent-workflow"
+    "agent-workflow",
+    "human-in-the-loop",
+    "agent-collaboration",
+    "artifact-iteration"
   ]
 }

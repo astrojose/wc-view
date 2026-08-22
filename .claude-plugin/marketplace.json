@@ -1,7 +1,7 @@
 {
   "name": "wc-view",
   "metadata": {
-    "description": "Local Markdown and HTML review surface for agent workflows"
+    "description": "Interactive workspace for human-agent artifact iteration"
   },
   "owner": {
     "name": "astrojose",

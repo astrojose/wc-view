@@ -1,20 +1,29 @@
 ---
 name: use-wc-view
 description: >-
-  Install and use the @astrojose/wc-view CLI for local Markdown and HTML
-  workflow review. Use when a user asks to open, view, inspect, review,
-  visualize, export, or interact with Markdown files, styled HTML artifacts,
-  documentation, docs/ trees, feedback queues, bridges, or
-  agent review surfaces using wc-view; when a user asks how to install or
-  update wc-view; or when a prompt implies the CLI should be run if available
-  and installed or updated if missing or stale.
+  Install and use the @astrojose/wc-view CLI as an interactive artifact
+  workspace. Use when a user asks to open, view, inspect, review, visualize,
+  export, or interact with Markdown files, styled HTML artifacts,
+  documentation, docs/ trees, feedback queues, bridges, or agent review
+  surfaces using wc-view; when a user asks how to install or update wc-view;
+  or when a prompt implies the CLI should be run if available and installed or
+  updated if missing or stale.
 ---
 
 # Use wc-view
 
 ## Overview
 
-Use `@astrojose/wc-view` as the standard local Markdown and HTML review surface for agent workflows. Use an isolated `npx` invocation for consumer workflows so each run avoids stale global installs. Resolve `latest` once per invocation by default, or honor an explicitly supplied `WC_VIEW_VERSION` when a workflow needs a reviewed version.
+Use `@astrojose/wc-view` to give a person and an active agent a shared local
+surface for an artifact under discussion. Prefer an agent-synthesized HTML
+artifact for an explicit visualization request; serve an existing Markdown
+file or documentation tree when that is the user's intent. When a
+visualization would help but was not requested, ask before generating one.
+
+Use an isolated `npx` invocation for consumer workflows so each run avoids
+stale global installs. Resolve `latest` once per invocation by default, or
+honor an explicitly supplied `WC_VIEW_VERSION` when a workflow needs a
+reviewed version.
 
 ## Quick Start
 
@@ -37,9 +46,10 @@ npx --yes "$WC_VIEW_PACKAGE" feedback --workspace . --format markdown
 
 1. **Identify the target content** from the prompt.
 
-   - **Visualization requests** ("visualize", "show the flow", "make a review artifact"): DO NOT just serve an existing static `.md` file. Synthesize a rich visual representation and serve it through a workspace-local scratch artifact.
+   - **Visualization requests** ("visualize", "show the flow", "make a review artifact"): DO NOT just serve an existing static `.md` file. Synthesize and serve a rich visualization through a workspace-local scratch artifact.
      - Prefer `.wc-view-scratch.html` for styled layouts, cards, tables, diagrams, visual hierarchy, or embedded interaction.
      - Use `.wc-view-scratch.md` when the output is Markdown-native documentation or mostly Mermaid plus prose.
+   - **Potential visualizations**: When a visualization would materially improve the discussion but the user did not ask for one, ask whether they want a `wc-view` artifact. Do not generate one by default.
    - **Standard review** ("open this", "view this", "review these docs"): Use the explicit file or directory path provided.
    - **General docs review**: Use the current repository's `docs/` directory when `docs/` exists.
    - **Export requests** ("export to HTML", "make offline copy"): Use `wc-view export`.

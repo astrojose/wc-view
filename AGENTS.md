@@ -1,6 +1,6 @@
 # wc-view
 
-Local Markdown and HTML review surface for agent workflows.
+Interactive artifact workspace for human-agent collaboration.
 
 ## Current State
 
@@ -39,7 +39,8 @@ Run type-check after coherent TypeScript changes.
 ## Agent Rules
 
 - Markdown, Mermaid, and explicit human acceptance are authoritative.
-- When asked to "visualize" a concept, process, or file, synthesize a dynamic visual representation into a temporary scratch file and serve that artifact via `wc-view`, rather than serving static text docs blindly.
+- When explicitly asked to "visualize" a concept, process, or file, synthesize a dynamic visual representation into a temporary scratch file and serve that artifact via `wc-view`, rather than serving static text docs blindly.
+- When visualization would help but was not requested, ask whether the user wants a `wc-view` artifact before generating one.
 - Prefer `.wc-view-scratch.html` for rich visual artifacts that need layout, style, or interaction; use `.wc-view-scratch.md` for document-first review.
 - Keep generated viewer state outside the repository: `~/.wc-view/`.
 - Keep machine-readable CLI payloads on `stdout`; send diagnostics to `stderr`.

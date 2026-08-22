@@ -1,6 +1,6 @@
 {
   "name": "wc-view",
-  "description": "Local Markdown and HTML review surface for agent workflows",
+  "description": "Interactive local workspace for reviewing and iterating on Markdown and agent-generated HTML artifacts",
   "version": "0.9.3",
   "author": {
     "name": "astrojose",
@@ -15,12 +15,15 @@
     "docs",
     "review",
     "cli",
-    "agent-workflow"
+    "agent-workflow",
+    "human-in-the-loop",
+    "agent-collaboration",
+    "artifact-iteration"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "wc-view",
-    "shortDescription": "Local Markdown and HTML review surface for agent workflows.",
+    "shortDescription": "Interactive workspace for human-agent artifact iteration.",
     "developerName": "astrojose",
     "category": "Productivity",
     "websiteURL": "https://github.com/astrojose/wc-view"
