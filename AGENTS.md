@@ -6,16 +6,12 @@ Local Markdown and HTML review surface for agent workflows.
 
 - `wc-view` design truth is adopted in `docs/design/` (product, interfaces, data).
 - `wc-view Design System/` is the authoritative source for the UI/UX design system (tokens, components, colors, typography, layout).
-- Implementation is tracked in `docs/implementation/`.
 - Package name is `@astrojose/wc-view`; CLI binary is `wc-view`.
 - Release workflow is owned by `.agents/skills/release-wcv/`.
 
 ## Start Here
 
-1. Read `.agents/skills/workflow-contract/SKILL.md`.
-2. Validate: `python3 .agents/workflows/workflow-contract/scripts/validate_workflow.py`.
-3. Read relevant docs in `docs/design/`.
-4. Treat `docs/changes/proposed/` as unresolved intent only.
+1. Read relevant docs in `docs/design/`.
 
 ## Local Setup
 
@@ -36,18 +32,15 @@ Local Markdown and HTML review surface for agent workflows.
 - Type-check: `./node_modules/.bin/tsc --noEmit`.
 - Unit tests: `npm test`.
 - Production build: `npm run build`.
-- Workflow validation: `npm run validate:workflow`.
 - Release preflight: `python3 .agents/skills/release-wcv/scripts/preflight_release.py --version <version>`.
 
-Run type-check after coherent TypeScript changes. Run workflow validation after docs, task, proposal, or AGENTS changes.
+Run type-check after coherent TypeScript changes.
 
 ## Agent Rules
 
 - Markdown, Mermaid, and explicit human acceptance are authoritative.
 - When asked to "visualize" a concept, process, or file, synthesize a dynamic visual representation into a temporary scratch file and serve that artifact via `wc-view`, rather than serving static text docs blindly.
 - Prefer `.wc-view-scratch.html` for rich visual artifacts that need layout, style, or interaction; use `.wc-view-scratch.md` for document-first review.
-- Do not create implementation tasks or code before accepted design truth exists.
-- Do not treat `docs/changes/proposed/` as approved truth.
 - Keep generated viewer state outside the repository: `~/.wc-view/`.
 - Keep machine-readable CLI payloads on `stdout`; send diagnostics to `stderr`.
 - Preserve `wc-view` localhost binding to `127.0.0.1` unless an accepted design change says otherwise.
@@ -57,5 +50,4 @@ Run type-check after coherent TypeScript changes. Run workflow validation after 
 
 - Canonical skills: `.agents/skills/`
 - Consumer companion skill: `skills/use-wc-view/`
-- Workflow policy: `.agents/workflows/workflow-contract/`
 - Release workflow: `.agents/skills/release-wcv/`

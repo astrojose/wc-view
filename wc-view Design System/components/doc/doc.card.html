@@ -14,7 +14,7 @@ function Card(){
   React.useEffect(()=>{document.documentElement.dataset.theme=theme;lucide.createIcons();},[theme]);
   return <div>
     <div className="row" style={{justifyContent:'flex-end'}}><Button size="sm" variant="ghost" onClick={()=>setHelp(true)}>Shift + ? shortcuts</Button><ThemeToggle theme={theme} onChange={setTheme} darkIcon={<Ic n="moon" />} lightIcon={<Ic n="sun" />} /></div>
-    <DocCanvas title="Local Markdown review surface" meta="docs/changes/proposed/wc-view-local-markdown-review-surface.md · proposed" style={{padding:'var(--space-4) 0'}}>
+    <DocCanvas title="Local Markdown review surface" meta="docs/design/product/ux-design-system.md · design specification" style={{padding:'var(--space-4) 0'}}>
       <p style={{margin:0}}>Markdown and explicit human acceptance stay authoritative. Browser feedback is unapproved input.</p>
       <CodeBlock label="wc-view feedback --unresolved" reservedHeight="6rem" code={'[{"id":"a3f","anchor":{"exact":"layered anchor","prefix":"Bind each annotation with a "},"comment":"Name the constant.","severity":"note","status":"unresolved"}]'} />
     </DocCanvas>

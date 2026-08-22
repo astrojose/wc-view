@@ -1,7 +1,7 @@
 One-line: the centered Markdown reading column — the layout root of every wc-view screen.
 
 ```jsx
-<DocCanvas title="wc-view: local Markdown review surface" meta="docs/changes/proposed/… · proposed">
+<DocCanvas title="wc-view: local Markdown review surface" meta="docs/design/… · design specification">
   <p>…</p>
 </DocCanvas>
 ```

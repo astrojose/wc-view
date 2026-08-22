@@ -205,12 +205,6 @@ Run TypeScript type-check:
 ./node_modules/.bin/tsc --noEmit
 ```
 
-Run workflow validation:
-
-```bash
-npm run validate:workflow
-```
-
 Run release preflight for the current version:
 
 ```bash
@@ -227,14 +221,11 @@ Use the repo-local release skill:
 /release-wcv
 ```
 
-The release workflow verifies typecheck, tests, build, workflow validation, changelog contents, npm package metadata, and npm tarball contents before any publish step. It publishes using `npm publish --access public` (utilizing `.npmrc`) and requires explicit approval before publishing, Git tag push, or GitHub Release creation.
+The release workflow verifies typecheck, tests, build, changelog contents, npm package metadata, and npm tarball contents before any publish step. It publishes using `npm publish --access public` (utilizing `.npmrc`) and requires explicit approval before publishing, Git tag push, or GitHub Release creation.
 
 ## Documentation
 
 - Product and architecture truth: `docs/design/`
-- Implementation planning: `docs/implementation/`
-- Proposed unresolved changes: `docs/changes/proposed/`
-- Workflow policy: `.agents/workflows/workflow-contract/`
 - Repo-local skills: `.agents/skills/`
 
 ## Safety

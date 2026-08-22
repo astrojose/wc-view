@@ -15,13 +15,12 @@ Run the wc-view release workflow end to end: changelog, versioning, verification
 - CLI binary: `wc-view`.
 - Primary distribution: npm.
 - Contributor-testing distribution: GitHub Release with tag, generated release notes, source archive, npm pack evidence, and attached package artifact when available.
-- Do not release this as part of `workflow-contract`; `wc-view` stays an independent CLI/browser tool.
 
 ## Safety Rules
 
 - Never run `git push`, `git push --tags`, or `gh release create` before showing the exact release plan and receiving explicit user approval in the current turn.
 - Publishing to npm happens in CI (`.github/workflows/publish.yml`), triggered by the pushed `v<x.y.z>` tag. Do not run `npm publish` locally. This requires the `NPM_TOKEN` secret to already be configured on the GitHub repo.
-- Never push the tag until all local verification (typecheck, tests, build, workflow validation, preflight) has passed, since CI will publish whatever is checked out at that tag.
+- Never push the tag until all local verification (typecheck, tests, build, preflight) has passed, since CI will publish whatever is checked out at that tag.
 - Never discard, reset, or overwrite unrelated user changes.
 - Always commit release changes on the current branch. Do not create or switch branches during this release skill.
 - Always use `$git-commit-now` to create the release commit after verification, staging only the approved release files for the current branch.
@@ -47,7 +46,6 @@ Run the wc-view release workflow end to end: changelog, versioning, verification
    - Run `./node_modules/.bin/tsc --noEmit` when local TypeScript exists.
    - Run `npm test`.
    - Run `npm run build`.
-   - Run `npm run validate:workflow`.
    - Run `python3 .agents/skills/release-wcv/scripts/preflight_release.py --version <x.y.z>` (includes `claude plugin validate .`).
    - Optionally sanity-check the Codex manifest by hand: `codex plugin marketplace add ./`, confirm `wc-view@wc-view` appears in `codex plugin list`, then `codex plugin marketplace remove wc-view`. Not run by the preflight script since it mutates local Codex config.
 4. Review publish plan:
@@ -92,7 +90,7 @@ Generate release notes from the changelog entry. Include:
 - Package: `@astrojose/wc-view`.
 - Install/test command: `npx @astrojose/wc-view@<x.y.z> --help`.
 - Contributor-testing note: use the GitHub Release assets and npm pack artifact when testing before npm install.
-- Verification summary: typecheck, tests, build, workflow validation, npm pack dry run.
+- Verification summary: typecheck, tests, build, npm pack dry run.
 
 ## Preflight Script
 

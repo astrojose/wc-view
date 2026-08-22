@@ -4,7 +4,7 @@ description: >-
   Install and use the @astrojose/wc-view CLI for local Markdown and HTML
   workflow review. Use when a user asks to open, view, inspect, review,
   visualize, export, or interact with Markdown files, styled HTML artifacts,
-  workflow-contract documents, docs/ trees, feedback queues, bridges, or
+  documentation, docs/ trees, feedback queues, bridges, or
   agent review surfaces using wc-view; when a user asks how to install or
   update wc-view; or when a prompt implies the CLI should be run if available
   and installed or updated if missing or stale.

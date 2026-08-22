@@ -1135,7 +1135,7 @@ const blocks = [{
 }, {
   id: 'b2',
   kind: 'p',
-  text: 'workflow-contract keeps Markdown documents as the authority for proposals, design, planning, and execution.'
+  text: 'Markdown files are the source of product and interface truth for wc-view.'
 }, {
   id: 'b3',
   kind: 'p',
@@ -1237,8 +1237,8 @@ function ReviewSurface() {
   const [dialog, setDialog] = React.useState(false);
   const [help, setHelp] = React.useState(false);
   const [toast, setToast] = React.useState({
-    msg: 'Reading docs/changes/proposed/wc-view-local-markdown-review-surface.md',
-    meta: 'proposed · 9.8 kB · watching for changes'
+    msg: 'Reading docs/design/product/ux-design-system.md',
+    meta: 'design specification · watching for changes'
   });
   const [toastOpen, setToastOpen] = React.useState(false);
   const [status, setStatus] = React.useState({
@@ -1355,7 +1355,7 @@ function ReviewSurface() {
     })
   }))), /*#__PURE__*/React.createElement(DocCanvas, {
     title: "wc-view: local Markdown review surface",
-    meta: "docs/changes/proposed/wc-view-local-markdown-review-surface.md \xB7 proposed"
+    meta: "docs/design/product/ux-design-system.md \xB7 design specification"
   }, /*#__PURE__*/React.createElement(DocumentBody, {
     notesByBlock: notesByBlock,
     activeId: target && target.id,

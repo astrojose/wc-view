@@ -1,13 +1,13 @@
 # UI kit — wc-view review surface
 
-Recreation of the only surface the proposal defines: a centered Markdown reading canvas with
+Recreation of the review surface defined by the public design docs: a centered Markdown reading canvas with
 inline annotation and a floating bottom composer. There is no sidebar, no navigation chrome,
-and no docs-tree view — the tree/tabs question is still an **Open Decision** upstream, so it is
+and no docs-tree view — the tree/tabs question is still an open design decision, so it is
 deliberately absent rather than invented.
 
 ## Files
 - `index.html` — interactive entry (dark default, theme toggle).
-- `DocumentBody.jsx` — the rendered proposal blocks wrapped in `AnnotatedBlock`.
+- `DocumentBody.jsx` — the rendered design-document blocks wrapped in `AnnotatedBlock`.
 - `CliPanel.jsx` — `wc-view feedback --unresolved` compact-JSON payload + `Mark in_progress`.
 - `ReviewSurface.jsx` — screen composition and review state.
 
@@ -19,5 +19,5 @@ deliberately absent rather than invented.
 5. **Mark in_progress** in the CLI panel drives the reconcile loop (`unresolved → in_progress`).
 6. Trash icon → the system's only modal, `ConfirmDialog`.
 
-Source of truth: `docs/changes/proposed/wc-view-local-markdown-review-surface.md` in `astrojose/wc-view`.
+Source of truth: `docs/design/product/ux-design-system.md` in `astrojose/wc-view`.
 Nothing here is production code; no viewer state is written anywhere.

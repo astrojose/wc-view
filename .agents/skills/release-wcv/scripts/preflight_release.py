@@ -161,7 +161,6 @@ def main() -> int:
         ["./node_modules/.bin/tsc", "--noEmit"],
         ["npm", "test"],
         ["npm", "run", "build"],
-        ["npm", "run", "validate:workflow"],
         ["claude", "plugin", "validate", "."],
     ]
     for command in commands:

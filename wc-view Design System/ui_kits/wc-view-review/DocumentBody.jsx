@@ -6,7 +6,7 @@ const H = ({ children }) => (
 
 const blocks = [
   { id: 'b1', kind: 'h', text: 'Context' },
-  { id: 'b2', kind: 'p', text: 'workflow-contract keeps Markdown documents as the authority for proposals, design, planning, and execution.' },
+  { id: 'b2', kind: 'p', text: 'Markdown files are the source of product and interface truth for wc-view.' },
   { id: 'b3', kind: 'p', text: 'CLI-agent users must currently locate and read Markdown in an editor or host-specific artifact UI. The same review surface must work with Codex, Claude Code, Pi, OpenCode, Cursor, and Antigravity.' },
   { id: 'b4', kind: 'h', text: 'Proposed Change' },
   { id: 'b5', kind: 'p', text: 'Render Markdown files or a docs/ tree in a lightweight localhost browser UI. Keep Markdown and explicit human acceptance authoritative — browser feedback is unapproved input.' },

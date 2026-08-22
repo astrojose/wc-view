@@ -8,17 +8,14 @@ browser feedback is explicitly **unapproved input**.
 
 ## Sources this system was built from
 
-- GitHub: **https://github.com/astrojose/wc-view** (branch `main`, tree `2de226ffb051`)
-  - **Primary spec:** `docs/changes/proposed/wc-view-local-markdown-review-surface.md` — palette, type,
-    geometry, motion, layout, component behaviour, and a11y contract all come from this one document.
-  - `AGENTS.md`, `docs/README.md`, `docs/implementation/*` — repo state and workflow policy.
-  - `.agents/workflows/workflow-contract/*` — the surrounding document-lifecycle contract.
-- Referenced upstream project: **workflow-contract** (vendored under `.agents/workflows/` in that repo).
+- GitHub: **https://github.com/astrojose/wc-view** (branch `main`)
+  - **Primary spec:** `docs/design/product/ux-design-system.md` — palette, type,
+    geometry, motion, layout, component behaviour, and accessibility contract.
+  - `AGENTS.md` and `docs/design/*` — repository guidance and product truth.
 
-Read the repository for deeper grounding — especially the proposal document, which is the only design
-truth that exists. **There is no implementation code, no Figma file, and no released UI yet.** Everything
-here is a faithful materialisation of a written spec; where the spec leaves an Open Decision, this system
-leaves a hole rather than inventing an answer.
+Read the repository for deeper grounding, especially the UX design-system document. This design system
+is a reference implementation of that written specification; where the specification leaves an open
+decision, this system leaves a hole rather than inventing an answer.
 
 ### What is deliberately absent
 - **No logo or brand mark** — the sources contain none. The name is always set as type: lowercase

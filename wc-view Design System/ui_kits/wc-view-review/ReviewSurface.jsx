@@ -12,7 +12,7 @@ function ReviewSurface() {
   const [cli, setCli] = React.useState(false);
   const [dialog, setDialog] = React.useState(false);
   const [help, setHelp] = React.useState(false);
-  const [toast, setToast] = React.useState({ msg: 'Reading docs/changes/proposed/wc-view-local-markdown-review-surface.md', meta: 'proposed · 9.8 kB · watching for changes' });
+  const [toast, setToast] = React.useState({ msg: 'Reading docs/design/product/ux-design-system.md', meta: 'design specification · watching for changes' });
   const [toastOpen, setToastOpen] = React.useState(false);
   const [status, setStatus] = React.useState({ tone: 'neutral', msg: 'Select any paragraph to attach a review note.' });
 
@@ -59,7 +59,7 @@ function ReviewSurface() {
         </div>
       </div>
 
-      <DocCanvas title="wc-view: local Markdown review surface" meta="docs/changes/proposed/wc-view-local-markdown-review-surface.md · proposed">
+      <DocCanvas title="wc-view: local Markdown review surface" meta="docs/design/product/ux-design-system.md · design specification">
         <DocumentBody notesByBlock={notesByBlock} activeId={target && target.id} onSelect={(b) => { setTarget(b); setDraft(''); }} />
         {target && (
           <div style={{ display: 'flex', justifyContent: 'flex-start' }}>

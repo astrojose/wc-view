@@ -1,6 +1,6 @@
 repo: astrojose/wc-view
 branch: main
-path: docs/changes/proposed
+path: docs/design/product
 
 ## Last sync
 
@@ -17,9 +17,9 @@ date: 2026-07-31T20:57:00Z
 
 | Screen / artifact | Built from |
 | --- | --- |
-| `ui_kits/wc-view-review/index.html` | `docs/changes/proposed/wc-view-local-markdown-review-surface.md` |
-| `ui_kits/wc-view-review/ReviewSurface.jsx` | same proposal — "Minimalist Canvas Layout", "Central Floating Bottom Input Bar" |
-| `ui_kits/wc-view-review/CliPanel.jsx` | same proposal — "Decoupled Asynchronous Agent Payload Contract" |
-| `tokens/*.css` | same proposal — "Sleek Minimal Design System & Theme Adaptation" |
-| `components/review/*` | same proposal — "Element Selection & Robust Spatial Annotations", a11y section |
-| `readme.md` | `AGENTS.md`, `docs/README.md`, `docs/implementation/project.md` |
+| `ui_kits/wc-view-review/index.html` | `docs/design/product/ux-design-system.md` |
+| `ui_kits/wc-view-review/ReviewSurface.jsx` | UX design system — "Minimalist Canvas Layout", "Central Floating Bottom Input Bar" |
+| `ui_kits/wc-view-review/CliPanel.jsx` | `docs/design/interfaces/cli-contract.md` |
+| `tokens/*.css` | UX design system — "Sleek Minimal Design System & Theme Adaptation" |
+| `components/review/*` | `docs/design/interfaces/floating-bar-interaction-spec.md` and accessibility guidance |
+| `readme.md` | `AGENTS.md` and `docs/design/*` |
