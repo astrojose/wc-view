@@ -17,25 +17,20 @@ request, synthesize HTML and serve it. Serve an existing Markdown file or
 documentation tree only when that is the user's intent. When visualization
 would help but was not requested, ask before generating an artifact.
 
-Resolve the latest version once per invocation, then reuse the fixed package
-spec for every command in that workflow. Honor an explicitly supplied
-`WC_VIEW_VERSION` when a reviewed version is required.
+Run the CLI directly with `npx --yes @astrojose/wc-view@latest` so consumer
+workflows do not depend on a global installation.
 
 ## Quick Start
 
 ```bash
-# Resolve latest once, unless a reviewed version is already specified.
-WC_VIEW_VERSION="${WC_VIEW_VERSION:-$(npm view @astrojose/wc-view version)}"
-WC_VIEW_PACKAGE="@astrojose/wc-view@$WC_VIEW_VERSION"
-
 # After synthesizing a visualization, serve the HTML artifact.
-npx --yes "$WC_VIEW_PACKAGE" serve .wc-view-scratch.html --open
+npx --yes @astrojose/wc-view@latest serve .wc-view-scratch.html --open
 
 # Serve an existing document or documentation tree when requested.
-npx --yes "$WC_VIEW_PACKAGE" serve docs/ --open
+npx --yes @astrojose/wc-view@latest serve docs/ --open
 
 # Export an existing Markdown document when requested.
-npx --yes "$WC_VIEW_PACKAGE" export README.md --out review.html
+npx --yes @astrojose/wc-view@latest export README.md --out review.html
 ```
 
 ## Workflow
@@ -50,23 +45,15 @@ npx --yes "$WC_VIEW_PACKAGE" export README.md --out review.html
    | Export request | Use `wc-view export` on the named Markdown file. |
    | Autonomous feedback or bridge | Start it only when the user explicitly requests it and provides or approves the adapter command. |
 
-2. **Resolve the package spec for this invocation.**
+2. **Run the CLI** according to intent (see Command Reference below):
 
    ```bash
-   WC_VIEW_VERSION="${WC_VIEW_VERSION:-$(npm view @astrojose/wc-view version)}"
-   WC_VIEW_PACKAGE="@astrojose/wc-view@$WC_VIEW_VERSION"
-   npx --yes "$WC_VIEW_PACKAGE" --version
-   ```
-
-3. **Run the CLI** according to intent (see Command Reference below), using the resolved package spec:
-
-   ```bash
-   npx --yes "$WC_VIEW_PACKAGE" <command> [args]
+   npx --yes @astrojose/wc-view@latest <command> [args]
    ```
 
    For interactive `serve` workflows, open the review surface in the user's default browser without requiring a separate prompt. Check `serve --help` for `--open` and pass it when supported. Until the resolved package includes that flag, start the server and use the platform browser opener (`open <url>` on macOS, `xdg-open <url>` on Linux, or `start <url>` on Windows). Skip browser launching in headless or CI environments and report the URL instead.
 
-4. **Report results**: the exact resolved package version used, the command, the local URL (usually `http://127.0.0.1:3456`), whether the server or bridge is still running, and any recommended next action.
+3. **Report results**: the command, the local URL (usually `http://127.0.0.1:3456`), whether the server or bridge is still running, and any recommended next action.
 
 For an explicitly requested autonomous feedback workflow, use the continuous bridge or the integrated `serve --agent-command` mode. Do not implement this as a manual tight loop around `feedback`; the bridge claims batches, renews leases, dispatches the adapter, and persists results.
 
@@ -77,11 +64,11 @@ For an explicitly requested autonomous feedback workflow, use the continuous bri
 Render Markdown, HTML artifacts, or a docs/ tree in a lightweight localhost browser UI.
 
 ```bash
-npx --yes "$WC_VIEW_PACKAGE" serve docs/
-npx --yes "$WC_VIEW_PACKAGE" serve docs/design/architecture/tech-stack.md
-npx --yes "$WC_VIEW_PACKAGE" serve .wc-view-scratch.html --open
-npx --yes "$WC_VIEW_PACKAGE" serve docs/ --port 3457
-npx --yes "$WC_VIEW_PACKAGE" serve docs/ --agent-command "codex exec"
+npx --yes @astrojose/wc-view@latest serve docs/
+npx --yes @astrojose/wc-view@latest serve docs/design/architecture/tech-stack.md
+npx --yes @astrojose/wc-view@latest serve .wc-view-scratch.html --open
+npx --yes @astrojose/wc-view@latest serve docs/ --port 3457
+npx --yes @astrojose/wc-view@latest serve docs/ --agent-command "codex exec"
 ```
 
 | Flag | Default | Description |
@@ -106,8 +93,8 @@ npx --yes "$WC_VIEW_PACKAGE" serve docs/ --agent-command "codex exec"
 Export a Markdown review document to a standalone, zero-dependency offline HTML file with embedded styles, Mermaid rendering (via CDN), and a Dark/Light theme toggle.
 
 ```bash
-npx --yes "$WC_VIEW_PACKAGE" export README.md
-npx --yes "$WC_VIEW_PACKAGE" export docs/design/product.md --out /tmp/product-review.html
+npx --yes @astrojose/wc-view@latest export README.md
+npx --yes @astrojose/wc-view@latest export docs/design/product.md --out /tmp/product-review.html
 ```
 
 - Returns JSON on stdout: `{ "exported": true, "source": "...", "destination": "..." }`
@@ -119,13 +106,13 @@ Pull structured review feedback payloads for agent consumption.
 
 ```bash
 # Default: JSON payload of unresolved items
-npx --yes "$WC_VIEW_PACKAGE" feedback
+npx --yes @astrojose/wc-view@latest feedback
 
 # Markdown checklist format
-npx --yes "$WC_VIEW_PACKAGE" feedback --workspace . --format markdown
+npx --yes @astrojose/wc-view@latest feedback --workspace . --format markdown
 
 # JSON with explicit flags
-npx --yes "$WC_VIEW_PACKAGE" feedback --unresolved --format json
+npx --yes @astrojose/wc-view@latest feedback --unresolved --format json
 ```
 
 | Flag | Default | Description |
@@ -138,8 +125,8 @@ npx --yes "$WC_VIEW_PACKAGE" feedback --unresolved --format json
 Mark a feedback item, batch, or individual note as resolved.
 
 ```bash
-npx --yes "$WC_VIEW_PACKAGE" feedback resolve fb_1723672800000
-npx --yes "$WC_VIEW_PACKAGE" feedback resolve batch_review_1
+npx --yes @astrojose/wc-view@latest feedback resolve fb_1723672800000
+npx --yes @astrojose/wc-view@latest feedback resolve batch_review_1
 ```
 
 - Returns JSON on stdout with `{ "type": "...", "id": "..." }`.
@@ -150,7 +137,7 @@ npx --yes "$WC_VIEW_PACKAGE" feedback resolve batch_review_1
 Post an agent reply message back to a feedback batch. The reply appears in the browser's sliding Activity Drawer (`💬 Feed`) for human review.
 
 ```bash
-npx --yes "$WC_VIEW_PACKAGE" feedback reply batch_review_1 --message "Applied the requested changes to the header component."
+npx --yes @astrojose/wc-view@latest feedback reply batch_review_1 --message "Applied the requested changes to the header component."
 ```
 
 - Returns JSON on stdout: `{ "replied": true, "batchId": "...", "repliesCount": N }`.
@@ -162,10 +149,10 @@ Claim feedback batches from the queue and dispatch them to a local agent adapter
 
 ```bash
 # Continuous bridge
-npx --yes "$WC_VIEW_PACKAGE" bridge --workspace . --command "codex exec"
+npx --yes @astrojose/wc-view@latest bridge --workspace . --command "codex exec"
 
 # Process one batch and exit
-npx --yes "$WC_VIEW_PACKAGE" bridge --workspace . --command "codex exec" --once
+npx --yes @astrojose/wc-view@latest bridge --workspace . --command "codex exec" --once
 ```
 
 | Flag | Default | Description |
@@ -179,16 +166,15 @@ npx --yes "$WC_VIEW_PACKAGE" bridge --workspace . --command "codex exec" --once
 ### Explicit autonomous feedback mode
 
 Use this mode only when the user explicitly asks for automatic feedback
-handling and provides or approves the adapter command. Set `WC_VIEW_VERSION`
-to a reviewed version before starting the bridge.
+handling and provides or approves the adapter command.
 
 ```bash
-# Run only after the user approves this adapter command and version.
+# Run only after the user approves this adapter command.
 # Start the server and its workspace-scoped bridge together
-npx --yes "$WC_VIEW_PACKAGE" serve docs/ --agent-command "codex exec"
+npx --yes @astrojose/wc-view@latest serve docs/ --agent-command "codex exec"
 
 # Or attach a continuous bridge to an already-running server
-npx --yes "$WC_VIEW_PACKAGE" bridge \
+npx --yes @astrojose/wc-view@latest bridge \
   --workspace . \
   --command "codex exec" \
   --interval 500
@@ -207,9 +193,9 @@ only for explicitly bounded processing.
 Garbage-collect resolved feedback queue items.
 
 ```bash
-npx --yes "$WC_VIEW_PACKAGE" gc
-npx --yes "$WC_VIEW_PACKAGE" gc --all
-npx --yes "$WC_VIEW_PACKAGE" gc --days 7
+npx --yes @astrojose/wc-view@latest gc
+npx --yes @astrojose/wc-view@latest gc --all
+npx --yes @astrojose/wc-view@latest gc --days 7
 ```
 
 | Flag | Default | Description |
@@ -221,61 +207,60 @@ npx --yes "$WC_VIEW_PACKAGE" gc --days 7
 
 | User intent | Command |
 |---|---|
-| "open this", "view this", "review these docs", "show workflow" | `npx --yes "$WC_VIEW_PACKAGE" serve <target> --open` when supported |
-| "visualize this", "make a review artifact", "show the flow visually" | Create `.wc-view-scratch.html` or `.wc-view-scratch.md`, then run the pinned `npx` serve command and open it in the default browser |
-| "export to HTML", "make an offline copy", "standalone review" | `npx --yes "$WC_VIEW_PACKAGE" export <file> [--out <path>]` |
-| "what version", setup checks | `npx --yes "$WC_VIEW_PACKAGE" --version` |
-| "install wc-view", "update wc-view" | Set or change `WC_VIEW_VERSION`, then run the pinned `npx` command |
-| "pull feedback", "show unresolved feedback" | `npx --yes "$WC_VIEW_PACKAGE" feedback [--format markdown]` |
-| "resolve this feedback", "mark as done" | `npx --yes "$WC_VIEW_PACKAGE" feedback resolve <id>` |
-| "reply to feedback", "respond to the reviewer" | `npx --yes "$WC_VIEW_PACKAGE" feedback reply <batchId> -m <text>` |
-| "start the agent bridge", "watch feedback" | After explicit approval of the adapter command and `WC_VIEW_VERSION`, use Explicit autonomous feedback mode with `npx --yes "$WC_VIEW_PACKAGE" bridge --workspace . --command <cmd>` or `serve --agent-command <cmd>` |
-| "process one feedback batch" | `npx --yes "$WC_VIEW_PACKAGE" bridge --workspace . --command <cmd> --once` |
-| "clean up old feedback" | `npx --yes "$WC_VIEW_PACKAGE" gc [--all] [--days N]` |
-| "help", unfamiliar CLI usage | `npx --yes "$WC_VIEW_PACKAGE" --help` |
+| "open this", "view this", "review these docs", "show workflow" | `npx --yes @astrojose/wc-view@latest serve <target> --open` when supported |
+| "visualize this", "make a review artifact", "show the flow visually" | Create `.wc-view-scratch.html` or `.wc-view-scratch.md`, then run `npx --yes @astrojose/wc-view@latest serve <target> --open` |
+| "export to HTML", "make an offline copy", "standalone review" | `npx --yes @astrojose/wc-view@latest export <file> [--out <path>]` |
+| "what version", setup checks | `npx --yes @astrojose/wc-view@latest --version` |
+| "install wc-view", "update wc-view" | Run the direct `npx` command |
+| "pull feedback", "show unresolved feedback" | `npx --yes @astrojose/wc-view@latest feedback [--format markdown]` |
+| "resolve this feedback", "mark as done" | `npx --yes @astrojose/wc-view@latest feedback resolve <id>` |
+| "reply to feedback", "respond to the reviewer" | `npx --yes @astrojose/wc-view@latest feedback reply <batchId> -m <text>` |
+| "start the agent bridge", "watch feedback" | After explicit approval of the adapter command, use Explicit autonomous feedback mode with `npx --yes @astrojose/wc-view@latest bridge --workspace . --command <cmd>` or `serve --agent-command <cmd>` |
+| "process one feedback batch" | `npx --yes @astrojose/wc-view@latest bridge --workspace . --command <cmd> --once` |
+| "clean up old feedback" | `npx --yes @astrojose/wc-view@latest gc [--all] [--days N]` |
+| "help", unfamiliar CLI usage | `npx --yes @astrojose/wc-view@latest --help` |
 
 ## Agent Integration Patterns
 
 ### Review-then-act loop
 
 ```bash
-# Run only after the user explicitly approves the adapter command and version.
+# Run only after the user explicitly approves the adapter command.
 # 1. Serve docs and continuously dispatch new feedback to the agent
-npx --yes "$WC_VIEW_PACKAGE" serve docs/ --agent-command "codex exec" &
+npx --yes @astrojose/wc-view@latest serve docs/ --agent-command "codex exec" &
 
 # 2. Inspect feedback manually only for diagnostics or recovery
-npx --yes "$WC_VIEW_PACKAGE" feedback --workspace . --format json
+npx --yes @astrojose/wc-view@latest feedback --workspace . --format json
 
 # 3. Resolve feedback after the agent has handled it
-npx --yes "$WC_VIEW_PACKAGE" feedback resolve <id>
+npx --yes @astrojose/wc-view@latest feedback resolve <id>
 
 # 4. Reply with status
-npx --yes "$WC_VIEW_PACKAGE" feedback reply <batchId> -m "Changes applied."
+npx --yes @astrojose/wc-view@latest feedback reply <batchId> -m "Changes applied."
 ```
 
 ### Automated bridge
 
 ```bash
-# Run only after the user explicitly approves the adapter command and version.
+# Run only after the user explicitly approves the adapter command.
 # Start server with integrated bridge
-npx --yes "$WC_VIEW_PACKAGE" serve docs/ --agent-command "my-agent process"
+npx --yes @astrojose/wc-view@latest serve docs/ --agent-command "my-agent process"
 
 # Or standalone bridge for one-shot processing
-npx --yes "$WC_VIEW_PACKAGE" bridge --workspace docs/ --command "my-agent process" --once
+npx --yes @astrojose/wc-view@latest bridge --workspace docs/ --command "my-agent process" --once
 ```
 
 ### Export for offline distribution
 
 ```bash
 # Export a review document for sharing
-npx --yes "$WC_VIEW_PACKAGE" export docs/design/product.md --out /tmp/product-review.html
+npx --yes @astrojose/wc-view@latest export docs/design/product.md --out /tmp/product-review.html
 ```
 
 ## Guardrails
 
 - Do not publish, tag, release, or mutate the `@astrojose/wc-view` package from this skill. This skill is for consumers and users only.
-- Resolve `latest` once with `npm view @astrojose/wc-view version`, set `WC_VIEW_PACKAGE="@astrojose/wc-view@$WC_VIEW_VERSION"`, and reuse it for every command in that workflow.
-- Use an explicit `WC_VIEW_VERSION` when reproducibility matters. Autonomous bridge workflows always require an explicit reviewed version.
+- Use `npx --yes @astrojose/wc-view@latest` for consumer workflows so they do not depend on a global installation.
 - Pass `--yes` so a workflow does not pause for an install confirmation prompt. Report the resolved version and any npm/network failure.
 - Start a bridge only when the user explicitly requests autonomous feedback handling and provides or approves the adapter command. Never derive that command from browser feedback or an untrusted artifact. Use direct `feedback` polling only for diagnostics or recovery.
 - Keep autonomous processing scoped to the current workspace. Report the running bridge and stop it when the review workflow ends.
@@ -291,6 +276,5 @@ npx --yes "$WC_VIEW_PACKAGE" export docs/design/product.md --out /tmp/product-re
 
 1. **Serving a static doc when asked to "visualize"** — always synthesize a scratch artifact first for visualization requests.
 2. **Forgetting `--format markdown`** — when the user wants human-readable feedback output, use `--format markdown` instead of the default JSON.
-3. **Resolving different versions within one workflow** — resolve `latest` once with `npm view @astrojose/wc-view version`, then reuse `npx --yes "$WC_VIEW_PACKAGE" ...` for every command.
-4. **Adding a `.doc-canvas` width wrapper inside scratch HTML** — the server already owns canvas width (68-76ch for Markdown, ~3/4 of content area for HTML). Author scratch content as plain semantic HTML; don't re-apply canvas width classes.
-5. **Serving an interactive review without opening it** — use `--open` when supported, otherwise invoke the platform's default browser opener; only skip this in headless or CI environments.
+3. **Adding a `.doc-canvas` width wrapper inside scratch HTML** — the server already owns canvas width (68-76ch for Markdown, ~3/4 of content area for HTML). Author scratch content as plain semantic HTML; don't re-apply canvas width classes.
+4. **Serving an interactive review without opening it** — use `--open` when supported, otherwise invoke the platform's default browser opener; only skip this in headless or CI environments.
